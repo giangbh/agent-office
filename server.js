@@ -26,10 +26,23 @@ const isAgentTool = (n) => ['task', 'agent'].includes(String(n || '').toLowerCas
 const recent = []; // 50 sự kiện gần nhất, xem tại /debug để dò lỗi adapter
 const short = (s, n = 60) => { s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; };
 
-// Chuẩn hoá tên sự kiện/tool của Gemini CLI về cách gọi của Claude Code (Codex dùng sẵn tên giống Claude)
-const EVENT_ALIASES = { BeforeAgent: 'UserPromptSubmit', BeforeTool: 'PreToolUse', AfterTool: 'PostToolUse', AfterAgent: 'Stop' };
-const TOOL_ALIASES = { run_shell_command: 'Bash', read_file: 'Read', write_file: 'Write', replace: 'Edit', search_file_content: 'Grep',
-  grep_search: 'Grep', list_directory: 'LS', google_web_search: 'WebSearch', web_fetch: 'WebFetch', write_todos: 'TodoWrite' };
+// Chuẩn hoá tên sự kiện/tool của Gemini CLI và Antigravity IDE về cách gọi của Claude Code
+const EVENT_ALIASES = {
+  BeforeAgent: 'UserPromptSubmit', PreInvocation: 'UserPromptSubmit',
+  BeforeTool: 'PreToolUse', AfterTool: 'PostToolUse',
+  AfterAgent: 'Stop', PostInvocation: 'Stop'
+};
+const TOOL_ALIASES = {
+  run_shell_command: 'Bash', run_command: 'Bash',
+  read_file: 'Read', view_file: 'Read',
+  write_file: 'Write', write_to_file: 'Write',
+  replace: 'Edit', replace_file_content: 'Edit', multi_replace_file_content: 'Edit',
+  search_file_content: 'Grep', grep_search: 'Grep',
+  list_directory: 'LS', list_dir: 'LS',
+  google_web_search: 'WebSearch', search_web: 'WebSearch',
+  web_fetch: 'WebFetch', read_url_content: 'WebFetch',
+  write_todos: 'TodoWrite', browser_subagent: 'Task'
+};
 
 function describeTool(e) {
   // Tên tool khác nhau giữa các công cụ (Claude: "Bash", omp: "bash"), nên so sánh không phân biệt hoa thường
@@ -278,8 +291,18 @@ async function claudeUsage(file) {
   return t;
 }
 
-function apply(e, source) {
-  if (!e || !e.session_id) return;
+function apply(e, source, eventName) {
+  if (!e) return;
+  // Chuẩn hoá payload từ Antigravity / Gemini CLI (camelCase -> snake_case)
+  if (!e.session_id && e.conversationId) e.session_id = e.conversationId;
+  if (!e.cwd && e.workspacePaths && e.workspacePaths[0]) e.cwd = e.workspacePaths[0];
+  if (!e.model && e.modelName) e.model = e.modelName;
+  if (!e.hook_event_name) e.hook_event_name = eventName || e.hookName || e.event;
+  if (e.toolCall) {
+    if (!e.tool_name && e.toolCall.name) e.tool_name = e.toolCall.name;
+    if (!e.tool_input && e.toolCall.args) e.tool_input = e.toolCall.args;
+  }
+  if (!e.session_id) return;
   e = { ...e, hook_event_name: EVENT_ALIASES[e.hook_event_name] || e.hook_event_name, tool_name: TOOL_ALIASES[e.tool_name] || e.tool_name };
   if (source && !e.agent_source) e.agent_source = source;
   const now = Date.now();
@@ -391,7 +414,7 @@ http.createServer((req, res) => {
     let body = '';
     req.on('data', (c) => (body += c));
     req.on('end', () => {
-      try { apply(JSON.parse(body), url.searchParams.get('source')); } catch (err) { console.error('Sự kiện lỗi:', err.message); }
+      try { apply(JSON.parse(body), url.searchParams.get('source'), url.searchParams.get('event')); } catch (err) { console.error('Sự kiện lỗi:', err.message); }
       res.end('ok');
     });
     return;
