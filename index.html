@@ -257,6 +257,16 @@ h1 small{display:block;font:400 13px/1.4 var(--body);color:var(--muted);margin-t
 .btn-install:hover{filter:brightness(1.1)}
 .btn-uninstall{background:rgba(239,68,68,.15);color:#FF7A6B;border:1px solid #EF4444}
 .btn-uninstall:hover{background:rgba(239,68,68,.3)}
+
+/* Mascot Mèo Quản Gia */
+.mascot{position:absolute;bottom:14px;left:25%;z-index:4;cursor:pointer;display:flex;flex-direction:column;align-items:center;transition:left .75s cubic-bezier(.25,.8,.25,1);user-select:none}
+.mascot:hover{filter:drop-shadow(0 0 6px rgba(255,200,87,.9))}
+.mascot:active{transform:scale(1.2) translateY(-4px)!important}
+.mascot-img{display:block;image-rendering:pixelated;transition:transform .2s ease}
+.mascot-bubble{font-size:11px;line-height:1.2;background:rgba(255,255,255,.94);color:var(--ink);padding:4px 8px;border-radius:10px 10px 10px 2px;box-shadow:0 3px 10px rgba(0,0,0,.3);white-space:nowrap;margin-bottom:6px;pointer-events:none;opacity:0;transform:translateY(4px);transition:all .25s ease;font-weight:700}
+.mascot-bubble.show{opacity:1;transform:none}
+.mascot.sleeping .mascot-img{opacity:.85}
+.mascot.sleeping .mascot-bubble{font-style:italic;color:#64748B;font-weight:500}
 </style>
 </head>
 <body>
@@ -274,6 +284,10 @@ h1 small{display:block;font:400 13px/1.4 var(--body);color:var(--muted);margin-t
   <section class="room r-work" aria-label="Khu làm việc">
     <header class="wall"><span class="plaque">🖥 Khu làm việc<b id="n-work">0</b></span><div class="deco"><div class="wboard"></div><div class="win"></div><div class="clock"></div></div></header>
     <div class="pods" id="room-work"></div>
+    <div id="mascot" class="mascot" role="button" tabindex="0" title="Mascot Mèo Quản Gia · Bấm để chơi cùng mèo!">
+      <span class="mascot-bubble" id="mascotBubble"></span>
+      <img id="mascotImg" class="mascot-img" alt="Mascot Mèo Quản Gia" src="">
+    </div>
     <div class="fdeco l"><img class="furn" data-furn="whiteboard" alt=""><img class="furn" data-furn="plant" alt=""></div>
     <div class="fdeco r"><img class="furn" data-furn="shelf" alt=""><img class="furn" data-furn="bin" alt=""></div>
   </section>
@@ -469,6 +483,169 @@ const FURN={
   napsofa:pix(SOFA,{A:'#4A5C9A',a:'#6B80C4',F:'#141828'},6),
 };
 document.querySelectorAll('[data-furn]').forEach(el=>{const f=FURN[el.dataset.furn];if(f){el.src=f.src;el.width=f.w;el.height=f.h}});
+
+// ---------- Mascot Mèo Quản Gia (Office Cat) ----------
+const CAT_FRAMES = [
+  // Frame 0: Bước chân 1
+  pix([
+    ".....Y.....Y....",
+    "....YYYY..YYYY..",
+    "...YEYEYYY.YY...",
+    "...YYYYYYYYY....",
+    "...bBYYYYYYY....",
+    "..YYYYYYYYYY....",
+    "..YYYYWWYYYYYY..",
+    "..YYWWWWYYYYYY..",
+    "..YYYYYYYYYYYY..",
+    "...YY..YY..YY...",
+    "...WW..WW..WW...",
+    "................"
+  ], {Y:'#F97316', W:'#FFFFFF', E:'#059669', B:'#FFC857', b:'#EF4444'}, 3),
+
+  // Frame 1: Bước chân 2
+  pix([
+    ".....Y.....Y....",
+    "....YYYY..YYYY..",
+    "...YEYEYYY.YY...",
+    "...YYYYYYYYY....",
+    "...bBYYYYYYY.Y..",
+    "..YYYYYYYYYYYY..",
+    "..YYYYWWYYYYYY..",
+    "..YYWWWWYYYYYY..",
+    "..YYYYYYYYYYYY..",
+    "....YY...YY.....",
+    "....WW...WW.....",
+    "................"
+  ], {Y:'#F97316', W:'#FFFFFF', E:'#059669', B:'#FFC857', b:'#EF4444'}, 3),
+
+  // Frame 2: Cuộn tròn nằm ngủ (Sleeping)
+  pix([
+    "................",
+    "................",
+    ".....Y.....Y....",
+    "....YYYY..YYYY..",
+    "...Y..EYYY.YY...",
+    "...YYYYYYYYY....",
+    "..bBYYYYYYYY....",
+    ".YYYYWWYYYYYY...",
+    ".YYYWWWWYYYYYY..",
+    "..YYYYYYYYYYY...",
+    "...WWWW..WWWW...",
+    "................"
+  ], {Y:'#F97316', W:'#FFFFFF', E:'#047857', B:'#FFC857', b:'#EF4444'}, 3)
+];
+
+const CAT_MEOWS_PATROL = [
+  "Văn phòng yên ắng quá~ ✨",
+  "Chờ sếp giao task mới! ☕",
+  "Meow~ Đang quét dọn sàn nhà 🧹",
+  "Đang canh chừng bug... 🪲",
+  "Kiểm tra bảng trắng: sạch bóng! 📋",
+  "Ai cho xin hạt cá hồi đi~ 🐟",
+  "Meow meow~ 🐾",
+  "Pantry có đồ ăn gì không nhỉ? 🥛"
+];
+
+const CAT_MEOWS_CLICK = [
+  "Meowww! ✨ Bạn vừa xoa đầu mèo!",
+  "Purrrrr~ 🐾 Yêu sếp nhất!",
+  "Ngoan ngoãn trực văn phòng nè! 💖",
+  "(=^･ω･^=) Sẵn sàng bắt bug!",
+  "Ting ting! Chúc bạn code không bug! 🍀"
+];
+
+let catState = {
+  pct: 25,
+  dir: 1,
+  frame: 0,
+  wait: 2,
+  bubbleTimer: 0,
+  text: "",
+  sleeping: false
+};
+
+function initMascot() {
+  const el = document.getElementById('mascot');
+  if (!el) return;
+  el.onclick = el.onkeydown = (e) => {
+    if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+    beep([[784, 0.06], [1046, 0.12], [1318, 0.18]]);
+    catState.text = CAT_MEOWS_CLICK[Math.floor(Math.random() * CAT_MEOWS_CLICK.length)];
+    catState.bubbleTimer = 5;
+    catState.wait = Math.max(catState.wait, 3);
+    updateMascotUI();
+  };
+  updateMascotUI();
+}
+
+function tickMascot(hasWorkingAgents) {
+  const el = document.getElementById('mascot');
+  if (!el) return;
+  catState.sleeping = hasWorkingAgents;
+
+  if (catState.sleeping) {
+    catState.pct = 14;
+    catState.dir = 1;
+    catState.frame = 2;
+    if (catState.bubbleTimer > 0) catState.bubbleTimer--;
+    else if (Math.random() < 0.15) {
+      catState.text = Math.random() < 0.5 ? "z Z z" : "Ngủ ngoan cho các bạn làm việc... 💤";
+      catState.bubbleTimer = 4;
+    }
+  } else {
+    if (catState.bubbleTimer > 0) {
+      catState.bubbleTimer--;
+    } else if (Math.random() < 0.22) {
+      catState.text = CAT_MEOWS_PATROL[Math.floor(Math.random() * CAT_MEOWS_PATROL.length)];
+      catState.bubbleTimer = 4;
+    }
+
+    if (catState.wait > 0) {
+      catState.wait--;
+      catState.frame = 0;
+    } else {
+      catState.pct += catState.dir * (4 + Math.random() * 3);
+      catState.frame = catState.frame === 0 ? 1 : 0;
+
+      if (catState.pct >= 80) {
+        catState.dir = -1;
+        catState.wait = Math.floor(2 + Math.random() * 3);
+      } else if (catState.pct <= 14) {
+        catState.dir = 1;
+        catState.wait = Math.floor(2 + Math.random() * 3);
+      } else if (Math.random() < 0.12) {
+        catState.wait = Math.floor(2 + Math.random() * 3);
+      }
+    }
+  }
+  updateMascotUI();
+}
+
+function updateMascotUI() {
+  const el = document.getElementById('mascot');
+  const img = document.getElementById('mascotImg');
+  const bbl = document.getElementById('mascotBubble');
+  if (!el || !img || !bbl) return;
+
+  const f = CAT_FRAMES[catState.frame] || CAT_FRAMES[0];
+  img.src = f.src;
+  img.width = f.w;
+  img.height = f.h;
+
+  el.style.left = catState.pct + '%';
+  el.style.transform = `scaleX(${catState.dir})`;
+  bbl.style.transform = `scaleX(${catState.dir})`;
+
+  el.classList.toggle('sleeping', catState.sleeping);
+
+  if (catState.bubbleTimer > 0 && catState.text) {
+    bbl.textContent = catState.text;
+    bbl.classList.add('show');
+  } else {
+    bbl.classList.remove('show');
+  }
+}
+
 // Phòng theo trạng thái: mất tín hiệu ưu tiên trước, rồi chờ duyệt, đang chạy, rảnh
 const roomOf=s=>s.stale?'nap':s.status==='waiting'?'boss':s.status==='working'?'work':'rest';
 const VACANT={work:'Chưa ai làm việc',boss:'Không ai chờ duyệt 🎉',rest:'Không có nhóm rảnh',nap:'Không ai ngủ gật'};
@@ -626,6 +803,7 @@ function render(){
   document.getElementById('lounge').innerHTML=done.sort((a,b)=>b.ended-a.ended).slice(0,10)
     .map(a=>`<div class="done">${person(a.team,'idle',a.id,false,a.type)}<div><div class="tag">${esc(a.desc)}</div><span class="check">✓ ${esc(a.project)}, ${ago(now-a.ended)} trước</span></div></div>`).join('')
     ||'<p>Chưa ai xong việc.</p>';
+  tickMascot(rooms.work.length > 0);
   renderDrawer(now);
   if(!document.getElementById('termDrawer').hidden) renderTerminal();
 }
@@ -954,7 +1132,7 @@ function connect(){
   es.onmessage=e=>{live=JSON.parse(e.data);if(replay)return;state=live;offset=state.now-Date.now();detectChanges(state.sessions);render()};
   es.onerror=()=>{document.getElementById('bar').classList.add('off');document.getElementById('conn').textContent='Mất kết nối tới server, đang thử lại…'};
 }
-connect(); setInterval(render,1000);
+initMascot(); connect(); setInterval(render,1000);
 </script>
 </body>
 </html>
