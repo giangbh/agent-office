@@ -2,6 +2,8 @@
 
 Dashboard xem các session Claude Code và sub-agent đang làm gì, theo thời gian thực. Chỉ cần Node.js, không cài thêm gói nào.
 
+![Giao diện Văn phòng Agent](assets/screenshot.png)
+
 ## Chạy thử (không cần Claude Code)
 ```bash
 node server.js --demo
