@@ -572,8 +572,93 @@ const FURN={
 };
 document.querySelectorAll('[data-furn]').forEach(el=>{const f=FURN[el.dataset.furn];if(f){el.src=f.src;el.width=f.w;el.height=f.h}});
 
-// ---------- Mascot Pokémon (Pikachu & Eevee) ----------
-const POKEMON = {
+// ---------- Mascot Văn Phòng (Mèo Quản Gia 🐱 + Pikachu ⚡ + Eevee 🦊) ----------
+const MASCOTS = {
+  cat: {
+    name: 'Mèo Quản Gia',
+    icon: '🐱',
+    scale: 3.5,
+    frames: [
+      // Frame 0: Đứng vẫy đuôi
+      pix([
+        "K...........K...",
+        "KK.........KK...",
+        "KYY.......YYK...",
+        ".KYY.....YYK....",
+        "..KYYYYYYYK.....",
+        "..KYYYYYYYK.....",
+        ".KKYEYYEYKKK....",
+        ".KYYYYYYYYKK....",
+        "..bBYYYYYYK.Y...",
+        ".YYYYWWYYYYKYY..",
+        ".YYKYYYYKYYKYY..",
+        ".YYYYYYYYYYKYY..",
+        "..KYYYYYYK.K....",
+        "..KYY.YYK.......",
+        "..KWW.WWK.......",
+        "..KK...KK......."
+      ], {K:'#1E293B', Y:'#F97316', E:'#059669', W:'#FFFFFF', B:'#FACC15', b:'#EF4444'}, 3.5),
+
+      // Frame 1: Bước chân tung tăng
+      pix([
+        ".K.........K....",
+        "KKK.......KKK...",
+        "KYYK.....KYYK...",
+        ".KYYK...KYYK....",
+        "..KYYYYYYYK.....",
+        "..KYYYYYYYK..Y..",
+        ".KKYEYYEYKKKYY..",
+        ".KYYYYYYYYKKYY..",
+        "..bBYYYYYYK.YY..",
+        ".YYYYWWYYYYKK...",
+        ".YYKYYYYKYY.....",
+        "..KYYYYYYK......",
+        "..KYY..YK.......",
+        "..KWW..WK.......",
+        "..KK...KK.......",
+        "................"
+      ], {K:'#1E293B', Y:'#F97316', E:'#059669', W:'#FFFFFF', B:'#FACC15', b:'#EF4444'}, 3.5),
+
+      // Frame 2: Cuộn tròn nằm ngủ (Sleeping)
+      pix([
+        "................",
+        "................",
+        "................",
+        ".....K.....K....",
+        "....KKK...KKK...",
+        "...KYYK...KYYK..",
+        "..KYYYYYYYKKYY..",
+        ".KKY-EY-EKKKYY..",
+        ".KYYYYYYYYKK....",
+        "..bBYYYYYYYY....",
+        ".YYYYWWYYYYYY...",
+        ".YYYWWWWYYYYYY..",
+        "..KYYYYYYYYYK...",
+        "...KWWWWWWKK....",
+        "................",
+        "................"
+      ], {K:'#1E293B', Y:'#F97316', E:'#059669', W:'#FFFFFF', B:'#FACC15', b:'#EF4444'}, 3.5)
+    ],
+    patrolMeows: [
+      "Meow~ Văn phòng yên ắng quá! ✨",
+      "Chờ sếp giao task mới! ☕",
+      "Meow~ Đang quét dọn sàn nhà 🧹",
+      "Đang canh chừng bug... 🪲",
+      "Kiểm tra bảng trắng: sạch bóng! 📋",
+      "Ai cho xin hạt cá hồi đi~ 🐟",
+      "Meow meow~ Chúc sếp ngày vui! 💖",
+      "Pantry có bánh cá không ta? 🥛"
+    ],
+    clickMeows: [
+      "Meowww! ✨ Bạn vừa xoa đầu mèo!",
+      "Purrrrr~ 🐾 Yêu sếp nhất trần đời!",
+      "Ngoan ngoãn trực văn phòng nè! 💖",
+      "(=^･ω･^=) Bấm tiếp để gọi bạn Pokémon nhé! ⚡",
+      "Ting ting! Chúc bạn code không bao giờ bug! 🍀"
+    ],
+    sound: [[784, 0.06], [1046, 0.12], [1318, 0.18]]
+  },
+
   pikachu: {
     name: 'Pikachu',
     icon: '⚡',
@@ -652,7 +737,7 @@ const POKEMON = {
       "⚡ THUNDERBOLT! Giật điện tan biến mọi bug! ⚡",
       "Pika pikaaa! (Cảm ơn sếp đã xoa đầu) 💖",
       "Pikachu sẵn sàng chiến đấu cùng AI! ⚡",
-      "Bấm cái nữa để đổi sang bạn Eevee nhé! ✨"
+      "Bấm tiếp để đổi sang bạn khác nhé! ✨"
     ],
     sound: [[659, 0.08], [880, 0.08], [1318, 0.18]]
   },
@@ -734,13 +819,15 @@ const POKEMON = {
       "Eevui vui sướng vẫy đuôi! 🐾",
       "Eevee ôm chân sếp cảm ơn nè! 💖",
       "Tung tăng chạy nhảy quanh văn phòng! ✨",
-      "Bấm cái nữa để đổi sang bạn Pikachu nhé! ⚡"
+      "Bấm tiếp để đổi sang bạn Mèo nhé! 🐱"
     ],
     sound: [[587, 0.08], [880, 0.12], [1174, 0.16]]
   }
 };
 
-let currentPokemon = 'pikachu';
+const MASCOT_KEYS = ['pikachu', 'cat', 'eevee'];
+// Ngẫu nhiên chọn một bạn lúc đầu
+let currentMascot = MASCOT_KEYS[Math.floor(Math.random() * MASCOT_KEYS.length)];
 
 let mascotState = {
   pct: 25,
@@ -757,13 +844,14 @@ function initMascot() {
   if (!el) return;
   el.onclick = el.onkeydown = (e) => {
     if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
-    const poke = POKEMON[currentPokemon];
-    beep(poke.sound);
-    mascotState.text = poke.clickMeows[Math.floor(Math.random() * poke.clickMeows.length)];
+    const m = MASCOTS[currentMascot] || MASCOTS.pikachu;
+    beep(m.sound);
+    mascotState.text = m.clickMeows[Math.floor(Math.random() * m.clickMeows.length)];
     mascotState.bubbleTimer = 5;
     mascotState.wait = Math.max(mascotState.wait, 3);
-    // Bấm đổi qua lại giữa Pikachu và Eevee
-    currentPokemon = currentPokemon === 'pikachu' ? 'eevee' : 'pikachu';
+    // Bấm đổi tuần tự qua lại giữa Pikachu, Mèo Quản Gia và Eevee
+    const idx = MASCOT_KEYS.indexOf(currentMascot);
+    currentMascot = MASCOT_KEYS[(idx + 1) % MASCOT_KEYS.length];
     updateMascotUI();
   };
   updateMascotUI();
@@ -772,8 +860,14 @@ function initMascot() {
 function tickMascot(hasWorkingAgents) {
   const el = document.getElementById('mascot');
   if (!el) return;
-  const poke = POKEMON[currentPokemon];
+  const m = MASCOTS[currentMascot] || MASCOTS.pikachu;
+  const wasWorking = mascotState.sleeping;
   mascotState.sleeping = hasWorkingAgents;
+
+  // Khi phòng vừa hết người làm việc: ngẫu nhiên đổi một bạn mascot mới xuất hiện tuần tra!
+  if (wasWorking && !hasWorkingAgents && Math.random() < 0.6) {
+    currentMascot = MASCOT_KEYS[Math.floor(Math.random() * MASCOT_KEYS.length)];
+  }
 
   if (mascotState.sleeping) {
     mascotState.pct = 14;
@@ -781,14 +875,14 @@ function tickMascot(hasWorkingAgents) {
     mascotState.frame = 2;
     if (mascotState.bubbleTimer > 0) mascotState.bubbleTimer--;
     else if (Math.random() < 0.15) {
-      mascotState.text = Math.random() < 0.5 ? "z Z z" : `${poke.name} đang ngủ ngoan cho các bạn làm việc... 💤`;
+      mascotState.text = Math.random() < 0.5 ? "z Z z" : `${m.name} đang ngủ ngoan cho các bạn làm việc... 💤`;
       mascotState.bubbleTimer = 4;
     }
   } else {
     if (mascotState.bubbleTimer > 0) {
       mascotState.bubbleTimer--;
     } else if (Math.random() < 0.22) {
-      mascotState.text = poke.patrolMeows[Math.floor(Math.random() * poke.patrolMeows.length)];
+      mascotState.text = m.patrolMeows[Math.floor(Math.random() * m.patrolMeows.length)];
       mascotState.bubbleTimer = 4;
     }
 
@@ -802,6 +896,10 @@ function tickMascot(hasWorkingAgents) {
       if (mascotState.pct >= 80) {
         mascotState.dir = -1;
         mascotState.wait = Math.floor(2 + Math.random() * 3);
+        // Có xác suất ngẫu nhiên đổi bạn mascot khi quay đầu
+        if (Math.random() < 0.15) {
+          currentMascot = MASCOT_KEYS[Math.floor(Math.random() * MASCOT_KEYS.length)];
+        }
       } else if (mascotState.pct <= 14) {
         mascotState.dir = 1;
         mascotState.wait = Math.floor(2 + Math.random() * 3);
@@ -819,13 +917,13 @@ function updateMascotUI() {
   const bbl = document.getElementById('mascotBubble');
   if (!el || !img || !bbl) return;
 
-  const poke = POKEMON[currentPokemon] || POKEMON.pikachu;
-  const f = poke.frames[mascotState.frame] || poke.frames[0];
+  const m = MASCOTS[currentMascot] || MASCOTS.pikachu;
+  const f = m.frames[mascotState.frame] || m.frames[0];
   img.src = f.src;
   img.width = f.w;
   img.height = f.h;
-  img.alt = poke.name;
-  el.title = `Mascot ${poke.name} ${poke.icon} · Bấm để chơi cùng hoặc đổi bạn mới!`;
+  img.alt = m.name;
+  el.title = `Mascot ${m.name} ${m.icon} · Bấm để chơi cùng hoặc đổi bạn mới!`;
 
   el.style.left = mascotState.pct + '%';
   el.style.transform = `scaleX(${mascotState.dir})`;
