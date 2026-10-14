@@ -262,7 +262,7 @@ h1 small{display:block;font:400 13px/1.4 var(--body);color:var(--muted);margin-t
 .mascot{position:absolute;bottom:10px;left:25%;z-index:4;cursor:pointer;display:flex;flex-direction:column;align-items:center;transition:left .75s cubic-bezier(.25,.8,.25,1);user-select:none}
 .mascot:hover{filter:drop-shadow(0 0 10px rgba(250,204,21,.9))}
 .mascot:active{transform:scale(1.22) translateY(-6px)!important}
-.mascot-img{display:block;width:52px;height:52px;image-rendering:pixelated;transition:transform .2s ease}
+.mascot-img{display:block;max-width:58px;max-height:56px;height:auto;image-rendering:pixelated;transition:transform .2s ease}
 .mascot-bubble{font-size:11px;line-height:1.2;background:rgba(255,255,255,.95);color:var(--ink);padding:4px 9px;border-radius:10px 10px 10px 2px;box-shadow:0 4px 12px rgba(0,0,0,.35);white-space:nowrap;margin-bottom:6px;pointer-events:none;opacity:0;transform:translateY(4px);transition:all .25s ease;font-weight:700;border:1px solid rgba(0,0,0,.1)}
 .mascot-bubble.show{opacity:1;transform:none}
 .mascot.sleeping .mascot-img{opacity:.88}
@@ -890,67 +890,130 @@ const MASCOTS = {
   snorlax: {
     name: 'Snorlax',
     icon: '💤',
-    scale: 3.5,
+    scale: 2,
     frames: [
-      // Frame 0: Snorlax đứng sừng sững, hai tay buông, bụng tròn xoe
+      // Frame 0: Snorlax chuẩn từng pixel theo ảnh mẫu của người dùng
       pix([
-        ".....KK....KK...",
-        "....KTTK..KTTK..",
-        "...KTTTTKKTTTTK.",
-        "..KTTFFFFFFFFTK.",
-        "..KTFEFFFEFFETK.",
-        "..KTFFFFFFFFFTK.",
-        ".KTTFFFFFFFFFTTK",
-        "KTFTTTTTTTTTTFKT",
-        "KTFFFFFFFFFFFFKT",
-        "KTFFFFFFFFFFFFKT",
-        "KTFFFFFFFFFFFFKT",
-        ".KTFFFFFFFFFFTK.",
-        "..KTTTTTTTTTTK..",
-        "..KFWFK..KFWFK..",
-        "..KWWFK..KFWWK..",
-        "...KKK....KKK..."
-      ], {K:'#0F172A', T:'#164E63', F:'#FFFBEB', E:'#0F172A', W:'#FFFFFF'}, 3.5),
+        "........KK.......KK........",
+        ".......KTTKK...KKTTK.......",
+        ".......KTTTKTTTKTTTK.......",
+        ".......KTTTTTTTTTTTK.......",
+        ".......KTTTTTTTTTTTK.......",
+        "......KTTDTBTTTTBTTTK......",
+        "......KTTBBBTTTBBBTTK......",
+        "......KTBBBBBTBBBBBTK......",
+        ".....KKTBBBBBBBBBBBTKK.....",
+        "...KDTDKSKDNBBBNDKSKDTD....",
+        "..KTDTTDSSBBBBBBBSSDTTTK...",
+        ".KTTTTTDTSSWSSSWSSTTTTTTK..",
+        "KTTTTDTTTTNSSSSSNTTTDTTTK..",
+        "KPTTTTKTTSSBBBBBSSTTTDTTTK.",
+        "KTPTKKTTSBBBBBBBBBSTTTTDTK.",
+        ".KKKDTTBBBBBBBBBBBBBTTDDKK.",
+        "..KDDDDTBBBBBBBBBBBBDDDDK..",
+        "..KDDDDSBBBBBBBBBBBBSDDDK..",
+        "...KDDSSBBBBBBBBBBBSSDDK...",
+        "...KDDSSSSBBBBBBBSSSSDDK...",
+        "...KKDSSSSSSSSSSSSSSSDKK...",
+        "....KDNSSSSSSSSSSSSSNDK....",
+        ".....KKKSSSSSSSSSSSKKK.....",
+        ".....DNNKKKKKKKKKKKNND.....",
+        "......KKKKD.....DNPSPK.....",
+        ".................KKKK......"
+      ], {
+        K: '#111827', // Viền đen
+        D: '#284B5B', // Xanh đậm bóng
+        T: '#4D8699', // Xanh mòng két thân chính
+        L: '#73AAB9', // Xanh sáng highlight
+        B: '#FDE6A6', // Kem sữa bụng & mặt
+        S: '#D0A159', // Vàng nâu bóng bụng
+        E: '#5A3825', // Nâu mắt và miệng
+        W: '#FFFFFF', // Răng nanh trắng
+        P: '#9F9EB8', // Lòng bàn chân tím xám
+        N: '#A86835'  // Móng / đệm chân nâu
+      }, 2),
 
       // Frame 1: Snorlax lắc lư bước đi lạch bạch
       pix([
-        "......KK....KK..",
-        ".....KTTK..KTTK.",
-        "....KTTTTKKTTTTK",
-        "...KTTFFFFFFFFTK",
-        "...KTFEFFFEFFETK",
-        "...KTFFFFFFFFFTK",
-        "..KTTFFFFFFFFFTK",
-        ".KTFTTTTTTTTTTFK",
-        ".KTFFFFFFFFFFFFK",
-        ".KTFFFFFFFFFFFFK",
-        "..KTFFFFFFFFFFTK",
-        "...KTTTTTTTTTTK.",
-        "...KFWFK..KKK...",
-        "...KWWFK.KFWFK..",
-        "....KKK..KWWFK..",
-        "..........KKK..."
-      ], {K:'#0F172A', T:'#164E63', F:'#FFFBEB', E:'#0F172A', W:'#FFFFFF'}, 3.5),
+        "........KK.......KK........",
+        ".......KTTKK...KKTTK.......",
+        ".......KTTTKTTTKTTTK.......",
+        ".......KTTTTTTTTTTTK.......",
+        ".......KTTTTTTTTTTTK.......",
+        "......KTTDTBTTTTBTTTK......",
+        "......KTTBBBTTTBBBTTK......",
+        "......KTBBBBBTBBBBBTK......",
+        ".....KKTBBBBBBBBBBBTKK.....",
+        "...KDTDKSKDNBBBNDKSKDTD....",
+        "..KTDTTDSSBBBBBBBSSDTTTK...",
+        ".KTTTTTDTSSWSSSWSSTTTTTTK..",
+        "KTTTTDTTTTNSSSSSNTTTDTTTK..",
+        "KPTTTTKTTSSBBBBBSSTTTDTTTK.",
+        "KTPTKKTTSBBBBBBBBBSTTTTDTK.",
+        ".KKKDTTBBBBBBBBBBBBBTTDDKK.",
+        "..KDDDDTBBBBBBBBBBBBDDDDK..",
+        "..KDDDDSBBBBBBBBBBBBSDDDK..",
+        "...KDDSSBBBBBBBBBBBSSDDK...",
+        "...KDDSSSSBBBBBBBSSSSDDK...",
+        "...KKDSSSSSSSSSSSSSSSDKK...",
+        "....KDNSSSSSSSSSSSSSNDK....",
+        ".....KKKSSSSSSSSSSSKKK.....",
+        "......DNNKKKKKKKKKKKNND....",
+        ".......KKKKD...DNPSPK......",
+        "................KKKK......."
+      ], {
+        K: '#111827',
+        D: '#284B5B',
+        T: '#4D8699',
+        L: '#73AAB9',
+        B: '#FDE6A6',
+        S: '#D0A159',
+        E: '#5A3825',
+        W: '#FFFFFF',
+        P: '#9F9EB8',
+        N: '#A86835'
+      }, 2),
 
-      // Frame 2: Snorlax nằm ườn ngủ say (Belly Up Sleeping)
+      // Frame 2: Snorlax cuộn tròn ngủ say
       pix([
-        "................",
-        "................",
-        "................",
-        "................",
-        ".....KK....KK...",
-        "....KTTK..KTTK..",
-        "...KTTTTKKTTTTK.",
-        "..KTTFEFFFEFFETK",
-        ".KTTFFFFFFFFFFFF",
-        "KTFFFFFFFFFFFFFF",
-        "KTFFFFFFFFFFFFFF",
-        ".KTFFFFFFFFFFFFK",
-        "..KTTTTTTTTTTTTK",
-        "...KFWFK..KFWFK.",
-        "...KWWFK..KFWWK.",
-        "....KKK....KKK.."
-      ], {K:'#0F172A', T:'#164E63', F:'#FFFBEB', E:'#0F172A', W:'#FFFFFF'}, 3.5)
+        "...........................",
+        "...........................",
+        "........KK.......KK........",
+        ".......KTTKK...KKTTK.......",
+        ".......KTTTKTTTKTTTK.......",
+        ".......KTTTTTTTTTTTK.......",
+        ".......KTTTTTTTTTTTK.......",
+        "......KTTDTBTTTTBTTTK......",
+        "......KTTBBBTTTBBBTTK......",
+        "......KTBBBBBTBBBBBTK......",
+        ".....KKTBBBBBBBBBBBTKK.....",
+        "...KDTDKKKDNBBBNDKKKDTD....",
+        "..KTDTTDSSBBBBBBBSSDTTTK...",
+        ".KTTTTTDTSSWSSSWSSTTTTTTK..",
+        "KTTTTDTTTTNSSSSSNTTTDTTTK..",
+        "KPTTTTKTTSSBBBBBSSTTTDTTTK.",
+        "KTPTKKTTSBBBBBBBBBSTTTTDTK.",
+        ".KKKDTTBBBBBBBBBBBBBTTDDKK.",
+        "..KDDDDTBBBBBBBBBBBBDDDDK..",
+        "..KDDDDSBBBBBBBBBBBBSDDDK..",
+        "...KDDSSBBBBBBBBBBBSSDDK...",
+        "...KDDSSSSBBBBBBBSSSSDDK...",
+        "...KKDSSSSSSSSSSSSSSSDKK...",
+        "....KDNSSSSSSSSSSSSSNDK....",
+        ".....KKKSSSSSSSSSSSKKK.....",
+        "......DNNKKKKKKKKKKKNND...."
+      ], {
+        K: '#111827',
+        D: '#284B5B',
+        T: '#4D8699',
+        L: '#73AAB9',
+        B: '#FDE6A6',
+        S: '#D0A159',
+        E: '#5A3825',
+        W: '#FFFFFF',
+        P: '#9F9EB8',
+        N: '#A86835'
+      }, 2)
     ],
     patrolMeows: {
       vi: [
