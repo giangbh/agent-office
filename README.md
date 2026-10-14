@@ -222,7 +222,7 @@ AGENT_OFFICE_DATA=/var/log/agent-office node server.js
 
 ## 🎨 Dành cho Lập trình viên: Tự chế (Hacking & Extensibility)
 
-Agent Office được viết cực kỳ tinh gọn, không qua bất kỳ bundler hay framework phức tạp nào. Bạn có thể mở trực tiếp [index.html](file:///Users/giangbh/Downloads/agent-office/index.html) để tùy biến:
+Agent Office được viết cực kỳ tinh gọn, không qua bất kỳ bundler hay framework phức tạp nào. Bạn có thể mở trực tiếp [index.html](index.html) để tùy biến:
 
 - **Thêm kiểu nhân vật mới**: Mở mảng `HEADS`, `FACES`, `SHIRTS` — mỗi ký tự tương ứng một mã màu pixel art!
 - **Thêm nội thất cho văn phòng**: Mở đối tượng `FURN` để tự vẽ bàn, ghế, máy in, cây cảnh theo phong cách ASCII pixel art.
