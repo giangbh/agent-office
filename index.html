@@ -875,20 +875,124 @@ const MASCOTS = {
         "Eevui vui sướng vẫy đuôi! 🐾",
         "Eevee ôm chân sếp cảm ơn nè! 💖",
         "Tung tăng chạy nhảy quanh văn phòng! ✨",
-        "Bấm tiếp để đổi sang bạn Mèo nhé! 🐱"
+        "Bấm tiếp để đổi sang bạn Snorlax béo tròn nhé! 💤"
       ],
       en: [
         "Eevui wags its tail with pure delight! 🐾",
         "Eevee happily hugs boss's leg! 💖",
         "Trotting cheerfully across the workspace! ✨",
-        "Click again to switch to Butler Cat! 🐱"
+        "Click again to switch to Snorlax! 💤"
       ]
     },
     sound: [[587, 0.08], [880, 0.12], [1174, 0.16]]
+  },
+
+  snorlax: {
+    name: 'Snorlax',
+    icon: '💤',
+    scale: 3.5,
+    frames: [
+      // Frame 0: Snorlax đứng sừng sững, hai tay buông, bụng tròn xoe
+      pix([
+        ".....KK....KK...",
+        "....KTTK..KTTK..",
+        "...KTTTTKKTTTTK.",
+        "..KTTFFFFFFFFTK.",
+        "..KTFEFFFEFFETK.",
+        "..KTFFFFFFFFFTK.",
+        ".KTTFFFFFFFFFTTK",
+        "KTFTTTTTTTTTTFKT",
+        "KTFFFFFFFFFFFFKT",
+        "KTFFFFFFFFFFFFKT",
+        "KTFFFFFFFFFFFFKT",
+        ".KTFFFFFFFFFFTK.",
+        "..KTTTTTTTTTTK..",
+        "..KFWFK..KFWFK..",
+        "..KWWFK..KFWWK..",
+        "...KKK....KKK..."
+      ], {K:'#0F172A', T:'#164E63', F:'#FFFBEB', E:'#0F172A', W:'#FFFFFF'}, 3.5),
+
+      // Frame 1: Snorlax lắc lư bước đi lạch bạch
+      pix([
+        "......KK....KK..",
+        ".....KTTK..KTTK.",
+        "....KTTTTKKTTTTK",
+        "...KTTFFFFFFFFTK",
+        "...KTFEFFFEFFETK",
+        "...KTFFFFFFFFFTK",
+        "..KTTFFFFFFFFFTK",
+        ".KTFTTTTTTTTTTFK",
+        ".KTFFFFFFFFFFFFK",
+        ".KTFFFFFFFFFFFFK",
+        "..KTFFFFFFFFFFTK",
+        "...KTTTTTTTTTTK.",
+        "...KFWFK..KKK...",
+        "...KWWFK.KFWFK..",
+        "....KKK..KWWFK..",
+        "..........KKK..."
+      ], {K:'#0F172A', T:'#164E63', F:'#FFFBEB', E:'#0F172A', W:'#FFFFFF'}, 3.5),
+
+      // Frame 2: Snorlax nằm ườn ngủ say (Belly Up Sleeping)
+      pix([
+        "................",
+        "................",
+        "................",
+        "................",
+        ".....KK....KK...",
+        "....KTTK..KTTK..",
+        "...KTTTTKKTTTTK.",
+        "..KTTFEFFFEFFETK",
+        ".KTTFFFFFFFFFFFF",
+        "KTFFFFFFFFFFFFFF",
+        "KTFFFFFFFFFFFFFF",
+        ".KTFFFFFFFFFFFFK",
+        "..KTTTTTTTTTTTTK",
+        "...KFWFK..KFWFK.",
+        "...KWWFK..KFWWK.",
+        "....KKK....KKK.."
+      ], {K:'#0F172A', T:'#164E63', F:'#FFFBEB', E:'#0F172A', W:'#FFFFFF'}, 3.5)
+    ],
+    patrolMeows: {
+      vi: [
+        "Snoooor... lax! 💤",
+        "Snorlax đang đi dạo tìm đồ ăn vặt quanh văn phòng~ 🍙",
+        "Bụng Snorlax đang reo ùng ục rồi nè! 🍔",
+        "Ai có bánh ngọt ở Pantry không cho xin một miếng! ☕",
+        "Lạch bạch lạch bạch... Đi bộ một tí cho tiêu mỡ! 🐾",
+        "Snorlax nằm cản đường một tí thôi nha sếp! 💤"
+      ],
+      en: [
+        "Snoooor... lax! 💤",
+        "Snorlax is lumbering around sniffing for snacks~ 🍙",
+        "My tummy is rumbling so loud! 🍔",
+        "Anyone got donuts or pizza in the pantry? ☕",
+        "Waddle waddle... Walking off that big lunch! 🐾",
+        "Snorlax might block the hallway for a quick nap! 💤"
+      ]
+    },
+    clickMeows: {
+      vi: [
+        "Snorlax lim dim mắt dụi đầu vào sếp! 💖",
+        "Oáp~ Tiếng ngáy rung chuyển cả sàn văn phòng! 💤",
+        "Snorlax được sếp xoa chiếc bụng béo thích mê! ✨",
+        "Bấm tiếp để đổi sang bạn Pikachu nhé! ⚡"
+      ],
+      en: [
+        "Snorlax happily yawns and rubs its sleepy head! 💖",
+        "Zzz... A mighty snore echoes through the office! 💤",
+        "Snorlax loves belly rubs from boss! ✨",
+        "Click again to switch back to Pikachu! ⚡"
+      ]
+    },
+    sleepText: {
+      vi: "Snorlax đang ngủ say tít như khúc gỗ cản đường... 💤",
+      en: "Snorlax is sleeping deeply like a cozy giant boulder... 💤"
+    },
+    sound: [[330, 0.12], [392, 0.12], [494, 0.14], [440, 0.24]]
   }
 };
 
-const MASCOT_KEYS = ['pikachu', 'cat', 'eevee'];
+const MASCOT_KEYS = ['pikachu', 'cat', 'eevee', 'snorlax'];
 let currentMascot = MASCOT_KEYS[Math.floor(Math.random() * MASCOT_KEYS.length)];
 
 let mascotState = {
@@ -1289,9 +1393,11 @@ function tickMascot(hasWorkingAgents) {
     mascotState.frame = 2;
     if (mascotState.bubbleTimer > 0) mascotState.bubbleTimer--;
     else if (Math.random() < 0.15) {
-      const sleepMsg = curLang === 'en'
-        ? `${m.name} is resting quietly while agents work... 💤`
-        : `${m.name} đang ngủ ngoan cho các bạn làm việc... 💤`;
+      const sleepMsg = m.sleepText
+        ? (m.sleepText[curLang] || m.sleepText.vi)
+        : (curLang === 'en'
+          ? `${m.name} is resting quietly while agents work... 💤`
+          : `${m.name} đang ngủ ngoan cho các bạn làm việc... 💤`);
       mascotState.text = Math.random() < 0.5 ? "z Z z" : sleepMsg;
       mascotState.bubbleTimer = 4;
     }

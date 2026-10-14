@@ -183,7 +183,7 @@ flowchart TD
 - **`Esc`**: Đóng nhanh bất kỳ cửa sổ nào (Terminal, Hooks Drawer, Bảng xếp hạng, Bảng chi tiết nhóm).
 - **`Click vào Pod bất kỳ`**: Mở Bảng thông tin chi tiết (Inspector) bên phải xem toàn bộ lịch sử 20 tool gần nhất, timeline sub-agent, và mức tiêu thụ token.
 - **`Click vào từng dòng tool`**: Mở ngay Terminal CRT tại đúng dòng tool đó để soi input/output.
-- **`Click vào Mascot Văn Phòng 🐾`**: Khi phòng làm việc trống, hệ thống **ngẫu nhiên xuất hiện một bạn mascot** tuần tra sàn nhà: **Mèo Quản Gia 🐱**, **Pikachu ⚡**, hoặc **Eevee 🦊** (kích thước lớn $52 \times 52$ pixels, sắc nét và nổi bật). Bấm vào mascot để nghe âm thanh 8-bit riêng (Meow / Pika / Eevui) và **chuyển đổi qua lại giữa Mèo và Pokémon**! Khi có người làm việc, mascot sẽ ngoan ngoãn cuộn tròn nằm ngủ ở góc phòng.
+- **`Click vào Mascot Văn Phòng 🐾`**: Khi phòng làm việc trống, hệ thống **ngẫu nhiên xuất hiện một bạn mascot** tuần tra sàn nhà: **Mèo Quản Gia 🐱**, **Pikachu ⚡**, **Eevee 🦊**, hoặc **Snorlax 💤** béo tròn đáng yêu (kích thước lớn $52 \times 52$ pixels, sắc nét và nổi bật). Bấm vào mascot để nghe âm thanh 8-bit riêng (Meow / Pika / Eevui / điệu sáo Poké Flute ru ngủ) và **chuyển đổi qua lại giữa Mèo và Pokémon**! Khi có người làm việc, mascot sẽ ngoan ngoãn cuộn tròn nằm ngủ ở góc phòng.
 - **`Tab` + `Enter` / `Space`**: Hỗ trợ đầy đủ điều hướng bằng bàn phím (Accessibility).
 
 ---

@@ -183,7 +183,7 @@ flowchart TD
 - **`Esc`**: Dismiss any active drawer (Terminal, Hooks Manager, Leaderboard, or Team Inspector).
 - **`Click any Pod`**: Open right-hand Inspector drawer showing latest 20 tool calls, sub-agent Gantt timeline, and token/cost metrics.
 - **`Click any Tool line`**: Jump directly to that command in the Retro CRT Terminal.
-- **`Click Office Mascot 🐾`**: When the workspace is empty, a mascot companion patrols the floor: **Butler Cat 🐱**, **Pikachu ⚡**, or **Eevee 🦊** (rendered in crisp $52 \times 52$ pixels). Click the mascot to hear custom 8-bit sound effects and **cycle between Cat and Pokémon companions**! While agents are working, the mascot curls up peacefully in the corner.
+- **`Click Office Mascot 🐾`**: When the workspace is empty, a mascot companion patrols the floor: **Butler Cat 🐱**, **Pikachu ⚡**, **Eevee 🦊**, or adorable chunky **Snorlax 💤** (rendered in crisp $52 \times 52$ pixels). Click the mascot to hear custom 8-bit sound effects (Meow / Pika / Eevui / soothing Poké Flute lullaby) and **cycle between Cat and Pokémon companions**! While agents are working, the mascot curls up peacefully in the corner.
 - **`🌐 Language Button`**: Switch UI language between **English** and **Tiếng Việt**.
 - **`Tab` + `Enter` / `Space`**: Full keyboard accessibility support.
 
