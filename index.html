@@ -157,8 +157,8 @@ h1 small{display:block;font:400 13px/1.4 var(--body);color:var(--muted);margin-t
 .pod.stale .person .f1,.pod.stale .person .f2,.pod.stale .person .acc,.pod.stale .desk.working .laptop{animation:none!important}
 .pod.stale .lead .person::before{content:'💤';position:absolute;right:-14px;top:-8px;font-size:14px}
 .pod.conflict{border-color:var(--coral);border-style:solid}
-.conflict{margin-top:8px;font-size:11px;line-height:1.4;color:var(--ink);background:var(--coral);border-radius:6px;padding:4px 8px}
-.conflict b{font-weight:700}
+.conflict-note{margin-top:8px;font-size:11px;line-height:1.4;color:var(--ink);background:var(--coral);border-radius:6px;padding:4px 8px}
+.conflict-note b{font-weight:700}
 .btn-remove{margin-top:22px;width:100%;background:transparent;color:var(--coral);border:1px dashed var(--coral);border-radius:8px;padding:8px;font:600 12px var(--body);cursor:pointer}
 .bubble.err{background:var(--coral);color:var(--ink)}
 .person.err::after{content:'💦';position:absolute;right:-10px;top:-6px;font-size:14px}
@@ -271,8 +271,9 @@ h1 small{display:block;font:400 13px/1.4 var(--body);color:var(--muted);margin-t
 </head>
 <body>
 <header class="top">
-  <h1>Văn phòng Agent<small id="sub">Đang kết nối…</small></h1>
+  <h1 id="mainTitle">Văn phòng Agent<small id="sub">Đang kết nối…</small></h1>
   <div class="stats" id="stats"></div>
+  <button class="sound" id="langBtn" title="Switch Language / Đổi ngôn ngữ">🌐 EN</button>
   <button class="sound" id="sound" aria-pressed="false">🔈 Bật âm thanh</button>
   <button class="sound" id="notify" aria-pressed="false">🔕 Bật thông báo</button>
   <button class="sound" id="replayBtn">⏪ Xem lại</button>
@@ -281,38 +282,38 @@ h1 small{display:block;font:400 13px/1.4 var(--body);color:var(--muted);margin-t
   <button class="sound" id="hookBtn">⚡ Hooks</button>
 </header>
 <main class="floor" id="floor">
-  <section class="room r-work" aria-label="Khu làm việc">
-    <header class="wall"><span class="plaque">🖥 Khu làm việc<b id="n-work">0</b></span><div class="deco"><div class="wboard"></div><div class="win"></div><div class="clock"></div></div></header>
+  <section class="room r-work" id="sec-work" aria-label="Khu làm việc">
+    <header class="wall"><span class="plaque" id="plaque-work">🖥 Khu làm việc<b id="n-work">0</b></span><div class="deco"><div class="wboard"></div><div class="win"></div><div class="clock"></div></div></header>
     <div class="pods" id="room-work"></div>
-    <div id="mascot" class="mascot" role="button" tabindex="0" title="Mascot Pokémon · Bấm để chơi cùng hoặc đổi bạn mới!">
+    <div id="mascot" class="mascot" role="button" tabindex="0" title="Mascot">
       <span class="mascot-bubble" id="mascotBubble"></span>
-      <img id="mascotImg" class="mascot-img" alt="Mascot Pokémon" src="">
+      <img id="mascotImg" class="mascot-img" alt="Mascot" src="">
     </div>
     <div class="fdeco l"><img class="furn" data-furn="whiteboard" alt=""><img class="furn" data-furn="plant" alt=""></div>
     <div class="fdeco r"><img class="furn" data-furn="shelf" alt=""><img class="furn" data-furn="bin" alt=""></div>
   </section>
-  <section class="room r-boss" aria-label="Phòng sếp: nhóm chờ bạn duyệt">
-    <header class="wall"><span class="plaque">📋 Phòng sếp<b id="n-boss">0</b></span><div class="deco"><div class="win"></div></div></header>
+  <section class="room r-boss" id="sec-boss" aria-label="Phòng sếp: nhóm chờ bạn duyệt">
+    <header class="wall"><span class="plaque" id="plaque-boss">📋 Phòng sếp<b id="n-boss">0</b></span><div class="deco"><div class="win"></div></div></header>
     <div class="bossdesk" id="bossdesk"></div>
     <div class="pods" id="room-boss"></div>
     <div class="fdeco r"><img class="furn" data-furn="shelf" alt=""><img class="furn" data-furn="plant" alt=""></div>
   </section>
-  <section class="room r-rest" aria-label="Phòng chờ việc: nhóm rảnh">
-    <header class="wall"><span class="plaque">🛋 Phòng chờ việc<b id="n-rest">0</b></span><div class="deco"><img class="furn" data-furn="shelf" alt=""><div class="win"></div></div></header>
+  <section class="room r-rest" id="sec-rest" aria-label="Phòng chờ việc: nhóm rảnh">
+    <header class="wall"><span class="plaque" id="plaque-rest">🛋 Phòng chờ việc<b id="n-rest">0</b></span><div class="deco"><img class="furn" data-furn="shelf" alt=""><div class="win"></div></div></header>
     <div class="pods" id="room-rest"></div>
     <div class="fdeco l"><img class="furn" data-furn="cooler" alt=""></div>
     <div class="fdeco r"><img class="furn" data-furn="sofa" alt=""><img class="furn" data-furn="plant" alt=""></div>
   </section>
-  <section class="room r-nap" aria-label="Phòng ngủ gật: nhóm mất tín hiệu">
-    <header class="wall"><span class="plaque">💤 Phòng ngủ gật & Server<b id="n-nap">0</b></span><div class="deco"><div class="win"></div></div></header>
+  <section class="room r-nap" id="sec-nap" aria-label="Phòng ngủ gật: nhóm mất tín hiệu">
+    <header class="wall"><span class="plaque" id="plaque-nap">💤 Phòng ngủ gật & Server<b id="n-nap">0</b></span><div class="deco"><div class="win"></div></div></header>
     <div class="pods" id="room-nap"></div>
     <span class="zzz" aria-hidden="true">z Z z</span>
     <div class="fdeco l"><img class="furn server-blink" data-furn="server" alt=""><img class="furn" data-furn="bin" alt=""></div>
     <div class="fdeco r"><img class="furn" data-furn="napsofa" alt=""></div>
   </section>
-  <section class="room r-cafe" aria-label="Pantry & Cà phê">
-    <header class="wall"><span class="plaque">☕ Pantry & Cà phê<b id="n-cafe">0</b></span><div class="deco"><img class="furn" data-furn="coffee" alt=""><img class="furn" data-furn="cooler" alt=""></div></header>
-    <div class="lounge"><p>Sub-agent làm xong ra đây ăn nhẹ & xả hơi</p><div id="lounge"></div></div>
+  <section class="room r-cafe" id="sec-cafe" aria-label="Pantry & Cà phê">
+    <header class="wall"><span class="plaque" id="plaque-cafe">☕ Pantry & Cà phê<b id="n-cafe">0</b></span><div class="deco"><img class="furn" data-furn="coffee" alt=""><img class="furn" data-furn="cooler" alt=""></div></header>
+    <div class="lounge"><p id="loungeDesc">Sub-agent làm xong ra đây ăn nhẹ & xả hơi</p><div id="lounge"></div></div>
     <div class="fdeco l"><img class="furn" data-furn="fridge" alt=""><img class="furn" data-furn="plant" alt=""></div>
     <div class="fdeco r"><img class="furn" data-furn="vending" alt=""></div>
   </section>
@@ -322,14 +323,19 @@ h1 small{display:block;font:400 13px/1.4 var(--body);color:var(--muted);margin-t
 <aside class="drawer term-drawer" id="termDrawer" aria-label="Retro Terminal Inspector" hidden></aside>
 <aside class="drawer" id="hookDrawer" aria-label="Quản lý Hooks" style="--team:var(--mint)" hidden></aside>
 <div class="replaybar" id="replaybar" hidden>
-  <b>⏪ Xem lại</b>
-  <select id="replayMin" aria-label="Khoảng thời gian"><option value="15">15 phút</option><option value="60" selected>1 giờ</option><option value="240">4 giờ</option><option value="1440">24 giờ</option></select>
+  <b id="replayTitle">⏪ Xem lại</b>
+  <select id="replayMin" aria-label="Khoảng thời gian">
+    <option value="15" id="opt-15">15 phút</option>
+    <option value="60" id="opt-60" selected>1 giờ</option>
+    <option value="240" id="opt-240">4 giờ</option>
+    <option value="1440" id="opt-1440">24 giờ</option>
+  </select>
   <button class="sound" id="replayPlay">▶ Phát</button>
   <input type="range" id="replaySlider" min="0" max="0" value="0" aria-label="Thời điểm">
   <span id="replayLabel"></span>
   <button class="sound" id="replayLive">Về trực tiếp</button>
 </div>
-<footer class="bar" id="bar"><span><span class="dot"></span><span id="conn">Đang kết nối</span></span><span>Agent Office · Claude Code · omp</span></footer>
+<footer class="bar" id="bar"><span><span class="dot"></span><span id="conn">Đang kết nối</span></span><span>Agent Office · Claude Code · Gemini · Codex · Antigravity</span></footer>
 <script>
 function pix(rows,pal,scale=3){
   const c=document.createElement('canvas');c.width=rows[0].length;c.height=rows.length;const g=c.getContext('2d');
@@ -639,23 +645,44 @@ const MASCOTS = {
         "................"
       ], {K:'#1E293B', Y:'#F97316', E:'#059669', W:'#FFFFFF', B:'#FACC15', b:'#EF4444'}, 3.5)
     ],
-    patrolMeows: [
-      "Meow~ Văn phòng yên ắng quá! ✨",
-      "Chờ sếp giao task mới! ☕",
-      "Meow~ Đang quét dọn sàn nhà 🧹",
-      "Đang canh chừng bug... 🪲",
-      "Kiểm tra bảng trắng: sạch bóng! 📋",
-      "Ai cho xin hạt cá hồi đi~ 🐟",
-      "Meow meow~ Chúc sếp ngày vui! 💖",
-      "Pantry có bánh cá không ta? 🥛"
-    ],
-    clickMeows: [
-      "Meowww! ✨ Bạn vừa xoa đầu mèo!",
-      "Purrrrr~ 🐾 Yêu sếp nhất trần đời!",
-      "Ngoan ngoãn trực văn phòng nè! 💖",
-      "(=^･ω･^=) Bấm tiếp để gọi bạn Pokémon nhé! ⚡",
-      "Ting ting! Chúc bạn code không bao giờ bug! 🍀"
-    ],
+    patrolMeows: {
+      vi: [
+        "Meow~ Văn phòng yên ắng quá! ✨",
+        "Chờ sếp giao task mới! ☕",
+        "Meow~ Đang quét dọn sàn nhà 🧹",
+        "Đang canh chừng bug... 🪲",
+        "Kiểm tra bảng trắng: sạch bóng! 📋",
+        "Ai cho xin hạt cá hồi đi~ 🐟",
+        "Meow meow~ Chúc sếp ngày vui! 💖",
+        "Pantry có bánh cá không ta? 🥛"
+      ],
+      en: [
+        "Meow~ The office is so quiet and peaceful! ✨",
+        "Waiting for boss to assign new tasks! ☕",
+        "Meow~ Sweeping the workspace floor 🧹",
+        "Keeping a watchful eye for tricky bugs... 🪲",
+        "Whiteboard status: sparkling clean! 📋",
+        "Anyone got salmon treats meow? 🐟",
+        "Meow meow~ Have a fantastic day, boss! 💖",
+        "Wonder if there are fish snacks in the pantry? 🥛"
+      ]
+    },
+    clickMeows: {
+      vi: [
+        "Meowww! ✨ Bạn vừa xoa đầu mèo!",
+        "Purrrrr~ 🐾 Yêu sếp nhất trần đời!",
+        "Ngoan ngoãn trực văn phòng nè! 💖",
+        "(=^･ω･^=) Bấm tiếp để gọi bạn Pokémon nhé! ⚡",
+        "Ting ting! Chúc bạn code không bao giờ bug! 🍀"
+      ],
+      en: [
+        "Meowww! ✨ You gave Butler Cat a gentle headpat!",
+        "Purrrrr~ 🐾 Best boss ever!",
+        "On duty guarding the office! 💖",
+        "(=^･ω･^=) Click again to switch to Pokémon companions! ⚡",
+        "Ting ting! Wishing you clean, bug-free commits today! 🍀"
+      ]
+    },
     sound: [[784, 0.06], [1046, 0.12], [1318, 0.18]]
   },
 
@@ -724,21 +751,40 @@ const MASCOTS = {
         "................"
       ], {K:'#0F172A', Y:'#FACC15', R:'#EF4444', B:'#78350F', W:'#FFFFFF'}, 3.5)
     ],
-    patrolMeows: [
-      "Pika pika! ⚡",
-      "Pikachu đang nạp điện cho văn phòng! ⚡",
-      "Pika-chuuu! Chờ sếp giao task mới! 🎮",
-      "Đang tìm bug để giật điện nè! 🪲⚡",
-      "Pikapi! Văn phòng sạch bóng! ✨",
-      "Pika? Cà phê xong chưa ta? ☕",
-      "Pikachu vẫy đuôi tia sét chào sếp! ⚡"
-    ],
-    clickMeows: [
-      "⚡ THUNDERBOLT! Giật điện tan biến mọi bug! ⚡",
-      "Pika pikaaa! (Cảm ơn sếp đã xoa đầu) 💖",
-      "Pikachu sẵn sàng chiến đấu cùng AI! ⚡",
-      "Bấm tiếp để đổi sang bạn khác nhé! ✨"
-    ],
+    patrolMeows: {
+      vi: [
+        "Pika pika! ⚡",
+        "Pikachu đang nạp điện cho văn phòng! ⚡",
+        "Pika-chuuu! Chờ sếp giao task mới! 🎮",
+        "Đang tìm bug để giật điện nè! 🪲⚡",
+        "Pikapi! Văn phòng sạch bóng! ✨",
+        "Pika? Cà phê xong chưa ta? ☕",
+        "Pikachu vẫy đuôi tia sét chào sếp! ⚡"
+      ],
+      en: [
+        "Pika pika! ⚡",
+        "Pikachu is charging up the office! ⚡",
+        "Pika-chuuu! Ready for new tasks, boss! 🎮",
+        "Hunting bugs with Thunder Shock! 🪲⚡",
+        "Pikapi! Office looks spotless! ✨",
+        "Pika? Is the coffee ready? ☕",
+        "Pikachu wags lightning tail at boss! ⚡"
+      ]
+    },
+    clickMeows: {
+      vi: [
+        "⚡ THUNDERBOLT! Giật điện tan biến mọi bug! ⚡",
+        "Pika pikaaa! (Cảm ơn sếp đã xoa đầu) 💖",
+        "Pikachu sẵn sàng chiến đấu cùng AI! ⚡",
+        "Bấm tiếp để đổi sang bạn khác nhé! ✨"
+      ],
+      en: [
+        "⚡ THUNDERBOLT! Zapping away all bugs! ⚡",
+        "Pika pikaaa! (Thank you for the headpat!) 💖",
+        "Pikachu is ready to code with AI agents! ⚡",
+        "Click again to switch companions! ✨"
+      ]
+    },
     sound: [[659, 0.08], [880, 0.08], [1318, 0.18]]
   },
 
@@ -807,26 +853,42 @@ const MASCOTS = {
         "................"
       ], {K:'#1E293B', n:'#B45309', E:'#1E293B', W:'#FEF3C7'}, 3.5)
     ],
-    patrolMeows: [
-      "Eevui! 🌸",
-      "Eevee đang đi dạo quanh văn phòng~ ✨",
-      "Văn phòng hôm nay yên tĩnh quá! 💤",
-      "Eevee muốn tiến hóa thành Jolteon! ⚡",
-      "Sếp ơi giao việc cho AI đi nà! 🚀",
-      "Eevee vẫy chiếc đuôi bồng bềnh! 🐾"
-    ],
-    clickMeows: [
-      "Eevui vui sướng vẫy đuôi! 🐾",
-      "Eevee ôm chân sếp cảm ơn nè! 💖",
-      "Tung tăng chạy nhảy quanh văn phòng! ✨",
-      "Bấm tiếp để đổi sang bạn Mèo nhé! 🐱"
-    ],
+    patrolMeows: {
+      vi: [
+        "Eevui! 🌸",
+        "Eevee đang đi dạo quanh văn phòng~ ✨",
+        "Văn phòng hôm nay yên tĩnh quá! 💤",
+        "Eevee muốn tiến hóa thành Jolteon! ⚡",
+        "Sếp ơi giao việc cho AI đi nà! 🚀",
+        "Eevee vẫy chiếc đuôi bồng bềnh! 🐾"
+      ],
+      en: [
+        "Eevui! 🌸",
+        "Eevee is happily strolling around the office~ ✨",
+        "The office is wonderfully calm and cozy! 💤",
+        "Eevee dreams of evolving into Jolteon! ⚡",
+        "Eevee swishes its fluffy tail with excitement! 🐾"
+      ]
+    },
+    clickMeows: {
+      vi: [
+        "Eevui vui sướng vẫy đuôi! 🐾",
+        "Eevee ôm chân sếp cảm ơn nè! 💖",
+        "Tung tăng chạy nhảy quanh văn phòng! ✨",
+        "Bấm tiếp để đổi sang bạn Mèo nhé! 🐱"
+      ],
+      en: [
+        "Eevui wags its tail with pure delight! 🐾",
+        "Eevee happily hugs boss's leg! 💖",
+        "Trotting cheerfully across the workspace! ✨",
+        "Click again to switch to Butler Cat! 🐱"
+      ]
+    },
     sound: [[587, 0.08], [880, 0.12], [1174, 0.16]]
   }
 };
 
 const MASCOT_KEYS = ['pikachu', 'cat', 'eevee'];
-// Ngẫu nhiên chọn một bạn lúc đầu
 let currentMascot = MASCOT_KEYS[Math.floor(Math.random() * MASCOT_KEYS.length)];
 
 let mascotState = {
@@ -839,6 +901,357 @@ let mascotState = {
   sleeping: false
 };
 
+// ---------- Đa ngôn ngữ (i18n) ----------
+let curLang = 'vi';
+try {
+  curLang = localStorage.getItem('agentOfficeLang') || (navigator.language && navigator.language.startsWith('en') ? 'en' : 'vi');
+} catch(e) {}
+
+const I18N = {
+  vi: {
+    appTitle: 'Văn phòng Agent',
+    connecting: 'Đang kết nối…',
+    connected: 'Đã kết nối',
+    connLost: 'Mất kết nối tới server, đang thử lại…',
+    btnSoundOn: '🔊 Tắt âm thanh',
+    btnSoundOff: '🔈 Bật âm thanh',
+    btnNotifyOn: '🔔 Tắt thông báo',
+    btnNotifyOff: '🔕 Bật thông báo',
+    notifyUnsupported: 'Trình duyệt không hỗ trợ',
+    btnReplay: '⏪ Xem lại',
+    btnBoard: '🏆 Xếp hạng',
+    btnTerm: '🖥️ Terminal',
+    btnHooks: '⚡ Hooks',
+    btnLang: '🌐 English',
+    plaqueWork: '🖥 Khu làm việc',
+    plaqueBoss: '📋 Phòng sếp',
+    plaqueRest: '🛋 Phòng chờ việc',
+    plaqueNap: '💤 Phòng ngủ gật & Server',
+    plaqueCafe: '☕ Pantry & Cà phê',
+    loungeDesc: 'Sub-agent làm xong ra đây ăn nhẹ & xả hơi',
+    loungeEmpty: 'Chưa ai xong việc.',
+    statSessions: 'nhóm (session)',
+    statRunning: 'nhóm đang chạy',
+    statSubsWorking: 'sub đang làm',
+    statSubsDone: 'sub xong',
+    statTokens: 'token (vào+ra)',
+    statCost: 'chi phí',
+    subStatus: (r, w) => `${r} nhóm đang chạy, ${w} sub-agent đang làm`,
+    tabTitleWait: (n) => `(${n}) Chờ duyệt · Văn phòng Agent`,
+    tabTitleNormal: 'Văn phòng Agent',
+    leadRole: 'Trưởng nhóm',
+    runawayBadge: '🚨 VÒNG LẶP',
+    noSignal: (t) => `💤 Không có tín hiệu ${t}`,
+    errorPrefix: '⚠ Lỗi: ',
+    waitingPrefix: '⏳ ',
+    thinking: 'Đang nghĩ…',
+    idleWaiting: 'Đang chờ việc mới',
+    vacant: {
+      work: 'Chưa ai làm việc',
+      boss: 'Không ai chờ duyệt 🎉',
+      rest: 'Không có nhóm rảnh',
+      nap: 'Không ai ngủ gật'
+    },
+    emptyWork: 'Chưa có nhóm nào trong văn phòng.<br>Mở Claude Code ở một thư mục bất kỳ, hoặc chạy <code>node server.js --demo</code> để xem thử.',
+    bossYou: 'Bạn',
+    bossPending: (n) => `${n} nhóm đang chờ bạn duyệt`,
+    bossNoPending: 'Không có việc cần duyệt',
+    agoSec: (s) => `${s} giây`,
+    agoMinSec: (m, s) => `${m} phút ${s} giây`,
+    agoBefore: (t) => `${t} trước`,
+    // Drawer
+    drawerStatus: { working: 'đang chạy', waiting: 'chờ bạn duyệt', idle: 'rảnh' },
+    drawerRunawayTitle: '🚨 CẢNH BÁO VÒNG LẶP VÔ TẬN',
+    drawerRunawaySub: '⚠️ Agent có dấu hiệu gọi lại cùng tool hoặc gặp lỗi liên tục. Mở Terminal để kiểm tra hoặc can thiệp tránh tiêu tốn token.',
+    drawerConflicts: '⚠ Đang sửa trùng file',
+    drawerThisTeam: 'Nhóm này',
+    drawerRecentError: 'Lỗi gần nhất',
+    drawerTokensCost: 'Token và chi phí',
+    drawerInput: 'Vào',
+    drawerOutput: 'Ra',
+    drawerCacheRead: 'Cache đọc',
+    drawerCacheWrite: 'Cache ghi',
+    drawerCost: 'Chi phí',
+    drawerNoCost: 'Công cụ này không báo chi phí',
+    drawerPrompt: 'Yêu cầu',
+    drawerRecentTools: (n) => `Tool gần đây (${n})`,
+    drawerOpenTerm: '🖥️ Mở Terminal',
+    drawerInspect: '>_ Soi',
+    drawerInspectTitle: 'Bấm để soi lệnh trong Terminal',
+    drawerSubAgents: (n) => `Sub-agent (${n})`,
+    drawerNone: 'Chưa có',
+    drawerRemoveBtn: '🗑 Xoá nhóm khỏi văn phòng',
+    drawerRemoveTitle: 'Dùng khi phiên đã tắt nhưng nhóm vẫn còn. Nếu phiên còn chạy, nhóm sẽ quay lại ở sự kiện kế tiếp',
+    drawerRemoveConfirm: (proj) => `Xoá nhóm "${proj}" khỏi văn phòng?`,
+    serverUnreachable: 'Không gọi được server',
+    // Leaderboard
+    boardTitle: '🏆 Xếp hạng trong ngày',
+    boardSubsEvents: (s, e) => `${s} sub-agent · ${e} sự kiện`,
+    boardLongest: 'Chạy lâu nhất',
+    boardBusiest: 'Gọi nhiều tool nhất',
+    boardTokens: 'Nhóm tốn nhiều token nhất',
+    boardTeams: 'Nhóm chăm chỉ nhất',
+    boardNoData: 'Chưa có số liệu',
+    boardLoadErr: 'Không tải được bảng xếp hạng.',
+    boardFootnote: 'Số token là của cả nhóm (omp/Claude Code không tách token cho từng sub-agent). Sub-agent đã xong vẫn được tính dù đã rời góc cà phê.',
+    runningNow: 'đang chạy',
+    toolsCount: (n) => `${n} tool`,
+    agentsCount: (n) => `${n} sub-agent`,
+    // Hooks
+    hookTitle: '⚡ Quản lý hook',
+    hookIntro: 'Cài hook để Claude Code, Gemini CLI, Codex và Antigravity gửi hoạt động về văn phòng. File cấu hình được sao lưu thành <code>.bak-agent-office</code> trước lần sửa đầu tiên; file có comment hoặc không phải JSON chuẩn sẽ không bị sửa.',
+    hookInstallAll: '⚡ Cài tất cả',
+    hookUninstallAll: '🗑️ Gỡ tất cả',
+    hookBadgeInstalled: '✓ ĐÃ CÀI',
+    hookBadgeNotInstalled: '○ CHƯA CÀI',
+    hookBadgeError: 'LỖI',
+    hookTestBtn: 'Gửi thử',
+    hookTestTitle: 'Chạy lệnh hook đã cài với payload mẫu và kiểm tra server có nhận được không',
+    hookInstallBtn: 'Cài',
+    hookUninstallBtn: 'Gỡ',
+    hookUninstallConfirm: (only) => only ? 'Gỡ hook của Agent Office khỏi công cụ này?' : 'Gỡ hook của Agent Office khỏi tất cả công cụ?',
+    hookSeen: (t) => t ? 'Nhận sự kiện lần cuối ' + t + ' trước' : 'Chưa nhận sự kiện nào (7 ngày qua)',
+    hookTestOk: (ms) => `✓ Gửi thử: server nhận sau ${ms} ms`,
+    hookTestFail: (err) => `✗ Gửi thử: ${err}`,
+    hookAfterInstall: 'Sau khi cài: khởi động lại phiên Claude Code / Gemini / Codex, mở hội thoại mới trong Antigravity.',
+    hookCliTitle: 'Dòng lệnh',
+    // Terminal
+    termEmpty: '> Chưa có session nào hoạt động trong văn phòng.',
+    termBannerProject: 'DỰ ÁN',
+    termBannerModel: 'MODEL',
+    termBannerStatus: 'TRẠNG THÁI',
+    termBannerCwd: 'CWD',
+    termRunawayAlert: '[!] CẢNH BÁO VÒNG LẶP VÔ TẬN (RUNAWAY LOOP)',
+    termType: 'LOẠI',
+    termDetectedAt: 'PHÁT HIỆN LÚC',
+    termExitError: 'EXIT 1 (LỖI)',
+    termExitOk: 'EXIT 0 (OK)',
+    termExitRunning: 'RUNNING / ĐANG CHẠY',
+    termCopyCmd: 'Chép lệnh',
+    termNoCmds: '> Chưa có lệnh nào được gọi trong phiên này.',
+    termLightReady: 'Sẵn sàng',
+    termLightRunaway: 'Bảo vệ vòng lặp: HOẠT ĐỘNG',
+    termLightSSE: 'Luồng sự kiện SSE: ĐÃ KẾT NỐI',
+    termBtnColorGreen: '🟢 Xanh',
+    termBtnColorAmber: '🟠 Hổ phách',
+    termBtnCopy: '📋 Chép log',
+    termBtnCopied: '✓ Đã chép!',
+    // Replay
+    replayMin15: '15 phút',
+    replayMin60: '1 giờ',
+    replayMin240: '4 giờ',
+    replayMin1440: '24 giờ',
+    replayPlay: '▶ Phát',
+    replayPause: '⏸ Dừng',
+    replayLive: 'Về trực tiếp',
+    replayNoLogs: 'Chưa có log trong khoảng này',
+    // Notifications
+    notifyWaitingTitle: (proj) => `Chờ bạn duyệt: ${proj}`,
+    notifyConflictTitle: (f) => `Hai nhóm cùng sửa ${f}`,
+    notifyConflictBody: (p1, pOthers) => `${p1} và ${pOthers}`
+  },
+  en: {
+    appTitle: 'Agent Office',
+    connecting: 'Connecting…',
+    connected: 'Connected',
+    connLost: 'Disconnected from server, reconnecting…',
+    btnSoundOn: '🔊 Mute Sound',
+    btnSoundOff: '🔈 Enable Sound',
+    btnNotifyOn: '🔔 Mute Notifications',
+    btnNotifyOff: '🔕 Enable Notifications',
+    notifyUnsupported: 'Browser not supported',
+    btnReplay: '⏪ Replay',
+    btnBoard: '🏆 Leaderboard',
+    btnTerm: '🖥️ Terminal',
+    btnHooks: '⚡ Hooks',
+    btnLang: '🌐 Tiếng Việt',
+    plaqueWork: '🖥 Work Area',
+    plaqueBoss: '📋 Boss Office',
+    plaqueRest: '🛋 Idle Lounge',
+    plaqueNap: '💤 Nap & Server',
+    plaqueCafe: '☕ Pantry & Cafe',
+    loungeDesc: 'Sub-agents relax and grab snacks here after completing tasks',
+    loungeEmpty: 'No one has finished yet.',
+    statSessions: 'sessions',
+    statRunning: 'active sessions',
+    statSubsWorking: 'subs working',
+    statSubsDone: 'subs finished',
+    statTokens: 'tokens (in+out)',
+    statCost: 'total cost',
+    subStatus: (r, w) => `${r} active session${r===1?'':'s'}, ${w} sub-agent${w===1?'':'s'} working`,
+    tabTitleWait: (n) => `(${n}) Awaiting Approval · Agent Office`,
+    tabTitleNormal: 'Agent Office',
+    leadRole: 'Team Lead',
+    runawayBadge: '🚨 RUNAWAY',
+    noSignal: (t) => `💤 No signal ${t}`,
+    errorPrefix: '⚠ Error: ',
+    waitingPrefix: '⏳ ',
+    thinking: 'Thinking…',
+    idleWaiting: 'Waiting for tasks',
+    vacant: {
+      work: 'No one is working',
+      boss: 'No one awaiting approval 🎉',
+      rest: 'No idle teams',
+      nap: 'No one napping'
+    },
+    emptyWork: 'No teams in the office yet.<br>Launch Claude Code in any project directory, or run <code>node server.js --demo</code> to preview.',
+    bossYou: 'You',
+    bossPending: (n) => `${n} team${n===1?'':'s'} awaiting your approval`,
+    bossNoPending: 'No pending approvals',
+    agoSec: (s) => `${s}s`,
+    agoMinSec: (m, s) => `${m}m ${s}s`,
+    agoBefore: (t) => `${t} ago`,
+    // Drawer
+    drawerStatus: { working: 'running', waiting: 'awaiting approval', idle: 'idle' },
+    drawerRunawayTitle: '🚨 RUNAWAY LOOP DETECTED',
+    drawerRunawaySub: '⚠️ Agent is repeatedly invoking identical tools or encountering errors. Inspect terminal logs to avoid token depletion.',
+    drawerConflicts: '⚠ Conflicting Files',
+    drawerThisTeam: 'This team',
+    drawerRecentError: 'Recent Errors',
+    drawerTokensCost: 'Tokens & Cost',
+    drawerInput: 'Input',
+    drawerOutput: 'Output',
+    drawerCacheRead: 'Cache Read',
+    drawerCacheWrite: 'Cache Write',
+    drawerCost: 'Cost',
+    drawerNoCost: 'Cost tracking not supported for this provider',
+    drawerPrompt: 'Prompt / Task',
+    drawerRecentTools: (n) => `Recent Tools (${n})`,
+    drawerOpenTerm: '🖥️ Open Terminal',
+    drawerInspect: '>_ Inspect',
+    drawerInspectTitle: 'Click to inspect command in Terminal',
+    drawerSubAgents: (n) => `Sub-agents (${n})`,
+    drawerNone: 'None',
+    drawerRemoveBtn: '🗑 Remove team from office',
+    drawerRemoveTitle: 'Use when session has exited but remains on screen. If still active, it will reappear on next event',
+    drawerRemoveConfirm: (proj) => `Remove team "${proj}" from office?`,
+    serverUnreachable: 'Failed to contact server',
+    // Leaderboard
+    boardTitle: '🏆 Daily Leaderboard',
+    boardSubsEvents: (s, e) => `${s} sub-agent${s===1?'':'s'} · ${e} event${e===1?'':'s'}`,
+    boardLongest: 'Longest Running',
+    boardBusiest: 'Most Active (Tools)',
+    boardTokens: 'Highest Token Usage',
+    boardTeams: 'Most Hardworking Team',
+    boardNoData: 'No data available',
+    boardLoadErr: 'Failed to load leaderboard.',
+    boardFootnote: 'Token count reflects the entire session (omp/Claude Code does not isolate tokens per sub-agent). Finished sub-agents remain counted after leaving cafe.',
+    runningNow: 'running',
+    toolsCount: (n) => `${n} tool${n===1?'':'s'}`,
+    agentsCount: (n) => `${n} sub-agent${n===1?'':'s'}`,
+    // Hooks
+    hookTitle: '⚡ Hook Manager',
+    hookIntro: 'Install hooks so Claude Code, Gemini CLI, Codex, and Antigravity stream activities to Agent Office. Config files are backed up to <code>.bak-agent-office</code> before any edits; non-standard JSON with comments is never modified.',
+    hookInstallAll: '⚡ Install All',
+    hookUninstallAll: '🗑️ Uninstall All',
+    hookBadgeInstalled: '✓ INSTALLED',
+    hookBadgeNotInstalled: '○ NOT INSTALLED',
+    hookBadgeError: 'ERROR',
+    hookTestBtn: 'Test',
+    hookTestTitle: 'Execute installed hook command with a test payload and verify server receipt',
+    hookInstallBtn: 'Install',
+    hookUninstallBtn: 'Uninstall',
+    hookUninstallConfirm: (only) => only ? 'Uninstall Agent Office hook from this tool?' : 'Uninstall Agent Office hooks from all tools?',
+    hookSeen: (t) => t ? 'Last received event ' + t + ' ago' : 'No events received (last 7 days)',
+    hookTestOk: (ms) => `✓ Test: server acknowledged in ${ms} ms`,
+    hookTestFail: (err) => `✗ Test failed: ${err}`,
+    hookAfterInstall: 'After installation: restart your Claude Code / Gemini / Codex session, or open a new conversation in Antigravity.',
+    hookCliTitle: 'CLI Commands',
+    // Terminal
+    termEmpty: '> No active sessions in office.',
+    termBannerProject: 'PROJECT',
+    termBannerModel: 'MODEL',
+    termBannerStatus: 'STATUS',
+    termBannerCwd: 'CWD',
+    termRunawayAlert: '[!] RUNAWAY LOOP DETECTED',
+    termType: 'TYPE',
+    termDetectedAt: 'DETECTED AT',
+    termExitError: 'EXIT 1 (ERROR)',
+    termExitOk: 'EXIT 0 (OK)',
+    termExitRunning: 'RUNNING',
+    termCopyCmd: 'Copy command',
+    termNoCmds: '> No commands invoked in this session yet.',
+    termLightReady: 'Ready',
+    termLightRunaway: 'Loop Guard: ACTIVE',
+    termLightSSE: 'SSE Stream: CONNECTED',
+    termBtnColorGreen: '🟢 Green',
+    termBtnColorAmber: '🟠 Amber',
+    termBtnCopy: '📋 Copy Log',
+    termBtnCopied: '✓ Copied!',
+    // Replay
+    replayMin15: '15 mins',
+    replayMin60: '1 hour',
+    replayMin240: '4 hours',
+    replayMin1440: '24 hours',
+    replayPlay: '▶ Play',
+    replayPause: '⏸ Pause',
+    replayLive: 'Live View',
+    replayNoLogs: 'No logs found in this timeframe',
+    // Notifications
+    notifyWaitingTitle: (proj) => `Awaiting approval: ${proj}`,
+    notifyConflictTitle: (f) => `File edit conflict on ${f}`,
+    notifyConflictBody: (p1, pOthers) => `${p1} and ${pOthers}`
+  }
+};
+
+const t=()=>I18N[curLang]||I18N.vi;
+
+function applyStaticLang() {
+  const dict = t();
+  const titleEl = document.getElementById('mainTitle');
+  if (titleEl && titleEl.childNodes.length > 0) titleEl.childNodes[0].textContent = dict.appTitle;
+  const langB = document.getElementById('langBtn');
+  if (langB) langB.textContent = dict.btnLang;
+  const replayB = document.getElementById('replayBtn');
+  if (replayB) replayB.textContent = dict.btnReplay;
+  const boardB = document.getElementById('boardBtn');
+  if (boardB) boardB.textContent = dict.btnBoard;
+  const termB = document.getElementById('termBtn');
+  if (termB) termB.textContent = dict.btnTerm;
+  const hookB = document.getElementById('hookBtn');
+  if (hookB) hookB.textContent = dict.btnHooks;
+
+  const updateSec = (id, txt) => {
+    const el = document.getElementById(id);
+    if (el) el.setAttribute('aria-label', txt);
+  };
+  updateSec('sec-work', dict.plaqueWork);
+  updateSec('sec-boss', dict.plaqueBoss);
+  updateSec('sec-rest', dict.plaqueRest);
+  updateSec('sec-nap', dict.plaqueNap);
+  updateSec('sec-cafe', dict.plaqueCafe);
+
+  const updatePlaque = (id, txt, countId) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const cnt = document.getElementById(countId);
+    const countVal = cnt ? cnt.textContent : '0';
+    el.innerHTML = `${txt}<b id="${countId}">${countVal}</b>`;
+  };
+  updatePlaque('plaque-work', dict.plaqueWork, 'n-work');
+  updatePlaque('plaque-boss', dict.plaqueBoss, 'n-boss');
+  updatePlaque('plaque-rest', dict.plaqueRest, 'n-rest');
+  updatePlaque('plaque-nap', dict.plaqueNap, 'n-nap');
+  updatePlaque('plaque-cafe', dict.plaqueCafe, 'n-cafe');
+
+  const ld = document.getElementById('loungeDesc');
+  if (ld) ld.textContent = dict.loungeDesc;
+  const rt = document.getElementById('replayTitle');
+  if (rt) rt.textContent = dict.btnReplay;
+  const o15 = document.getElementById('opt-15'); if (o15) o15.textContent = dict.replayMin15;
+  const o60 = document.getElementById('opt-60'); if (o60) o60.textContent = dict.replayMin60;
+  const o240 = document.getElementById('opt-240'); if (o240) o240.textContent = dict.replayMin240;
+  const o1440 = document.getElementById('opt-1440'); if (o1440) o1440.textContent = dict.replayMin1440;
+  const rLive = document.getElementById('replayLive'); if (rLive) rLive.textContent = dict.replayLive;
+}
+
+const getMascotTexts = (m, type) => {
+  const list = m[type];
+  if (!list) return [];
+  if (Array.isArray(list)) return list;
+  return list[curLang] || list.vi || list.en || [];
+};
+
 function initMascot() {
   const el = document.getElementById('mascot');
   if (!el) return;
@@ -846,7 +1259,8 @@ function initMascot() {
     if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
     const m = MASCOTS[currentMascot] || MASCOTS.pikachu;
     beep(m.sound);
-    mascotState.text = m.clickMeows[Math.floor(Math.random() * m.clickMeows.length)];
+    const clicks = getMascotTexts(m, 'clickMeows');
+    mascotState.text = clicks[Math.floor(Math.random() * clicks.length)] || '';
     mascotState.bubbleTimer = 5;
     mascotState.wait = Math.max(mascotState.wait, 3);
     // Bấm đổi tuần tự qua lại giữa Pikachu, Mèo Quản Gia và Eevee
@@ -875,14 +1289,18 @@ function tickMascot(hasWorkingAgents) {
     mascotState.frame = 2;
     if (mascotState.bubbleTimer > 0) mascotState.bubbleTimer--;
     else if (Math.random() < 0.15) {
-      mascotState.text = Math.random() < 0.5 ? "z Z z" : `${m.name} đang ngủ ngoan cho các bạn làm việc... 💤`;
+      const sleepMsg = curLang === 'en'
+        ? `${m.name} is resting quietly while agents work... 💤`
+        : `${m.name} đang ngủ ngoan cho các bạn làm việc... 💤`;
+      mascotState.text = Math.random() < 0.5 ? "z Z z" : sleepMsg;
       mascotState.bubbleTimer = 4;
     }
   } else {
     if (mascotState.bubbleTimer > 0) {
       mascotState.bubbleTimer--;
     } else if (Math.random() < 0.22) {
-      mascotState.text = m.patrolMeows[Math.floor(Math.random() * m.patrolMeows.length)];
+      const patrols = getMascotTexts(m, 'patrolMeows');
+      mascotState.text = patrols[Math.floor(Math.random() * patrols.length)] || '';
       mascotState.bubbleTimer = 4;
     }
 
@@ -923,7 +1341,9 @@ function updateMascotUI() {
   img.width = f.w;
   img.height = f.h;
   img.alt = m.name;
-  el.title = `Mascot ${m.name} ${m.icon} · Bấm để chơi cùng hoặc đổi bạn mới!`;
+  el.title = curLang === 'en'
+    ? `Mascot ${m.name} ${m.icon} · Click to play or cycle companion!`
+    : `Mascot ${m.name} ${m.icon} · Bấm để chơi cùng hoặc đổi bạn mới!`;
 
   el.style.left = mascotState.pct + '%';
   el.style.transform = `scaleX(${mascotState.dir})`;
@@ -941,7 +1361,6 @@ function updateMascotUI() {
 
 // Phòng theo trạng thái: mất tín hiệu ưu tiên trước, rồi chờ duyệt, đang chạy, rảnh
 const roomOf=s=>s.stale?'nap':s.status==='waiting'?'boss':s.status==='working'?'work':'rest';
-const VACANT={work:'Chưa ai làm việc',boss:'Không ai chờ duyệt 🎉',rest:'Không có nhóm rảnh',nap:'Không ai ngủ gật'};
 const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
 // FLIP: ghi vị trí từng nhóm trước khi vẽ lại, sau đó cho nhóm "đi" từ chỗ cũ sang chỗ mới
 function capturePods(){const m=new Map();
@@ -986,33 +1405,32 @@ const SOUND={
   alarm:[[880,.12],[587,.12],[880,.12],[587,.18]]
 };
 const btn=document.getElementById('sound');
-function paintBtn(){btn.setAttribute('aria-pressed',soundOn);btn.textContent=soundOn?'🔊 Tắt âm thanh':'🔈 Bật âm thanh'}
+function paintBtn(){btn.setAttribute('aria-pressed',soundOn);btn.textContent=soundOn?t().btnSoundOn:t().btnSoundOff}
 btn.onclick=()=>{soundOn=!soundOn;try{localStorage.setItem('agentOfficeSound',soundOn?'1':'0')}catch(e){};paintBtn();if(soundOn)beep(SOUND.done)};
-paintBtn();
 
 // ---------- Thông báo hệ thống + tiêu đề tab ----------
 const STUCK_MS=10*60e3, ERR_MS=20e3;
 let notifyOn=false;
 try{notifyOn=localStorage.getItem('agentOfficeNotify')==='1'&&'Notification' in window&&Notification.permission==='granted'}catch(e){}
 const nbtn=document.getElementById('notify');
-function paintNotify(){nbtn.setAttribute('aria-pressed',notifyOn);nbtn.textContent=notifyOn?'🔔 Tắt thông báo':'🔕 Bật thông báo'}
+function paintNotify(){nbtn.setAttribute('aria-pressed',notifyOn);nbtn.textContent=notifyOn?t().btnNotifyOn:t().btnNotifyOff}
 nbtn.onclick=async()=>{
-  if(!('Notification' in window)){nbtn.textContent='Trình duyệt không hỗ trợ';return}
+  if(!('Notification' in window)){nbtn.textContent=t().notifyUnsupported;return}
   if(notifyOn){notifyOn=false}
   else{const p=Notification.permission==='granted'?'granted':await Notification.requestPermission();notifyOn=p==='granted'}
   try{localStorage.setItem('agentOfficeNotify',notifyOn?'1':'0')}catch(e){}
   paintNotify();
 };
-paintNotify();
+
 function notifyWaiting(s){
   if(!notifyOn||!document.hidden) return;
-  try{new Notification('Chờ bạn duyệt: '+s.project,{body:s.activity||'Cần bạn xác nhận',tag:'agent-office-'+s.id})}catch(e){}
+  try{new Notification(t().notifyWaitingTitle(s.project),{body:s.activity||(curLang==='en'?'Needs confirmation':'Cần bạn xác nhận'),tag:'agent-office-'+s.id})}catch(e){}
 }
 const baseName=f=>String(f||'').split('/').pop();
 function notifyConflict(s){
   if(!notifyOn||!document.hidden) return;
   const c=s.conflicts[0];
-  try{new Notification('Hai nhóm cùng sửa '+baseName(c.file),{body:`${s.project} và ${[...new Set(c.others.map(o=>o.project))].join(', ')}`,tag:'agent-office-conflict-'+c.file})}catch(e){}
+  try{new Notification(t().notifyConflictTitle(baseName(c.file)),{body:t().notifyConflictBody(s.project, [...new Set(c.others.map(o=>o.project))].join(', ')),tag:'agent-office-conflict-'+c.file})}catch(e){}
 }
 
 let prev=null; // trạng thái lần trước để phát hiện thay đổi
@@ -1041,10 +1459,14 @@ function detectChanges(S){
   }
   prev=cur;
 }
-const ago=ms=>{const s=Math.max(0,Math.round(ms/1000));return s<60?s+' giây':Math.floor(s/60)+' phút '+(s%60)+' giây'};
+const ago=ms=>{
+  const s=Math.max(0,Math.round(ms/1000));
+  return s<60 ? t().agoSec(s) : t().agoMinSec(Math.floor(s/60), s%60);
+};
 let state={now:Date.now(),sessions:[]},offset=0;
 
 function render(){
+  const dict = t();
   const now=replay?state.now:Date.now()+offset, S=state.sessions;
   const agents=S.flatMap(s=>s.agents.map(a=>({...a,team:color(s.id),project:s.project,stale:!!s.stale})));
   const working=agents.filter(a=>a.status==='working'&&!a.stale), done=agents.filter(a=>a.status==='done');
@@ -1052,26 +1474,30 @@ function render(){
   const tokTotal=S.reduce((a,s)=>a+((s.usage&&(s.usage.input||0)+(s.usage.output||0))||0),0);
   const costTotal=S.reduce((a,s)=>a+((s.usage&&s.usage.cost)||0),0);
   document.getElementById('stats').innerHTML=[
-    ['#5AB0FF',S.length,'nhóm (session)'],['#B98CFF',running,'nhóm đang chạy'],
-    ['#FFC857',working.length,'sub đang làm'],['#7BD389',done.length,'sub xong'],
-    ...(tokTotal?[['#4FD1C5',fmtTok(tokTotal),'token (vào+ra)']]:[]),...(costTotal?[['#FF9ECF',fmtCost(costTotal),'chi phí']]:[])]
+    ['#5AB0FF',S.length,dict.statSessions],['#B98CFF',running,dict.statRunning],
+    ['#FFC857',working.length,dict.statSubsWorking],['#7BD389',done.length,dict.statSubsDone],
+    ...(tokTotal?[['#4FD1C5',fmtTok(tokTotal),dict.statTokens]]:[]),...(costTotal?[['#FF9ECF',fmtCost(costTotal),dict.statCost]]:[])]
     .map(([c,n,l])=>`<div class="stat" style="--c:${c}"><b>${n}</b><span>${l}</span></div>`).join('');
-  document.getElementById('sub').textContent=`${running} nhóm đang chạy, ${working.length} sub-agent đang làm`;
+  document.getElementById('sub').textContent=dict.subStatus(running, working.length);
 
   const nWait=S.filter(s=>s.status==='waiting').length;
-  document.title=(nWait?`(${nWait}) Chờ duyệt · `:'')+'Văn phòng Agent';
+  document.title=nWait?dict.tabTitleWait(nWait):dict.tabTitleNormal;
   const pod=s=>{
     const col=color(s.id), mine=s.agents.filter(a=>a.status==='working');
     const err=s.status==='working'&&s.error&&now-s.error.at<ERR_MS;
     const isRunaway=!!s.runaway;
-    const runawayChip=isRunaway?`<span class="runaway-badge" title="${esc(s.runaway.msg)}">🚨 VÒNG LẶP (${s.runaway.count})</span>`:'';
-    const bubble=isRunaway?`🚨 ${esc(s.runaway.msg)}`:s.stale?'💤 Không có tín hiệu '+ago(now-s.updated):err?'⚠ Lỗi: '+esc(s.error.text):s.status==='waiting'?'⏳ '+esc(s.activity):s.status==='working'?esc(s.activity||'Đang nghĩ…'):'Đang chờ việc mới';
+    const runawayChip=isRunaway?`<span class="runaway-badge" title="${esc(s.runaway.msg)}">🚨 ${dict.runawayBadge} (${s.runaway.count})</span>`:'';
+    const bubble=isRunaway?`🚨 ${esc(s.runaway.msg)}`:s.stale?dict.noSignal(ago(now-s.updated)):err?dict.errorPrefix+esc(s.error.text):s.status==='waiting'?dict.waitingPrefix+esc(s.activity):s.status==='working'?esc(s.activity||dict.thinking):dict.idleWaiting;
     const run=s.status!=='idle'&&s.started?` · <span class="timer">${ago(now-s.started)}</span>`:'';
     const cf=s.conflicts||[];
+    const conflictHtml = cf.length ? (curLang === 'en'
+      ? `<div class="conflict" title="${esc(cf.map(c=>c.file).join('\n'))}">⚠ Conflict editing ${cf.slice(0,2).map(c=>`<b>${esc(baseName(c.file))}</b> with ${esc([...new Set(c.others.map(o=>o.project))].join(', '))}`).join('; ')}${cf.length>2?` and ${cf.length-2} other files`:''}</div>`
+      : `<div class="conflict" title="${esc(cf.map(c=>c.file).join('\n'))}">⚠ Cùng sửa ${cf.slice(0,2).map(c=>`<b>${esc(baseName(c.file))}</b> với ${esc([...new Set(c.others.map(o=>o.project))].join(', '))}`).join('; ')}${cf.length>2?` và ${cf.length-2} file khác`:''}</div>`) : '';
+
     return `<section class="pod ${s.status}${s.stale?' stale':''}${isRunaway?' runaway':''}${cf.length?' conflict':''}" data-sid="${esc(s.id)}" tabindex="0" role="button" style="--team:${col}">
       <header class="flag"><span class="flag-name">${esc(s.project)}</span>${engineChip(s)}${usageChip(s)}${runawayChip}<span class="flag-task" title="${esc(s.task)}">${esc(s.task)}</span></header>
-      <div class="lead">${person(col,s.stale?'idle':s.status+(isRunaway?' runaway':err?' err':''),s.id,true)}<div><div class="role">Trưởng nhóm${run}</div><div class="bubble${isRunaway?' err':err&&!s.stale?' err':''}">${bubble}</div></div></div>
-      ${cf.length?`<div class="conflict" title="${esc(cf.map(c=>c.file).join('\n'))}">⚠ Cùng sửa ${cf.slice(0,2).map(c=>`<b>${esc(baseName(c.file))}</b> với ${esc([...new Set(c.others.map(o=>o.project))].join(', '))}`).join('; ')}${cf.length>2?` và ${cf.length-2} file khác`:''}</div>`:''}
+      <div class="lead">${person(col,s.stale?'idle':s.status+(isRunaway?' runaway':err?' err':''),s.id,true)}<div><div class="role">${dict.leadRole}${run}</div><div class="bubble${isRunaway?' err':err&&!s.stale?' err':''}">${bubble}</div></div></div>
+      ${conflictHtml}
       ${mine.length?`<div class="desks">${mine.map(a=>`<div class="desk working">${a.activity?`<span class="act" title="${esc(a.activity)}">${esc(a.activity)}</span>`:''}${person(col,'working',a.id,false,a.type)}<div class="table"><span class="laptop"></span></div>
         <span class="tag" title="${esc(a.desc)}">${esc(a.desc)}</span><span class="timer${now-a.started>STUCK_MS?' stuck':''}">${now-a.started>STUCK_MS?'⚠ ':''}${ago(now-a.started)}</span></div>`).join('')}</div>`:''}
     </section>`};
@@ -1081,21 +1507,21 @@ function render(){
   for(const k in rooms){
     $('n-'+k).textContent=rooms[k].length;
     $('room-'+k).innerHTML=rooms[k].map(pod).join('')||(k==='work'&&!S.length
-      ?`<div class="empty">Chưa có nhóm nào trong văn phòng.<br>Mở Claude Code ở một thư mục bất kỳ, hoặc chạy <code>node server.js --demo</code> để xem thử.</div>`
-      :`<div class="vacant">${VACANT[k]}</div>`);
+      ?`<div class="empty">${dict.emptyWork}</div>`
+      :`<div class="vacant">${dict.vacant[k]}</div>`);
   }
   walkPods(old);
   // Phòng sếp: bạn ngồi bàn, nhóm chờ duyệt xếp hàng trước mặt
   $('bossdesk').innerHTML=`${person('#FFC857',nWait?'waiting':'idle','boss-you',true)}<div><div class="table"><span class="laptop"></span></div></div>
-    <div class="who">Bạn<span>${nWait?nWait+' nhóm đang chờ bạn duyệt':'Không có việc cần duyệt'}</span></div>`;
+    <div class="who">${dict.bossYou}<span>${nWait?dict.bossPending(nWait):dict.bossNoPending}</span></div>`;
   const d=new Date(now);
   document.querySelectorAll('.clock').forEach(c=>c.textContent=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`);
   $('floor').classList.toggle('night',d.getHours()<6||d.getHours()>=18);
 
   $('n-cafe').textContent=done.length;
   document.getElementById('lounge').innerHTML=done.sort((a,b)=>b.ended-a.ended).slice(0,10)
-    .map(a=>`<div class="done">${person(a.team,'idle',a.id,false,a.type)}<div><div class="tag">${esc(a.desc)}</div><span class="check">✓ ${esc(a.project)}, ${ago(now-a.ended)} trước</span></div></div>`).join('')
-    ||'<p>Chưa ai xong việc.</p>';
+    .map(a=>`<div class="done">${person(a.team,'idle',a.id,false,a.type)}<div><div class="tag">${esc(a.desc)}</div><span class="check">✓ ${esc(a.project)}, ${dict.agoBefore(ago(now-a.ended))}</span></div></div>`).join('')
+    ||`<p>${dict.loungeEmpty}</p>`;
   tickMascot(rooms.work.length > 0);
   renderDrawer(now);
   if(!document.getElementById('termDrawer').hidden) renderTerminal();
@@ -1104,37 +1530,38 @@ function render(){
 // ---------- Bảng chi tiết ----------
 let selected=null;
 const drawer=document.getElementById('drawer');
-const clock=t=>new Date(t).toLocaleTimeString('vi-VN');
+const clock=t=>new Date(t).toLocaleTimeString(curLang==='vi'?'vi-VN':'en-US');
 function renderDrawer(now){
+  const dict = t();
   const s=selected&&state.sessions.find(x=>x.id===selected);
   if(!s){drawer.hidden=true;return}
   const col=color(s.id), tools=(s.tools||[]).slice().reverse();
-  const ST={working:'đang chạy',waiting:'chờ bạn duyệt',idle:'rảnh'};
+  const ST=dict.drawerStatus;
   const runawayBox=s.runaway?`<div class="runaway-box">
-    <b>🚨 CẢNH BÁO VÒNG LẶP VÔ TẬN</b>
+    <b>${dict.drawerRunawayTitle}</b>
     <p>${esc(s.runaway.msg)}</p>
-    <small>⚠️ Agent có dấu hiệu gọi lại cùng tool hoặc gặp lỗi liên tục. Mở Terminal để kiểm tra hoặc can thiệp tránh tiêu tốn token.</small>
+    <small>${dict.drawerRunawaySub}</small>
   </div>`:'';
-  const h=`<button class="x" aria-label="Đóng" id="drawerX">×</button>
+  const h=`<button class="x" aria-label="Close" id="drawerX">×</button>
     <h2>${esc(s.project)}</h2>
     <div>${engineChip(s)} <span class="st">${ST[s.status]||s.status}${s.started&&s.status!=='idle'?' · '+ago(now-s.started):''}</span></div>
     <div class="st" title="${esc(s.id)}">${esc(s.id)}</div>
-    ${(s.conflicts||[]).length?`<h3>⚠ Đang sửa trùng file</h3><ul>${s.conflicts.map(c=>`<li class="bad"><b>${esc(c.file)}</b><div class="st">Nhóm này (${esc(c.who)}, ${clock(c.at)})${c.others.map(o=>` · ${esc(o.project)} (${esc(o.who)}, ${clock(o.at)})`).join('')}</div></li>`).join('')}</ul>`:''}
+    ${(s.conflicts||[]).length?`<h3>${dict.drawerConflicts}</h3><ul>${s.conflicts.map(c=>`<li class="bad"><b>${esc(c.file)}</b><div class="st">${dict.drawerThisTeam} (${esc(c.who)}, ${clock(c.at)})${c.others.map(o=>` · ${esc(o.project)} (${esc(o.who)}, ${clock(o.at)})`).join('')}</div></li>`).join('')}</ul>`:''}
     ${runawayBox}
-    ${s.error?`<h3>Lỗi gần nhất</h3><ul><li class="bad"><small>${clock(s.error.at)}</small>${esc(s.error.text)}</li></ul>`:''}
-    ${s.usage?`<h3>Token và chi phí</h3><ul><li>Vào: <b>${fmtTok(s.usage.input||0)}</b> · Ra: <b>${fmtTok(s.usage.output||0)}</b></li>
-      <li>Cache đọc: ${fmtTok(s.usage.cacheRead||0)} · Cache ghi: ${fmtTok(s.usage.cacheWrite||0)}</li>
-      <li>${s.usage.cost!=null?'Chi phí: <b>'+fmtCost(s.usage.cost)+'</b>':'<span class="st">Công cụ này không báo chi phí</span>'}</li></ul>`:''}
-    <h3>Yêu cầu</h3><div class="prompt">${esc(s.prompt||s.task||'(chưa có)')}</div>
+    ${s.error?`<h3>${dict.drawerRecentError}</h3><ul><li class="bad"><small>${clock(s.error.at)}</small>${esc(s.error.text)}</li></ul>`:''}
+    ${s.usage?`<h3>${dict.drawerTokensCost}</h3><ul><li>${dict.drawerInput}: <b>${fmtTok(s.usage.input||0)}</b> · ${dict.drawerOutput}: <b>${fmtTok(s.usage.output||0)}</b></li>
+      <li>${dict.drawerCacheRead}: ${fmtTok(s.usage.cacheRead||0)} · ${dict.drawerCacheWrite}: ${fmtTok(s.usage.cacheWrite||0)}</li>
+      <li>${s.usage.cost!=null?dict.drawerCost+': <b>'+fmtCost(s.usage.cost)+'</b>':'<span class="st">'+dict.drawerNoCost+'</span>'}</li></ul>`:''}
+    <h3>${dict.drawerPrompt}</h3><div class="prompt">${esc(s.prompt||s.task||'(chưa có)')}</div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin:18px 0 6px">
-      <h3 style="margin:0">Tool gần đây (${tools.length})</h3>
-      <button class="term-btn" id="openTermFromDrawer" title="Mở Retro Terminal Inspector">🖥️ Mở Terminal</button>
+      <h3 style="margin:0">${dict.drawerRecentTools(tools.length)}</h3>
+      <button class="term-btn" id="openTermFromDrawer" title="Retro Terminal Inspector">${dict.drawerOpenTerm}</button>
     </div>
-    <ul>${tools.map(t=>`<li class="${t.error?'bad':''} tool-item" data-tool-id="${esc(t.id||'')}" title="Bấm để soi lệnh trong Terminal"><small>${clock(t.at)}</small>${t.error?'⚠ ':''}${esc(t.text)}<span class="inspect-tag">&gt;_ Soi</span></li>`).join('')||'<li>Chưa có</li>'}</ul>
-    <h3>Sub-agent (${s.agents.length})</h3>
+    <ul>${tools.map(t=>`<li class="${t.error?'bad':''} tool-item" data-tool-id="${esc(t.id||'')}" title="${dict.drawerInspectTitle}"><small>${clock(t.at)}</small>${t.error?'⚠ ':''}${esc(t.text)}<span class="inspect-tag">${dict.drawerInspect}</span></li>`).join('')||`<li>${dict.drawerNone}</li>`}</ul>
+    <h3>${dict.drawerSubAgents(s.agents.length)}</h3>
     ${gantt(s.agents,now)}
-    <ul>${s.agents.map(a=>`<li><small>${a.status==='working'?'⏳':'✓'}</small><b>${esc(a.desc)}</b> <span class="st">${esc(a.type)} · ${ago((a.ended||now)-a.started)}${a.toolCount?' · '+a.toolCount+' tool':''}</span>${a.status==='working'&&a.activity?`<div class="st">▶ ${esc(a.activity)}</div>`:''}${a.prompt?`<div class="st">${esc(a.prompt)}</div>`:''}</li>`).join('')||'<li>Chưa có</li>'}</ul>
-    ${replay?'':`<button class="btn-remove" id="removeGroup" title="Dùng khi phiên đã tắt nhưng nhóm vẫn còn. Nếu phiên còn chạy, nhóm sẽ quay lại ở sự kiện kế tiếp">🗑 Xoá nhóm khỏi văn phòng</button>`}`;
+    <ul>${s.agents.map(a=>`<li><small>${a.status==='working'?'⏳':'✓'}</small><b>${esc(a.desc)}</b> <span class="st">${esc(a.type)} · ${ago((a.ended||now)-a.started)}${a.toolCount?' · '+dict.toolsCount(a.toolCount):''}</span>${a.status==='working'&&a.activity?`<div class="st">▶ ${esc(a.activity)}</div>`:''}${a.prompt?`<div class="st">${esc(a.prompt)}</div>`:''}</li>`).join('')||`<li>${dict.drawerNone}</li>`}</ul>
+    ${replay?'':`<button class="btn-remove" id="removeGroup" title="${dict.drawerRemoveTitle}">${dict.drawerRemoveBtn}</button>`}`;
   const top=drawer.scrollTop;
   drawer.style.setProperty('--team',col); drawer.innerHTML=h; drawer.hidden=false; drawer.scrollTop=top;
   document.getElementById('drawerX').onclick=()=>{selected=null;render()};
@@ -1142,8 +1569,8 @@ function renderDrawer(now){
   if(otb) otb.onclick=()=>openTerminal(s.id);
   const rm=document.getElementById('removeGroup');
   if(rm) rm.onclick=async()=>{
-    if(!confirm(`Xoá nhóm "${s.project}" khỏi văn phòng?`))return;
-    let r;try{r=await fetch('/session-remove?id='+encodeURIComponent(s.id),{method:'POST'})}catch(e){alert('Không gọi được server');return}
+    if(!confirm(dict.drawerRemoveConfirm(s.project)))return;
+    let r;try{r=await fetch('/session-remove?id='+encodeURIComponent(s.id),{method:'POST'})}catch(e){alert(dict.serverUnreachable);return}
     if(!r.ok){alert((await r.json().catch(()=>({}))).error||'Lỗi '+r.status);return}
     selected=null;render();
   };
@@ -1156,8 +1583,9 @@ function gantt(agents,now){
   if(!agents.length) return '';
   const t0=Math.min(...agents.map(a=>a.started)), t1=Math.max(now,...agents.map(a=>a.ended||now)), span=Math.max(1,t1-t0);
   const pct=t=>((t-t0)/span*100).toFixed(2)+'%';
-  return `<div class="gantt" aria-label="Dòng thời gian sub-agent">${agents.map(a=>{const end=a.ended||now;
-    return `<div class="row"><span class="nm" title="${esc(a.desc)}">${esc(a.desc)}</span><span class="lane"><span class="span${a.status==='working'?' on':''}" style="left:${pct(a.started)};width:calc(${pct(end)} - ${pct(a.started)})" title="${clock(a.started)} → ${a.ended?clock(a.ended):'đang chạy'} (${ago(end-a.started)})"></span></span></div>`}).join('')}
+  const runningStr = t().runningNow;
+  return `<div class="gantt" aria-label="Gantt timeline">${agents.map(a=>{const end=a.ended||now;
+    return `<div class="row"><span class="nm" title="${esc(a.desc)}">${esc(a.desc)}</span><span class="lane"><span class="span${a.status==='working'?' on':''}" style="left:${pct(a.started)};width:calc(${pct(end)} - ${pct(a.started)})" title="${clock(a.started)} → ${a.ended?clock(a.ended):runningStr} (${ago(end-a.started)})"></span></span></div>`}).join('')}
     <div class="axis"><span>${clock(t0)}</span><span>${ago(span)}</span><span>${clock(t1)}</span></div></div>`;
 }
 const floorEl=document.getElementById('floor');
@@ -1178,11 +1606,12 @@ let termColor=localStorage.getItem('agentOfficeTermColor')||'green'; // 'green' 
 let termTargetSid=null, termTargetToolId=null;
 
 function renderTerminal(){
+  const dict = t();
   const td=document.getElementById('termDrawer');
   if(td.hidden) return;
   const s=state.sessions.find(x=>x.id===(termTargetSid||selected))||state.sessions[0];
   if(!s){
-    td.innerHTML=`<div class="term-bezel"><div class="term-header"><div class="term-title">AGENT_OS TERMINAL</div><button class="term-close" id="termX">×</button></div><div class="term-screen">&gt; Chưa có session nào hoạt động trong văn phòng.</div></div>`;
+    td.innerHTML=`<div class="term-bezel"><div class="term-header"><div class="term-title">AGENT_OS TERMINAL</div><button class="term-close" id="termX">×</button></div><div class="term-screen">${dict.termEmpty}</div></div>`;
     document.getElementById('termX').onclick=closeTerminal;
     return;
   }
@@ -1192,48 +1621,48 @@ function renderTerminal(){
   let runawayAlert='';
   if(s.runaway){
     runawayAlert=`<div class="term-alert">
-      [!] CẢNH BÁO VÒNG LẶP VÔ TẬN (RUNAWAY LOOP)
+      ${dict.termRunawayAlert}
       &gt; ${esc(s.runaway.msg)}
-      &gt; LOẠI: ${esc(s.runaway.type).toUpperCase()} | PHÁT HIỆN LÚC: ${clock(s.runaway.at||now)}
+      &gt; ${dict.termType}: ${esc(s.runaway.type).toUpperCase()} | ${dict.termDetectedAt}: ${clock(s.runaway.at||now)}
     </div>`;
   }
   const banner=`<div class="term-banner">╔══════════════════════════════════════════════════════════════════════════════╗
 ║ AGENT_OS v1.0.4 • RETRO CRT TERMINAL INSPECTOR                           ║
-║ DỰ ÁN: ${esc(s.project).padEnd(20)} MODEL: ${(esc(s.model||s.source||'claude')).padEnd(14)} TRẠNG THÁI: ${(esc(s.status)).toUpperCase().padEnd(10)}║
-║ CWD: ${(esc(s.cwd||'/workspace/'+s.project)).padEnd(68)}║
+║ ${dict.termBannerProject}: ${esc(s.project).padEnd(18)} ${dict.termBannerModel}: ${(esc(s.model||s.source||'claude')).padEnd(12)} ${dict.termBannerStatus}: ${(esc(s.status)).toUpperCase().padEnd(10)}║
+║ ${dict.termBannerCwd}: ${(esc(s.cwd||'/workspace/'+s.project)).padEnd(68)}║
 ╚══════════════════════════════════════════════════════════════════════════════╝</div>`;
 
-  const items=tools.map((t,idx)=>{
-    const isTarget=termTargetToolId&&t.id===termTargetToolId;
-    const statusText=t.error?'EXIT 1 (LỖI)':(t.output?'EXIT 0 (OK)':'RUNNING / ĐANG CHẠY');
-    const statusClass=t.error?'err':(t.output?'ok':'');
-    const promptLine=`agent@${esc(s.project)}:~$ ${esc(t.text)}`;
-    const inputContent=t.input?`<div class="cmd-body"><span style="opacity:.7">&gt; INPUT:</span>\n${esc(t.input)}</div>`:'';
-    const outputContent=t.output?`<div class="cmd-output"><span style="opacity:.7">&gt; OUTPUT:</span>\n${esc(t.output)}</div>`:'';
+  const items=tools.map((item,idx)=>{
+    const isTarget=termTargetToolId&&item.id===termTargetToolId;
+    const statusText=item.error?dict.termExitError:(item.output?dict.termExitOk:dict.termExitRunning);
+    const statusClass=item.error?'err':(item.output?'ok':'');
+    const promptLine=`agent@${esc(s.project)}:~$ ${esc(item.text)}`;
+    const inputContent=item.input?`<div class="cmd-body"><span style="opacity:.7">&gt; INPUT:</span>\n${esc(item.input)}</div>`:'';
+    const outputContent=item.output?`<div class="cmd-output"><span style="opacity:.7">&gt; OUTPUT:</span>\n${esc(item.output)}</div>`:'';
     return `<div class="cmd-block${isTarget?' target':''}" id="cmd-${idx}">
-      <div><span class="cmd-time">[${clock(t.at)}]</span><span class="cmd-prompt">${promptLine}</span></div>
-      <div class="cmd-meta"><span class="cmd-status ${statusClass}">${statusText}</span><button class="term-btn copy-cmd-btn" data-cmd="${esc(t.input||t.text)}" title="Chép lệnh">📋</button></div>
+      <div><span class="cmd-time">[${clock(item.at)}]</span><span class="cmd-prompt">${promptLine}</span></div>
+      <div class="cmd-meta"><span class="cmd-status ${statusClass}">${statusText}</span><button class="term-btn copy-cmd-btn" data-cmd="${esc(item.input||item.text)}" title="${dict.termCopyCmd}">📋</button></div>
       ${inputContent}
       ${outputContent}
     </div>`;
-  }).join('')||'<div style="opacity:.6;padding:20px 0">&gt; Chưa có lệnh nào được gọi trong phiên này.</div>';
+  }).join('')||`<div style="opacity:.6;padding:20px 0">${dict.termNoCmds}</div>`;
 
   td.innerHTML=`
     <div class="term-bezel">
       <div class="term-header">
         <div class="term-lights">
-          <span class="light red" title="Sẵn sàng"></span>
-          <span class="light green" title="Bảo vệ vòng lặp: HOẠT ĐỘNG"></span>
-          <span class="light yellow" title="Luồng sự kiện SSE: ĐÃ KẾT NỐI"></span>
+          <span class="light red" title="${dict.termLightReady}"></span>
+          <span class="light green" title="${dict.termLightRunaway}"></span>
+          <span class="light yellow" title="${dict.termLightSSE}"></span>
         </div>
         <div class="term-title">AGENT_OS // CRT_CONSOLE [${esc(s.project)}]</div>
         <div class="term-actions">
           <select id="termSessionSelect" class="board-day" style="padding:2px 6px;font-size:11px">
             ${state.sessions.map(x=>`<option value="${esc(x.id)}"${x.id===s.id?' selected':''}>${esc(x.project)} (${x.status})</option>`).join('')}
           </select>
-          <button class="term-btn" id="termColorBtn" title="Đổi màu hiển thị CRT">${termColor==='green'?'🟠 Amber':'🟢 Xanh'}</button>
-          <button class="term-btn" id="termCopyBtn" title="Chép toàn bộ log">📋 Chép log</button>
-          <button class="term-close" id="termX" aria-label="Đóng">&times;</button>
+          <button class="term-btn" id="termColorBtn" title="CRT Phosphor">${termColor==='green'?'🟠 Amber':dict.termBtnColorGreen}</button>
+          <button class="term-btn" id="termCopyBtn" title="Copy">${dict.termBtnCopy}</button>
+          <button class="term-close" id="termX" aria-label="Close">&times;</button>
         </div>
       </div>
       <div class="term-screen${termColor==='amber'?' amber':''}" id="termScreen">
@@ -1256,10 +1685,10 @@ function renderTerminal(){
     renderTerminal();
   };
   document.getElementById('termCopyBtn').onclick=()=>{
-    const text=tools.map(t=>`[${clock(t.at)}] ${t.text}\nINPUT: ${t.input||''}\nOUTPUT: ${t.output||''}\n---`).join('\n\n');
+    const text=tools.map(item=>`[${clock(item.at)}] ${item.text}\nINPUT: ${item.input||''}\nOUTPUT: ${item.output||''}\n---`).join('\n\n');
     navigator.clipboard.writeText(text).then(()=>{
       const b=document.getElementById('termCopyBtn');
-      if(b){b.textContent='✓ Đã chép!';setTimeout(()=>{if(document.getElementById('termCopyBtn'))document.getElementById('termCopyBtn').textContent='📋 Chép log'},1500)}
+      if(b){b.textContent=dict.termBtnCopied;setTimeout(()=>{if(document.getElementById('termCopyBtn'))document.getElementById('termCopyBtn').textContent=dict.termBtnCopy},1500)}
     });
   };
   td.querySelectorAll('.copy-cmd-btn').forEach(b=>{
@@ -1305,21 +1734,23 @@ const board=document.getElementById('board');
 let boardTimer=null;
 const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 function rankList(title,rows,row){
-  return `<h3>${title}</h3><ol class="rank">${rows.length?rows.map((r,i)=>`<li><span class="no">${['🥇','🥈','🥉'][i]||i+1}</span>${row(r)}</li>`).join(''):'<li class="st">Chưa có số liệu</li>'}</ol>`;
+  const dict = t();
+  return `<h3>${title}</h3><ol class="rank">${rows.length?rows.map((r,i)=>`<li><span class="no">${['🥇','🥈','🥉'][i]||i+1}</span>${row(r)}</li>`).join(''):`<li class="st">${dict.boardNoData}</li>`}</ol>`;
 }
 async function loadBoard(){
+  const dict = t();
   const day=($('boardDay')&&$('boardDay').value)||today();
-  let b;try{b=await (await fetch('/leaderboard?day='+day)).json()}catch(e){board.innerHTML='<p>Không tải được bảng xếp hạng.</p>';return}
-  const sub=a=>`${person(color(a.team),'idle',a.id,false,a.type)}<span class="who"><b title="${esc(a.desc)}">${esc(a.desc)}</b><span class="st">${esc(a.project)} · ${esc(a.type)}${a.working?' · đang chạy':''}</span></span>`;
-  const team=t=>`${person(color(t.id),'idle',t.id,true)}<span class="who"><b>${esc(t.project)}</b><span class="st" title="${esc(t.id)}">${esc(t.model||t.source||'')} · #${esc(t.id.slice(-6))}</span></span>`;
-  board.innerHTML=`<button class="x" aria-label="Đóng" id="boardX">×</button>
-    <h2>🏆 Xếp hạng trong ngày</h2>
-    <div><input type="date" class="board-day" id="boardDay" value="${b.day}" max="${today()}" aria-label="Ngày"> <span class="st">${b.subagents} sub-agent · ${b.events} sự kiện</span></div>
-    ${rankList('Chạy lâu nhất',b.longest,a=>sub(a)+`<span class="val">${ago(a.ms)}</span>`)}
-    ${rankList('Gọi nhiều tool nhất',b.busiest,a=>sub(a)+`<span class="val">${a.tools} tool</span>`)}
-    ${rankList('Nhóm tốn nhiều token nhất',b.tokens,t=>team(t)+`<span class="val">${fmtTok(t.tokens)}${t.usage&&t.usage.cost!=null?' · '+fmtCost(t.usage.cost):''}</span>`)}
-    ${rankList('Nhóm chăm chỉ nhất',b.teams,t=>team(t)+`<span class="val">${t.tools} tool · ${t.agents} sub-agent</span>`)}
-    <p class="st">Số token là của cả nhóm (omp/Claude Code không tách token cho từng sub-agent). Sub-agent đã xong vẫn được tính dù đã rời góc cà phê.</p>`;
+  let b;try{b=await (await fetch('/leaderboard?day='+day)).json()}catch(e){board.innerHTML=`<p>${dict.boardLoadErr}</p>`;return}
+  const sub=a=>`${person(color(a.team),'idle',a.id,false,a.type)}<span class="who"><b title="${esc(a.desc)}">${esc(a.desc)}</b><span class="st">${esc(a.project)} · ${esc(a.type)}${a.working?' · '+dict.runningNow:''}</span></span>`;
+  const team=teamObj=>`${person(color(teamObj.id),'idle',teamObj.id,true)}<span class="who"><b>${esc(teamObj.project)}</b><span class="st" title="${esc(teamObj.id)}">${esc(teamObj.model||teamObj.source||'')} · #${esc(teamObj.id.slice(-6))}</span></span>`;
+  board.innerHTML=`<button class="x" aria-label="Close" id="boardX">×</button>
+    <h2>${dict.boardTitle}</h2>
+    <div><input type="date" class="board-day" id="boardDay" value="${b.day}" max="${today()}" aria-label="Date"> <span class="st">${dict.boardSubsEvents(b.subagents, b.events)}</span></div>
+    ${rankList(dict.boardLongest,b.longest,a=>sub(a)+`<span class="val">${ago(a.ms)}</span>`)}
+    ${rankList(dict.boardBusiest,b.busiest,a=>sub(a)+`<span class="val">${dict.toolsCount(a.tools)}</span>`)}
+    ${rankList(dict.boardTokens,b.tokens,tObj=>team(tObj)+`<span class="val">${fmtTok(tObj.tokens)}${tObj.usage&&tObj.usage.cost!=null?' · '+fmtCost(tObj.usage.cost):''}</span>`)}
+    ${rankList(dict.boardTeams,b.teams,tObj=>team(tObj)+`<span class="val">${dict.toolsCount(tObj.tools)} · ${dict.agentsCount(tObj.agents)}</span>`)}
+    <p class="st">${dict.boardFootnote}</p>`;
   $('boardX').onclick=closeBoard;
   $('boardDay').onchange=loadBoard;
 }
@@ -1336,12 +1767,13 @@ function showFrame(){
   $('replayLabel').textContent=`${clock(state.now)} (${replay.i+1}/${replay.frames.length})`;
   render();
 }
-function stopPlay(){if(replay&&replay.timer){clearInterval(replay.timer);replay.timer=null}$('replayPlay').textContent='▶ Phát'}
+function stopPlay(){if(replay&&replay.timer){clearInterval(replay.timer);replay.timer=null}$('replayPlay').textContent=t().replayPlay}
 async function startReplay(){
+  const dict = t();
   const r=await fetch('/replay?minutes='+$('replayMin').value);
   const frames=await r.json();
   $('replaybar').hidden=false;
-  if(!frames.length){stopPlay();replay=null;$('replayLabel').textContent='Chưa có log trong khoảng này';return}
+  if(!frames.length){stopPlay();replay=null;$('replayLabel').textContent=dict.replayNoLogs;return}
   stopPlay();
   replay={frames,i:frames.length-1,timer:null};
   $('replaySlider').max=frames.length-1;
@@ -1359,26 +1791,26 @@ $('replayPlay').onclick=()=>{
   if(!replay)return;
   if(replay.timer){stopPlay();return}
   if(replay.i>=replay.frames.length-1)replay.i=0;
-  $('replayPlay').textContent='⏸ Dừng';
+  $('replayPlay').textContent=t().replayPause;
   replay.timer=setInterval(()=>{if(replay.i>=replay.frames.length-1){stopPlay();return}replay.i++;showFrame()},400);
 };
 
 // ---------- Quản lý hook ----------
 const hookDrawer=document.getElementById('hookDrawer');
 let hookMsg='';
-// Server trả {error} (403/405) hoặc danh sách [{id,name,file,installed,msg,error}]
 async function hookCall(path,opts){
   try{
     const r=await fetch(path,opts), body=await r.json();
     if(!r.ok){hookMsg=body.error||('Lỗi '+r.status);return null}
     hookMsg='';return body;
-  }catch(e){hookMsg='Không gọi được server: '+e.message;return null}
+  }catch(e){hookMsg=t().serverUnreachable+': '+e.message;return null}
 }
 async function loadHooksUI(){hookDrawer.hidden=false;renderHooksDrawer(await hookCall('/hooks-status')||[])}
 function closeHooksUI(){hookDrawer.hidden=true}
 const hookTests={}; // id -> kết quả Gửi thử gần nhất {ok, ms, error}
 async function hookAction(kind,only){
-  if(kind==='uninstall'&&!confirm(only?'Gỡ hook của Agent Office khỏi công cụ này?':'Gỡ hook của Agent Office khỏi tất cả công cụ?'))return;
+  const dict = t();
+  if(kind==='uninstall'&&!confirm(dict.hookUninstallConfirm(only)))return;
   hookDrawer.querySelectorAll('button[data-act]').forEach(b=>b.disabled=true);
   const res=await hookCall('/hooks-'+kind+(only?'?only='+only:''),{method:'POST'});
   if(kind==='test'){if(res)hookTests[only]=res;renderHooksDrawer(await hookCall('/hooks-status')||[]);return}
@@ -1386,32 +1818,33 @@ async function hookAction(kind,only){
   hookMsg=hookMsg||msg;
   renderHooksDrawer(list);
 }
-const seenText=t=>t?'Nhận sự kiện lần cuối '+ago(Date.now()-t)+' trước':'Chưa nhận sự kiện nào (7 ngày qua)';
+const seenText=tVal=>t().hookSeen(tVal?ago(Date.now()-tVal):null);
 function renderHooksDrawer(items){
+  const dict = t();
   const cards=items.map(it=>`
     <div class="hook-item">
       <div class="info"><b>${esc(it.name)}</b><small>${esc(it.file)}</small>${it.error?`<small style="color:var(--coral)">⚠ ${esc(it.error)}</small>`:it.msg?`<small>${esc(it.msg)}</small>`:''}
         <small style="color:${it.lastSeen?'var(--mint)':'var(--muted)'}">${seenText(it.lastSeen)}</small>
-        ${hookTests[it.id]?`<small style="color:${hookTests[it.id].ok?'var(--mint)':'var(--coral)'}">${hookTests[it.id].ok?`✓ Gửi thử: server nhận sau ${hookTests[it.id].ms} ms`:'✗ Gửi thử: '+esc(hookTests[it.id].error)}</small>`:''}</div>
+        ${hookTests[it.id]?`<small style="color:${hookTests[it.id].ok?'var(--mint)':'var(--coral)'}">${hookTests[it.id].ok?dict.hookTestOk(hookTests[it.id].ms):dict.hookTestFail(esc(hookTests[it.id].error))}</small>`:''}</div>
       <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
-        <span class="hook-badge ${it.installed?'on':'off'}">${it.error?'LỖI':it.installed?'✓ ĐÃ CÀI':'○ CHƯA CÀI'}</span>
-        ${it.installed?`<button class="sound" data-act="test" data-only="${esc(it.id)}" style="padding:4px 8px;font-size:11px" title="Chạy lệnh hook đã cài với payload mẫu và kiểm tra server có nhận được không">Gửi thử</button>`:''}
-        <button class="sound" data-act="${it.installed?'uninstall':'install'}" data-only="${esc(it.id)}" style="padding:4px 8px;font-size:11px">${it.installed?'Gỡ':'Cài'}</button>
+        <span class="hook-badge ${it.installed?'on':'off'}">${it.error?dict.hookBadgeError:it.installed?dict.hookBadgeInstalled:dict.hookBadgeNotInstalled}</span>
+        ${it.installed?`<button class="sound" data-act="test" data-only="${esc(it.id)}" style="padding:4px 8px;font-size:11px" title="${dict.hookTestTitle}">${dict.hookTestBtn}</button>`:''}
+        <button class="sound" data-act="${it.installed?'uninstall':'install'}" data-only="${esc(it.id)}" style="padding:4px 8px;font-size:11px">${it.installed?dict.hookUninstallBtn:dict.hookInstallBtn}</button>
       </div>
     </div>`).join('');
   hookDrawer.innerHTML=`
-    <button class="x" aria-label="Đóng" id="hookX">×</button>
-    <h2>⚡ Quản lý hook</h2>
-    <p class="st">Cài hook để Claude Code, Gemini CLI, Codex và Antigravity gửi hoạt động về văn phòng. File cấu hình được sao lưu thành <code>.bak-agent-office</code> trước lần sửa đầu tiên; file có comment hoặc không phải JSON chuẩn sẽ không bị sửa.</p>
+    <button class="x" aria-label="Close" id="hookX">×</button>
+    <h2>${dict.hookTitle}</h2>
+    <p class="st">${dict.hookIntro}</p>
     ${hookMsg?`<p style="color:var(--coral)">⚠ ${esc(hookMsg)}</p>`:''}
     <div class="hook-btn-row">
-      <button class="btn-install" data-act="install">⚡ Cài tất cả</button>
-      <button class="btn-uninstall" data-act="uninstall">🗑️ Gỡ tất cả</button>
+      <button class="btn-install" data-act="install">${dict.hookInstallAll}</button>
+      <button class="btn-uninstall" data-act="uninstall">${dict.hookUninstallAll}</button>
     </div>
     <div id="hookList">${cards}</div>
-    <p class="st">Sau khi cài: khởi động lại phiên Claude Code / Gemini / Codex, mở hội thoại mới trong Antigravity.</p>
-    <h3>Dòng lệnh</h3>
-    <div class="prompt" style="font-size:11px">node setup-hooks.js --status<br>node setup-hooks.js            # cài tất cả<br>node setup-hooks.js --uninstall</div>
+    <p class="st">${dict.hookAfterInstall}</p>
+    <h3>${dict.hookCliTitle}</h3>
+    <div class="prompt" style="font-size:11px">node setup-hooks.js --status<br>node setup-hooks.js            # install all<br>node setup-hooks.js --uninstall</div>
     <h3>omp (oh-my-pi)</h3>
     <div class="prompt" style="font-size:11px">omp -e ./omp-office.ts</div>`;
   $('hookX').onclick=closeHooksUI;
@@ -1419,13 +1852,30 @@ function renderHooksDrawer(items){
 }
 document.getElementById('hookBtn').onclick=()=>hookDrawer.hidden?loadHooksUI():closeHooksUI();
 
+// Nút chuyển đổi ngôn ngữ
+const langBtn = document.getElementById('langBtn');
+if (langBtn) {
+  langBtn.onclick = () => {
+    curLang = curLang === 'vi' ? 'en' : 'vi';
+    try { localStorage.setItem('agentOfficeLang', curLang); } catch(e) {}
+    applyStaticLang();
+    paintBtn();
+    paintNotify();
+    render();
+    if (!hookDrawer.hidden) loadHooksUI();
+    if (!board.hidden) loadBoard();
+    if (!document.getElementById('termDrawer').hidden) renderTerminal();
+  };
+}
+
 function connect(){
   const es=new EventSource('/events');
-  es.onopen=()=>{document.getElementById('bar').classList.remove('off');document.getElementById('conn').textContent='Đã kết nối'};
+  es.onopen=()=>{document.getElementById('bar').classList.remove('off');document.getElementById('conn').textContent=t().connected};
   es.onmessage=e=>{live=JSON.parse(e.data);if(replay)return;state=live;offset=state.now-Date.now();detectChanges(state.sessions);render()};
-  es.onerror=()=>{document.getElementById('bar').classList.add('off');document.getElementById('conn').textContent='Mất kết nối tới server, đang thử lại…'};
+  es.onerror=()=>{document.getElementById('bar').classList.add('off');document.getElementById('conn').textContent=t().connLost};
 }
-initMascot(); connect(); setInterval(render,1000);
+
+applyStaticLang(); paintBtn(); paintNotify(); initMascot(); connect(); setInterval(render,1000);
 </script>
 </body>
 </html>

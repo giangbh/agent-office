@@ -1,5 +1,9 @@
 # 🏢 VĂN PHÒNG AGENT (AGENT OFFICE)
 
+<p align="right">
+  <b>🇻🇳 Tiếng Việt</b> | <a href="README_EN.md">🇺🇸 English</a>
+</p>
+
 > **Biến dòng lệnh AI khô khan thành một thế giới Pixel Art sống động thời gian thực!**  
 > Trực quan hóa hoạt động của **Claude Code**, **Antigravity IDE**, **Gemini CLI**, **Codex CLI**, và **oh-my-pi (omp)** cùng dàn sub-agent trong một tòa nhà văn phòng retro 8-bit.
 
