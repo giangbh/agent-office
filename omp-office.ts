@@ -2,7 +2,7 @@
 // Dịch sự kiện của omp sang cùng định dạng với hook của Claude Code, nên server không cần biết model là gì.
 //
 // Đã đối chiếu với omp 18.7.0: các sự kiện session_start, before_agent_start, tool_call,
-// tool_result, agent_end, session_shutdown đều có trong omp. Chưa chạy thử trọn vẹn một phiên thật.
+// tool_result, agent_end, session_shutdown đều có trong omp. Đã chạy thử một phiên `omp -p` thật có 2 sub-agent song song.
 // Nạp bằng: omp -e /đường/dẫn/omp-office.ts
 // Mọi chỗ đều bọc try/catch nên nếu sai cũng không làm hỏng omp,
 // chỉ là văn phòng không thấy gì. Khi đó mở http://localhost:4317/debug để xem server nhận được gì.

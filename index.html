@@ -23,10 +23,52 @@ h1 small{display:block;font:400 13px/1.4 var(--body);color:var(--muted);margin-t
 .stat{background:var(--night);border-radius:10px;padding:8px 14px;min-width:96px;border-bottom:3px solid var(--c)}
 .stat b{display:block;font:800 24px/1 var(--display);color:var(--c)}
 .stat span{font-size:12px;color:var(--muted)}
-.floor{max-width:1280px;margin:0 auto 24px;display:grid;grid-template-columns:1fr 260px;gap:0;border-radius:18px;overflow:hidden;
-  background:repeating-conic-gradient(var(--tile-a) 0 25%, var(--tile-b) 0 50%) 0 0/48px 48px;min-height:520px;box-shadow:0 0 0 6px var(--night)}
-.pods{padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;align-content:start}
-.pod{cursor:pointer;border:2px dashed color-mix(in srgb,var(--team) 55%,transparent);border-radius:16px;padding:14px 14px 18px;position:relative;background:color-mix(in srgb,var(--team) 6%,transparent)}
+/* mặt bằng: mỗi trạng thái một phòng, nhóm "đi" giữa các phòng khi trạng thái đổi */
+.floor{max-width:1280px;margin:0 auto 24px;display:grid;gap:6px;padding:6px;background:var(--night);border-radius:18px;min-height:520px;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) 300px;grid-template-areas:"work work boss" "rest nap cafe"}
+.room{position:relative;display:flex;flex-direction:column;border-radius:12px;min-height:230px;background:var(--fl)}
+.r-work{grid-area:work;min-height:340px;--fl:repeating-conic-gradient(var(--tile-a) 0 25%,var(--tile-b) 0 50%) 0 0/48px 48px}
+.r-boss{grid-area:boss;--fl:radial-gradient(ellipse at 50% 35%,#6A3446,#3E2230 75%)}
+.r-rest{grid-area:rest;--fl:repeating-linear-gradient(180deg,#4E3A2A 0 22px,#433122 22px 24px)}
+.r-nap{grid-area:nap;--fl:radial-gradient(#ffffff1c 1px,transparent 1.6px) 0 0/22px 22px,#181E33}
+.r-cafe{grid-area:cafe;--fl:repeating-linear-gradient(90deg,#2F4A3F 0 24px,#2B4439 0 48px)}
+.wall{position:relative;flex:none;height:58px;display:flex;align-items:flex-end;gap:10px;padding:0 12px 6px;border-radius:12px 12px 0 0;
+  background:linear-gradient(#3A4566,#2C3550);border-bottom:6px solid #1F2740}
+.r-boss .wall{background:linear-gradient(#5A3A48,#46303A)}
+.r-nap .wall{background:linear-gradient(#252C45,#1E2438)}
+.r-cafe .wall{background:linear-gradient(#35574A,#2B463C)}
+.plaque{align-self:center;font:800 14px/1 var(--display);background:var(--paper);color:var(--ink);padding:5px 10px 3px;border-radius:4px;box-shadow:0 2px 0 rgba(0,0,0,.35);white-space:nowrap}
+.plaque b{display:inline-block;min-width:20px;margin-left:6px;padding:2px 6px 0;border-radius:999px;background:var(--ink);color:var(--paper);font-size:12px;text-align:center}
+.deco{margin-left:auto;display:flex;align-items:flex-end;gap:10px}
+.furn{display:block;image-rendering:pixelated;pointer-events:none}
+.win{position:relative;width:46px;height:34px;border:3px solid #C9D2E6;border-radius:2px;background:linear-gradient(#7EC8FF,#CDEBFF);overflow:hidden}
+.win::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 45%,#C9D2E6 45% 55%,transparent 55%),linear-gradient(transparent 45%,#C9D2E6 45% 55%,transparent 55%)}
+.win::after{content:'';position:absolute;width:9px;height:9px;border-radius:50%;left:7px;top:5px;background:#FFE066;box-shadow:0 0 8px #FFE066}
+.night .win{background:linear-gradient(#0E1430,#25305A)}
+.night .win::after{background:#E9EEF7;box-shadow:0 0 6px #E9EEF7}
+.r-nap .win{background:linear-gradient(#0E1430,#25305A)}
+.r-nap .win::after{background:#E9EEF7;box-shadow:0 0 6px #E9EEF7}
+.wboard{width:58px;height:32px;background:#F4F6FB;border:3px solid #9AA6C2;border-radius:2px;
+  background-image:linear-gradient(90deg,#FF7A6B 0 40%,transparent 0),linear-gradient(90deg,#5AB0FF 0 65%,transparent 0),linear-gradient(90deg,#7BD389 0 30%,transparent 0);
+  background-size:100% 3px;background-repeat:no-repeat;background-position:6px 6px,6px 13px,6px 20px}
+.clock{width:34px;height:34px;border-radius:50%;background:var(--paper);border:3px solid #6C7894;color:var(--ink);font:700 10px/28px var(--body);text-align:center}
+.fdeco{position:absolute;bottom:8px;display:flex;align-items:flex-end;gap:8px;pointer-events:none;z-index:0}
+.fdeco.l{left:10px}.fdeco.r{right:10px}
+.pods{position:relative;flex:1;padding:16px 16px 70px;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:20px;align-content:start}
+.r-boss .pods,.r-rest .pods,.r-nap .pods{grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr))}
+.r-boss .pods{padding-bottom:16px}
+.vacant{grid-column:1/-1;color:var(--muted);font-size:12px;text-align:center;padding:24px 8px;opacity:.8}
+.bossdesk{display:flex;align-items:flex-end;gap:10px;padding:14px 16px 0}
+.bossdesk .table{width:96px;margin-top:0}
+.bossdesk .who{font-size:12px;color:var(--paper)}
+.bossdesk .who span{display:block;color:var(--muted);font-size:11px}
+.queue{padding:8px 16px 0;font-size:11px;color:#E8B6C4}
+.zzz{position:absolute;right:18px;top:70px;font:800 16px var(--display);color:#AFC0EE;opacity:.7;animation:zzz 3s ease-in-out infinite;pointer-events:none}
+@keyframes zzz{50%{transform:translate(4px,-8px);opacity:.3}}
+.pod.walk .lead .person .f1{animation:f1 .25s steps(1) infinite}
+.pod.walk .lead .person .f2{animation:f2 .25s steps(1) infinite}
+.pod{cursor:pointer;border:2px dashed color-mix(in srgb,var(--team) 55%,transparent);border-radius:16px;padding:14px 14px 18px;position:relative;z-index:1;background:color-mix(in srgb,var(--team) 6%,transparent)}
+.pod.walk{z-index:5}
 .pod:hover,.pod:focus-visible{border-style:solid;outline:none}
 .drawer{position:fixed;top:0;right:0;bottom:0;width:min(400px,100vw);background:var(--night);border-left:4px solid var(--team);padding:18px 18px 70px;overflow:auto;z-index:10;box-shadow:-8px 0 24px rgba(0,0,0,.4)}
 .drawer[hidden],.replaybar[hidden]{display:none}
@@ -43,8 +85,8 @@ h1 small{display:block;font:400 13px/1.4 var(--body);color:var(--muted);margin-t
 .gantt .row{display:grid;grid-template-columns:90px 1fr;gap:6px;align-items:center;margin:3px 0}
 .gantt .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--paper)}
 .gantt .lane{position:relative;height:12px;background:var(--wall);border-radius:3px}
-.gantt .bar{position:absolute;top:0;bottom:0;min-width:3px;border-radius:3px;background:var(--team);opacity:.55}
-.gantt .bar.on{opacity:1;background:repeating-linear-gradient(45deg,var(--team) 0 6px,var(--lamp) 0 12px)}
+.gantt .span{position:absolute;top:0;bottom:0;min-width:3px;border-radius:3px;background:var(--team);opacity:.55}
+.gantt .span.on{opacity:1;background:repeating-linear-gradient(45deg,var(--team) 0 6px,var(--lamp) 0 12px)}
 .gantt .axis{display:flex;justify-content:space-between;margin-left:96px;color:var(--muted);font-size:10px}
 .replaybar{position:fixed;left:0;right:0;bottom:0;z-index:11;background:var(--night);border-top:3px solid var(--lamp);padding:10px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .replaybar input[type=range]{flex:1;min-width:160px}
@@ -77,6 +119,19 @@ h1 small{display:block;font:400 13px/1.4 var(--body);color:var(--muted);margin-t
 @keyframes f1{0%{visibility:visible}50%{visibility:hidden}}
 @keyframes f2{0%{visibility:hidden}50%{visibility:visible}}
 .lead .person{width:48px;height:60px}
+/* hiệu ứng theo loại sub-agent: scout cầm kính lúp, reviewer cầm bút đỏ, sonic chạy nhanh */
+.person .acc{position:absolute;font-size:14px;line-height:1;pointer-events:none}
+.k-scout .acc{right:-12px;top:14px}
+.k-reviewer .acc{right:-11px;top:18px;filter:hue-rotate(-20deg) saturate(1.6)}
+.k-sonic .acc{left:-16px;top:20px;font-size:12px}
+.person.working.k-scout .acc{animation:scan 1.6s ease-in-out infinite}
+.person.working.k-reviewer .acc{animation:scribble .35s steps(2) infinite}
+.person.working.k-sonic .acc{animation:dash .3s steps(2) infinite}
+.person.working.k-sonic .f1{animation-duration:.18s}
+.person.working.k-sonic .f2{animation-duration:.18s}
+@keyframes scan{50%{transform:translate(-8px,-4px) rotate(-18deg)}}
+@keyframes scribble{50%{transform:translate(2px,2px) rotate(12deg)}}
+@keyframes dash{50%{transform:translateX(-4px);opacity:.4}}
 .sound{font:600 13px var(--body);background:var(--night);color:var(--paper);border:2px solid #3A4766;border-radius:8px;padding:8px 12px;cursor:pointer}
 .sound[aria-pressed="true"]{border-color:var(--mint);color:var(--mint)}
 .sound:focus-visible{outline:3px solid var(--lamp);outline-offset:2px}
@@ -85,14 +140,14 @@ h1 small{display:block;font:400 13px/1.4 var(--body);color:var(--muted);margin-t
 .idle .bubble{background:transparent;color:var(--muted);padding:0}
 .pod.stale{opacity:.6;border-style:dotted}
 .pod.stale .bubble{background:transparent;color:var(--muted);padding:0}
-.pod.stale .person .f1,.pod.stale .person .f2,.pod.stale .desk.working .laptop{animation:none!important}
+.pod.stale .person .f1,.pod.stale .person .f2,.pod.stale .person .acc,.pod.stale .desk.working .laptop{animation:none!important}
+.pod.stale .lead .person::before{content:'💤';position:absolute;right:-14px;top:-8px;font-size:14px}
 .bubble.err{background:var(--coral);color:var(--ink)}
 .person.err::after{content:'💦';position:absolute;right:-10px;top:-6px;font-size:14px}
 .timer.stuck{color:var(--coral);font-weight:600}
 .role{font:600 11px var(--body);color:var(--team)}
 /* góc cà phê */
-.lounge{background:repeating-linear-gradient(90deg,#2F4A3F 0 24px,#2B4439 0 48px);padding:20px 16px;border-left:6px solid var(--night)}
-.lounge h2{font:800 18px/1.2 var(--display);margin:0 0 2px}
+.lounge{position:relative;z-index:1;padding:14px 16px 70px}
 .lounge p{margin:0 0 14px;color:#B6CFC2;font-size:12px}
 .done{display:flex;gap:8px;align-items:center;margin-bottom:10px}
 .done .tag{margin:0;font-size:12px}
@@ -102,8 +157,73 @@ h1 small{display:block;font:400 13px/1.4 var(--body);color:var(--muted);margin-t
 .bar{max-width:1280px;margin:0 auto 24px;padding:0 24px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--mint);margin-right:6px}
 .off .dot{background:var(--coral)}
-@media (max-width:760px){.floor{grid-template-columns:1fr}.lounge{border-left:0;border-top:6px solid var(--night)}.pods{padding:16px}.stats{margin-left:0}}
-@media (prefers-reduced-motion:reduce){.person .f1,.person .f2,.desk.working .laptop{animation:none!important}}
+@media (max-width:900px){.floor{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"work work" "boss rest" "nap cafe"}}
+@media (max-width:760px){.floor{grid-template-columns:1fr;grid-template-areas:"work" "boss" "rest" "nap" "cafe"}.pods{padding:12px 12px 70px}.stats{margin-left:0}}
+@media (prefers-reduced-motion:reduce){.person .f1,.person .f2,.person .acc,.desk.working .laptop,.zzz{animation:none!important}}
+#board{z-index:12}
+.board-day{background:var(--wall);color:var(--paper);border:1px solid #3A4766;border-radius:6px;padding:4px 6px;font:12px var(--body)}
+.rank li{display:flex;align-items:center;gap:8px}
+.rank .no{font:800 14px var(--display);width:22px;text-align:center;color:var(--muted)}
+.rank li:nth-child(1) .no{color:var(--lamp)}
+.rank .who{flex:1;min-width:0}
+.rank .who b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank .val{font-weight:700;color:var(--mint);white-space:nowrap}
+.rank .person{margin-left:12px}
+
+/* Cảnh báo vòng lặp vô tận (Runaway loop alarm) */
+.pod.runaway{border:3px solid #FF3B30!important;background:color-mix(in srgb,#FF3B30 14%,transparent)!important;animation:runaway-glow .8s ease-in-out infinite alternate}
+@keyframes runaway-glow{0%{box-shadow:0 0 8px rgba(255,59,48,.35)}100%{box-shadow:0 0 24px rgba(255,59,48,.85)}}
+.runaway-badge{display:inline-flex;align-items:center;gap:4px;background:#FF3B30;color:#FFF;font:800 11px/1 var(--display);padding:3px 8px;border-radius:999px;animation:alarm-flash .5s steps(2) infinite}
+@keyframes alarm-flash{50%{background:#B91C1C}}
+.runaway-box{margin:12px 0;padding:12px 14px;background:rgba(255,59,48,.16);border:2px solid #FF3B30;border-radius:8px;color:#FF7A6B}
+.runaway-box b{color:#FFF;display:flex;align-items:center;gap:6px;font:800 13px var(--display)}
+.runaway-box p{margin:6px 0 4px;font-size:12px;color:#FFE4E6}
+.runaway-box small{color:#FDA4AF;font-size:11px}
+.person.runaway::after{content:'🚨';position:absolute;right:-14px;top:-12px;font-size:16px;animation:alarm-spin .8s ease-in-out infinite}
+@keyframes alarm-spin{0%,100%{transform:rotate(-15deg)}50%{transform:rotate(15deg)}}
+
+/* Retro Terminal Inspector Drawer */
+.term-drawer{width:min(680px,100vw);background:#0B0E14;border-left:4px solid var(--lamp);box-shadow:-12px 0 32px rgba(0,0,0,.7);display:flex;flex-direction:column;padding:0!important;overflow:hidden;z-index:20}
+.term-drawer[hidden]{display:none}
+.term-bezel{display:flex;flex-direction:column;height:100%;background:#111622;border:8px solid #1E2638;border-radius:12px;box-shadow:inset 0 0 16px rgba(0,0,0,.8);position:relative;overflow:hidden}
+.term-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#1A233A;border-bottom:2px solid #2B3858;color:#9AA6C2;font:700 12px var(--display);flex-wrap:wrap;gap:8px}
+.term-lights{display:flex;gap:6px;align-items:center}
+.term-lights .light{width:9px;height:9px;border-radius:50%;display:inline-block;box-shadow:0 0 4px currentColor}
+.term-lights .red{background:#FF4949;color:#FF4949}
+.term-lights .green{background:#22C55E;color:#22C55E}
+.term-lights .yellow{background:#EAB308;color:#EAB308}
+.term-title{font:800 12px/1 var(--display);letter-spacing:1px;color:var(--paper)}
+.term-actions{display:flex;gap:6px;align-items:center}
+.term-btn{background:#0F172A;color:#E2E8F0;border:1px solid #334155;border-radius:4px;padding:4px 8px;font:600 11px var(--body);cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+.term-btn:hover{background:#1E293B;border-color:#64748B}
+.term-close{font-size:18px;line-height:1;padding:2px 8px;background:none;border:0;color:var(--muted);cursor:pointer}
+.term-close:hover{color:#FFF}
+.term-screen{flex:1;overflow-y:auto;padding:14px;background:#05080F;color:#22C55E;font-family:ui-monospace,SFMono-Regular,"JetBrains Mono",Menlo,monospace;font-size:12px;line-height:1.55;position:relative;text-shadow:0 0 5px rgba(34,197,94,.4)}
+.term-bezel::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.15) 0 2px,transparent 2px 4px);pointer-events:none;z-index:3}
+/* CRT Phosphor Amber theme */
+.term-screen.amber{color:#FFB000;text-shadow:0 0 5px rgba(255,176,0,.4)}
+.term-screen.amber .cmd-prompt{color:#FFC857}
+.term-screen.amber .cmd-status.ok{color:#FFB000}
+.term-screen.amber .cmd-body{border-left-color:#FFB000}
+.term-screen.amber .cmd-output{color:#FDE68A}
+/* Terminal line elements */
+.cmd-block{margin-bottom:14px;padding-bottom:12px;border-bottom:1px dashed rgba(255,255,255,.14)}
+.cmd-block.target{background:rgba(255,200,87,.12);border-radius:4px;padding:6px 8px}
+.cmd-prompt{color:#5AB0FF;font-weight:700}
+.cmd-time{color:#64748B;font-size:11px;margin-right:6px}
+.cmd-meta{display:flex;justify-content:space-between;align-items:center;margin-top:2px;font-size:11px}
+.cmd-body{white-space:pre-wrap;word-break:break-word;margin:6px 0 0 10px;padding:6px 10px;background:rgba(0,0,0,.45);border-radius:4px;border-left:3px solid currentColor}
+.cmd-output{margin-top:6px;padding:6px 10px;background:rgba(0,0,0,.6);border-radius:4px;font-size:11px;color:#A7F3D0;white-space:pre-wrap;word-break:break-word}
+.cmd-status{font-weight:700;font-size:11px}
+.cmd-status.ok{color:#22C55E}
+.cmd-status.err{color:#FF4949;text-shadow:0 0 6px rgba(255,73,73,.6)}
+.term-banner{margin-bottom:14px;padding:10px 12px;background:rgba(255,255,255,.04);border:1px solid currentColor;border-radius:4px;font-size:11px;line-height:1.45;white-space:pre;overflow-x:auto}
+.term-alert{background:rgba(239,68,68,.2);border:1px solid #EF4444;color:#FF7A6B;padding:8px 12px;border-radius:6px;margin-bottom:14px;font-weight:700;animation:term-siren 1s steps(2) infinite}
+@keyframes term-siren{50%{background:rgba(239,68,68,.4);color:#FFFFFF}}
+/* Tool items in drawer */
+.tool-item{cursor:pointer;padding:6px 8px!important;border-radius:6px;transition:background .15s}
+.tool-item:hover{background:rgba(255,255,255,.08)}
+.tool-item .inspect-tag{opacity:.6;float:right;font-size:10px;padding:2px 5px;background:#0F172A;border:1px solid #334155;border-radius:4px;font-family:ui-monospace,monospace}
 </style>
 </head>
 <body>
@@ -113,12 +233,41 @@ h1 small{display:block;font:400 13px/1.4 var(--body);color:var(--muted);margin-t
   <button class="sound" id="sound" aria-pressed="false">🔈 Bật âm thanh</button>
   <button class="sound" id="notify" aria-pressed="false">🔕 Bật thông báo</button>
   <button class="sound" id="replayBtn">⏪ Xem lại</button>
+  <button class="sound" id="boardBtn">🏆 Xếp hạng</button>
+  <button class="sound" id="termBtn">🖥️ Terminal</button>
 </header>
-<main class="floor">
-  <div class="pods" id="pods"></div>
-  <aside class="lounge"><h2>Góc cà phê</h2><p>Sub-agent làm xong ra đây nghỉ</p><div id="lounge"></div></aside>
+<main class="floor" id="floor">
+  <section class="room r-work" aria-label="Khu làm việc">
+    <header class="wall"><span class="plaque">🖥 Khu làm việc<b id="n-work">0</b></span><div class="deco"><div class="wboard"></div><div class="win"></div><div class="clock"></div></div></header>
+    <div class="pods" id="room-work"></div>
+    <div class="fdeco l"><img class="furn" data-furn="plant" alt=""></div>
+    <div class="fdeco r"><img class="furn" data-furn="shelf" alt=""><img class="furn" data-furn="plant" alt=""></div>
+  </section>
+  <section class="room r-boss" aria-label="Phòng sếp: nhóm chờ bạn duyệt">
+    <header class="wall"><span class="plaque">📋 Phòng sếp<b id="n-boss">0</b></span><div class="deco"><div class="win"></div></div></header>
+    <div class="bossdesk" id="bossdesk"></div>
+    <div class="pods" id="room-boss"></div>
+  </section>
+  <section class="room r-rest" aria-label="Phòng chờ việc: nhóm rảnh">
+    <header class="wall"><span class="plaque">🛋 Phòng chờ việc<b id="n-rest">0</b></span><div class="deco"><img class="furn" data-furn="shelf" alt=""><div class="win"></div></div></header>
+    <div class="pods" id="room-rest"></div>
+    <div class="fdeco r"><img class="furn" data-furn="sofa" alt=""><img class="furn" data-furn="plant" alt=""></div>
+  </section>
+  <section class="room r-nap" aria-label="Phòng ngủ gật: nhóm mất tín hiệu">
+    <header class="wall"><span class="plaque">💤 Phòng ngủ gật<b id="n-nap">0</b></span><div class="deco"><div class="win"></div></div></header>
+    <div class="pods" id="room-nap"></div>
+    <span class="zzz" aria-hidden="true">z Z z</span>
+    <div class="fdeco r"><img class="furn" data-furn="napsofa" alt=""></div>
+  </section>
+  <section class="room r-cafe" aria-label="Góc cà phê">
+    <header class="wall"><span class="plaque">☕ Góc cà phê<b id="n-cafe">0</b></span><div class="deco"><img class="furn" data-furn="coffee" alt=""></div></header>
+    <div class="lounge"><p>Sub-agent làm xong ra đây nghỉ</p><div id="lounge"></div></div>
+    <div class="fdeco l"><img class="furn" data-furn="plant" alt=""></div>
+  </section>
 </main>
+<aside class="drawer" id="board" aria-label="Bảng xếp hạng" style="--team:var(--lamp)" hidden></aside>
 <aside class="drawer" id="drawer" hidden></aside>
+<aside class="drawer term-drawer" id="termDrawer" aria-label="Retro Terminal Inspector" hidden></aside>
 <div class="replaybar" id="replaybar" hidden>
   <b>⏪ Xem lại</b>
   <select id="replayMin" aria-label="Khoảng thời gian"><option value="15">15 phút</option><option value="60" selected>1 giờ</option><option value="240">4 giờ</option><option value="1440">24 giờ</option></select>
@@ -218,7 +367,54 @@ function sprite(team,seed,frame,leader){
   grid.forEach((r,y)=>r.forEach((p,x)=>{if(pal[p]){g.fillStyle=pal[p];g.fillRect(x,y,1,1)}}));
   return spriteCache[key]=c.toDataURL();
 }
-const person=(col,state,seed='x',leader=false)=>`<div class="person ${state}"><img class="f1" alt="" src="${sprite(col,seed,0,leader)}"><img class="f2" alt="" src="${sprite(col,seed,1,leader)}"></div>`;
+// Phụ kiện theo loại sub-agent (tên agent của omp hoặc subagent_type của Claude Code)
+const KINDS={scout:['🔍','Trinh sát'],reviewer:['🖍️','Soát lỗi'],sonic:['💨','Làm nhanh']};
+const kindOf=t=>{t=String(t||'').toLowerCase();return /scout|explore/.test(t)?'scout':/review/.test(t)?'reviewer':/sonic|quick|fast/.test(t)?'sonic':''};
+const person=(col,state,seed='x',leader=false,type='')=>{const k=kindOf(type),acc=k&&KINDS[k];
+  return `<div class="person ${state}${k?' k-'+k:''}"${acc?` title="${acc[1]}"`:''}><img class="f1" alt="" src="${sprite(col,seed,0,leader)}"><img class="f2" alt="" src="${sprite(col,seed,1,leader)}">${acc?`<span class="acc" aria-hidden="true">${acc[0]}</span>`:''}</div>`};
+// ---------- Nội thất pixel art (cùng kiểu ghép ký tự như nhân vật) ----------
+function pix(rows,pal,scale=3){
+  const c=document.createElement('canvas');c.width=rows[0].length;c.height=rows.length;const g=c.getContext('2d');
+  rows.forEach((r,y)=>[...r].forEach((p,x)=>{if(pal[p]){g.fillStyle=pal[p];g.fillRect(x,y,1,1)}}));
+  return {src:c.toDataURL(),w:c.width*scale,h:c.height*scale};
+}
+const SOFA=["..AAAAAAAAAAAA..",".AaaaaaaaaaaaaA.","AAaaaaaaaaaaaaAA","AAAAAAAAAAAAAAAA","AaaaaaaaaaaaaaaA","AAAAAAAAAAAAAAAA",".F............F."];
+const FURN={
+  plant:pix(["..g...g..",".gGg.gGg.","gGGgGgGGg",".gGGGGGg.","..ggGgg..","....G....","..PPPPP..","..ppppp..","...ppp..."],
+    {g:'#5DBB63',G:'#2F7D3E',P:'#C46A3A',p:'#9A4E2A'},4),
+  shelf:pix(["WWWWWWWWWW","WrbgyWrgbW","WrbgyWrgbW","WWWWWWWWWW","WgyrbWbyrW","WgyrbWbyrW","WWWWWWWWWW","WbrWWyggbW","WbrWWyggbW","WWWWWWWWWW"],
+    {W:'#7A4E2D',r:'#FF7A6B',b:'#5AB0FF',g:'#7BD389',y:'#FFC857'},4),
+  coffee:pix(["KKKKKKKKKK","KmmmmmmmmK","KmRmmmmmmK","KmmmmmwwmK","KKKKKKKKKK",".Kk....kK.",".Kk.cc.kK.",".Kk.cc.kK.","KKKKKKKKKK","KmmmmmmmmK","KKKKKKKKKK"],
+    {K:'#2A2F45',m:'#9AA6C2',k:'#4A5270',R:'#FF7A6B',w:'#7BD389',c:'#FFF4DE'},4),
+  sofa:pix(SOFA,{A:'#B5546A',a:'#D9728A',F:'#3A2A22'},6),
+  napsofa:pix(SOFA,{A:'#4A5C9A',a:'#6B80C4',F:'#141828'},6),
+};
+document.querySelectorAll('[data-furn]').forEach(el=>{const f=FURN[el.dataset.furn];el.src=f.src;el.width=f.w;el.height=f.h});
+// Phòng theo trạng thái: mất tín hiệu ưu tiên trước, rồi chờ duyệt, đang chạy, rảnh
+const roomOf=s=>s.stale?'nap':s.status==='waiting'?'boss':s.status==='working'?'work':'rest';
+const VACANT={work:'Chưa ai làm việc',boss:'Không ai chờ duyệt 🎉',rest:'Không có nhóm rảnh',nap:'Không ai ngủ gật'};
+const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
+// FLIP: ghi vị trí từng nhóm trước khi vẽ lại, sau đó cho nhóm "đi" từ chỗ cũ sang chỗ mới
+function capturePods(){const m=new Map();
+  for(const el of document.querySelectorAll('#floor [data-sid]'))m.set(el.dataset.sid,{r:el.getBoundingClientRect(),room:el.parentElement.id});
+  return m}
+// Đang đi dở mà bị vẽ lại (mỗi giây) thì đi tiếp phần thời gian còn lại, không bắt đầu lại
+const walkUntil=new Map();
+function walkPods(old){
+  if(reduceMotion.matches||document.hidden)return; // tab ẩn không vẽ khung hình: animation sẽ đứng ở điểm đầu
+  const t=performance.now();
+  for(const el of document.querySelectorAll('#floor [data-sid]')){
+    const sid=el.dataset.sid, o=old.get(sid);
+    if(!o){el.animate([{opacity:0,transform:'translateY(12px)'},{opacity:1,transform:'none'}],{duration:350,easing:'ease-out'});continue}
+    const r=el.getBoundingClientRect(),dx=o.r.left-r.left,dy=o.r.top-r.top;
+    if(Math.abs(dx)+Math.abs(dy)<2)continue;
+    if(o.room!==el.parentElement.id)walkUntil.set(sid,t+900);
+    const left=(walkUntil.get(sid)||0)-t, walking=left>50;
+    if(walking)el.classList.add('walk');else walkUntil.delete(sid);
+    el.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:'none'}],{duration:walking?left:350,easing:'cubic-bezier(.3,.7,.4,1)'})
+      .onfinish=()=>el.classList.remove('walk');
+  }
+}
 
 // ---------- Âm thanh 8-bit ----------
 let audio=null, soundOn=false;
@@ -234,7 +430,12 @@ function beep(notes){
     o.connect(g).connect(audio.destination); o.start(t); o.stop(t+d); t+=d*.85;
   }
 }
-const SOUND={done:[[784,.1],[1047,.22]], waiting:[[523,.14],[392,.2]], hired:[[660,.07]]};
+const SOUND={
+  done:[[784,.1],[1047,.22]],
+  waiting:[[523,.14],[392,.2]],
+  hired:[[660,.07]],
+  alarm:[[880,.12],[587,.12],[880,.12],[587,.18]]
+};
 const btn=document.getElementById('sound');
 function paintBtn(){btn.setAttribute('aria-pressed',soundOn);btn.textContent=soundOn?'🔊 Tắt âm thanh':'🔈 Bật âm thanh'}
 btn.onclick=()=>{soundOn=!soundOn;try{localStorage.setItem('agentOfficeSound',soundOn?'1':'0')}catch(e){};paintBtn();if(soundOn)beep(SOUND.done)};
@@ -263,7 +464,13 @@ let prev=null; // trạng thái lần trước để phát hiện thay đổi
 function detectChanges(S){
   if(prev) S.forEach(s=>{if(s.status==='waiting'&&prev['s'+s.id]!=='waiting') notifyWaiting(s)});
   const cur={};
-  S.forEach(s=>{cur['s'+s.id]=s.status; s.agents.forEach(a=>cur['a'+a.id]=a.status)});
+  let alarm=false;
+  S.forEach(s=>{
+    cur['s'+s.id]=s.status;
+    cur['r'+s.id]=s.runaway?s.runaway.count:0;
+    if(s.runaway && (!prev || !prev['r'+s.id])) alarm=true;
+    s.agents.forEach(a=>cur['a'+a.id]=a.status);
+  });
   if(prev){
     let done=false,waiting=false,hired=false;
     for(const k in cur){
@@ -271,7 +478,7 @@ function detectChanges(S){
       if(k[0]==='a'&&cur[k]==='working'&&!prev[k]) hired=true;
       if(k[0]==='s'&&cur[k]==='waiting'&&prev[k]!=='waiting') waiting=true;
     }
-    if(waiting) beep(SOUND.waiting); else if(done) beep(SOUND.done); else if(hired) beep(SOUND.hired);
+    if(alarm) beep(SOUND.alarm); else if(waiting) beep(SOUND.waiting); else if(done) beep(SOUND.done); else if(hired) beep(SOUND.hired);
   }
   prev=cur;
 }
@@ -294,23 +501,42 @@ function render(){
 
   const nWait=S.filter(s=>s.status==='waiting').length;
   document.title=(nWait?`(${nWait}) Chờ duyệt · `:'')+'Văn phòng Agent';
-  document.getElementById('pods').innerHTML=S.length?S.map(s=>{
+  const pod=s=>{
     const col=color(s.id), mine=s.agents.filter(a=>a.status==='working');
     const err=s.status==='working'&&s.error&&now-s.error.at<ERR_MS;
-    const bubble=s.stale?'💤 Không có tín hiệu '+ago(now-s.updated):err?'⚠ Lỗi: '+esc(s.error.text):s.status==='waiting'?'⏳ '+esc(s.activity):s.status==='working'?esc(s.activity||'Đang nghĩ…'):'Đang chờ việc mới';
+    const isRunaway=!!s.runaway;
+    const runawayChip=isRunaway?`<span class="runaway-badge" title="${esc(s.runaway.msg)}">🚨 VÒNG LẶP (${s.runaway.count})</span>`:'';
+    const bubble=isRunaway?`🚨 ${esc(s.runaway.msg)}`:s.stale?'💤 Không có tín hiệu '+ago(now-s.updated):err?'⚠ Lỗi: '+esc(s.error.text):s.status==='waiting'?'⏳ '+esc(s.activity):s.status==='working'?esc(s.activity||'Đang nghĩ…'):'Đang chờ việc mới';
     const run=s.status!=='idle'&&s.started?` · <span class="timer">${ago(now-s.started)}</span>`:'';
-    return `<section class="pod ${s.status}${s.stale?' stale':''}" data-sid="${esc(s.id)}" tabindex="0" role="button" style="--team:${col}">
-      <header class="flag"><span class="flag-name">${esc(s.project)}</span>${engineChip(s)}${usageChip(s)}<span class="flag-task" title="${esc(s.task)}">${esc(s.task)}</span></header>
-      <div class="lead">${person(col,s.stale?'idle':s.status+(err?' err':''),s.id,true)}<div><div class="role">Trưởng nhóm${run}</div><div class="bubble${err&&!s.stale?' err':''}">${bubble}</div></div></div>
-      ${mine.length?`<div class="desks">${mine.map(a=>`<div class="desk working">${a.activity?`<span class="act" title="${esc(a.activity)}">${esc(a.activity)}</span>`:''}${person(col,'working',a.id)}<div class="table"><span class="laptop"></span></div>
+    return `<section class="pod ${s.status}${s.stale?' stale':''}${isRunaway?' runaway':''}" data-sid="${esc(s.id)}" tabindex="0" role="button" style="--team:${col}">
+      <header class="flag"><span class="flag-name">${esc(s.project)}</span>${engineChip(s)}${usageChip(s)}${runawayChip}<span class="flag-task" title="${esc(s.task)}">${esc(s.task)}</span></header>
+      <div class="lead">${person(col,s.stale?'idle':s.status+(isRunaway?' runaway':err?' err':''),s.id,true)}<div><div class="role">Trưởng nhóm${run}</div><div class="bubble${isRunaway?' err':err&&!s.stale?' err':''}">${bubble}</div></div></div>
+      ${mine.length?`<div class="desks">${mine.map(a=>`<div class="desk working">${a.activity?`<span class="act" title="${esc(a.activity)}">${esc(a.activity)}</span>`:''}${person(col,'working',a.id,false,a.type)}<div class="table"><span class="laptop"></span></div>
         <span class="tag" title="${esc(a.desc)}">${esc(a.desc)}</span><span class="timer${now-a.started>STUCK_MS?' stuck':''}">${now-a.started>STUCK_MS?'⚠ ':''}${ago(now-a.started)}</span></div>`).join('')}</div>`:''}
-    </section>`}).join('')
-    :`<div class="empty">Chưa có nhóm nào trong văn phòng.<br>Mở Claude Code ở một thư mục bất kỳ, hoặc chạy <code>node server.js --demo</code> để xem thử.</div>`;
+    </section>`};
+  const rooms={work:[],boss:[],rest:[],nap:[]};
+  S.forEach(s=>rooms[roomOf(s)].push(s));
+  const old=capturePods();
+  for(const k in rooms){
+    $('n-'+k).textContent=rooms[k].length;
+    $('room-'+k).innerHTML=rooms[k].map(pod).join('')||(k==='work'&&!S.length
+      ?`<div class="empty">Chưa có nhóm nào trong văn phòng.<br>Mở Claude Code ở một thư mục bất kỳ, hoặc chạy <code>node server.js --demo</code> để xem thử.</div>`
+      :`<div class="vacant">${VACANT[k]}</div>`);
+  }
+  walkPods(old);
+  // Phòng sếp: bạn ngồi bàn, nhóm chờ duyệt xếp hàng trước mặt
+  $('bossdesk').innerHTML=`${person('#FFC857',nWait?'waiting':'idle','boss-you',true)}<div><div class="table"><span class="laptop"></span></div></div>
+    <div class="who">Bạn<span>${nWait?nWait+' nhóm đang chờ bạn duyệt':'Không có việc cần duyệt'}</span></div>`;
+  const d=new Date(now);
+  document.querySelectorAll('.clock').forEach(c=>c.textContent=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`);
+  $('floor').classList.toggle('night',d.getHours()<6||d.getHours()>=18);
 
+  $('n-cafe').textContent=done.length;
   document.getElementById('lounge').innerHTML=done.sort((a,b)=>b.ended-a.ended).slice(0,10)
-    .map(a=>`<div class="done">${person(a.team,'idle',a.id)}<div><div class="tag">${esc(a.desc)}</div><span class="check">✓ ${esc(a.project)}, ${ago(now-a.ended)} trước</span></div></div>`).join('')
+    .map(a=>`<div class="done">${person(a.team,'idle',a.id,false,a.type)}<div><div class="tag">${esc(a.desc)}</div><span class="check">✓ ${esc(a.project)}, ${ago(now-a.ended)} trước</span></div></div>`).join('')
     ||'<p>Chưa ai xong việc.</p>';
   renderDrawer(now);
+  if(!document.getElementById('termDrawer').hidden) renderTerminal();
 }
 
 // ---------- Bảng chi tiết ----------
@@ -322,23 +548,37 @@ function renderDrawer(now){
   if(!s){drawer.hidden=true;return}
   const col=color(s.id), tools=(s.tools||[]).slice().reverse();
   const ST={working:'đang chạy',waiting:'chờ bạn duyệt',idle:'rảnh'};
+  const runawayBox=s.runaway?`<div class="runaway-box">
+    <b>🚨 CẢNH BÁO VÒNG LẶP VÔ TẬN</b>
+    <p>${esc(s.runaway.msg)}</p>
+    <small>⚠️ Agent có dấu hiệu gọi lại cùng tool hoặc gặp lỗi liên tục. Mở Terminal để kiểm tra hoặc can thiệp tránh tiêu tốn token.</small>
+  </div>`:'';
   const h=`<button class="x" aria-label="Đóng" id="drawerX">×</button>
     <h2>${esc(s.project)}</h2>
     <div>${engineChip(s)} <span class="st">${ST[s.status]||s.status}${s.started&&s.status!=='idle'?' · '+ago(now-s.started):''}</span></div>
     <div class="st" title="${esc(s.id)}">${esc(s.id)}</div>
+    ${runawayBox}
     ${s.error?`<h3>Lỗi gần nhất</h3><ul><li class="bad"><small>${clock(s.error.at)}</small>${esc(s.error.text)}</li></ul>`:''}
     ${s.usage?`<h3>Token và chi phí</h3><ul><li>Vào: <b>${fmtTok(s.usage.input||0)}</b> · Ra: <b>${fmtTok(s.usage.output||0)}</b></li>
       <li>Cache đọc: ${fmtTok(s.usage.cacheRead||0)} · Cache ghi: ${fmtTok(s.usage.cacheWrite||0)}</li>
       <li>${s.usage.cost!=null?'Chi phí: <b>'+fmtCost(s.usage.cost)+'</b>':'<span class="st">Công cụ này không báo chi phí</span>'}</li></ul>`:''}
     <h3>Yêu cầu</h3><div class="prompt">${esc(s.prompt||s.task||'(chưa có)')}</div>
-    <h3>Tool gần đây (${tools.length})</h3>
-    <ul>${tools.map(t=>`<li class="${t.error?'bad':''}"><small>${clock(t.at)}</small>${t.error?'⚠ ':''}${esc(t.text)}</li>`).join('')||'<li>Chưa có</li>'}</ul>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:18px 0 6px">
+      <h3 style="margin:0">Tool gần đây (${tools.length})</h3>
+      <button class="term-btn" id="openTermFromDrawer" title="Mở Retro Terminal Inspector">🖥️ Mở Terminal</button>
+    </div>
+    <ul>${tools.map(t=>`<li class="${t.error?'bad':''} tool-item" data-tool-id="${esc(t.id||'')}" title="Bấm để soi lệnh trong Terminal"><small>${clock(t.at)}</small>${t.error?'⚠ ':''}${esc(t.text)}<span class="inspect-tag">&gt;_ Soi</span></li>`).join('')||'<li>Chưa có</li>'}</ul>
     <h3>Sub-agent (${s.agents.length})</h3>
     ${gantt(s.agents,now)}
     <ul>${s.agents.map(a=>`<li><small>${a.status==='working'?'⏳':'✓'}</small><b>${esc(a.desc)}</b> <span class="st">${esc(a.type)} · ${ago((a.ended||now)-a.started)}${a.toolCount?' · '+a.toolCount+' tool':''}</span>${a.status==='working'&&a.activity?`<div class="st">▶ ${esc(a.activity)}</div>`:''}${a.prompt?`<div class="st">${esc(a.prompt)}</div>`:''}</li>`).join('')||'<li>Chưa có</li>'}</ul>`;
   const top=drawer.scrollTop;
   drawer.style.setProperty('--team',col); drawer.innerHTML=h; drawer.hidden=false; drawer.scrollTop=top;
   document.getElementById('drawerX').onclick=()=>{selected=null;render()};
+  const otb=document.getElementById('openTermFromDrawer');
+  if(otb) otb.onclick=()=>openTerminal(s.id);
+  drawer.querySelectorAll('.tool-item').forEach(li=>{
+    li.onclick=()=>openTerminal(s.id, li.dataset.toolId);
+  });
 }
 // Dòng thời gian: mỗi sub-agent một thanh từ lúc bắt đầu đến lúc xong (đang chạy thì kéo tới hiện tại)
 function gantt(agents,now){
@@ -346,13 +586,175 @@ function gantt(agents,now){
   const t0=Math.min(...agents.map(a=>a.started)), t1=Math.max(now,...agents.map(a=>a.ended||now)), span=Math.max(1,t1-t0);
   const pct=t=>((t-t0)/span*100).toFixed(2)+'%';
   return `<div class="gantt" aria-label="Dòng thời gian sub-agent">${agents.map(a=>{const end=a.ended||now;
-    return `<div class="row"><span class="nm" title="${esc(a.desc)}">${esc(a.desc)}</span><span class="lane"><span class="bar${a.status==='working'?' on':''}" style="left:${pct(a.started)};width:calc(${pct(end)} - ${pct(a.started)})" title="${clock(a.started)} → ${a.ended?clock(a.ended):'đang chạy'} (${ago(end-a.started)})"></span></span></div>`}).join('')}
+    return `<div class="row"><span class="nm" title="${esc(a.desc)}">${esc(a.desc)}</span><span class="lane"><span class="span${a.status==='working'?' on':''}" style="left:${pct(a.started)};width:calc(${pct(end)} - ${pct(a.started)})" title="${clock(a.started)} → ${a.ended?clock(a.ended):'đang chạy'} (${ago(end-a.started)})"></span></span></div>`}).join('')}
     <div class="axis"><span>${clock(t0)}</span><span>${ago(span)}</span><span>${clock(t1)}</span></div></div>`;
 }
-const podsEl=document.getElementById('pods');
-podsEl.onclick=e=>{const p=e.target.closest('[data-sid]');if(p){selected=p.dataset.sid;render()}};
-podsEl.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){const p=e.target.closest('[data-sid]');if(p){e.preventDefault();selected=p.dataset.sid;render()}}};
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&selected){selected=null;render()}});
+const floorEl=document.getElementById('floor');
+floorEl.onclick=e=>{const p=e.target.closest('[data-sid]');if(p){selected=p.dataset.sid;render()}};
+floorEl.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){const p=e.target.closest('[data-sid]');if(p){e.preventDefault();selected=p.dataset.sid;render()}}};
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    const td=document.getElementById('termDrawer');
+    if(!td.hidden){closeTerminal()}else if(!board.hidden){closeBoard()}else if(selected){selected=null;render()}
+  } else if((e.key==='t'||e.key==='T') && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)){
+    const td=document.getElementById('termDrawer');
+    if(td.hidden) openTerminal(); else closeTerminal();
+  }
+});
+
+// ---------- Retro Terminal Inspector ----------
+let termColor=localStorage.getItem('agentOfficeTermColor')||'green'; // 'green' hoặc 'amber'
+let termTargetSid=null, termTargetToolId=null;
+
+function renderTerminal(){
+  const td=document.getElementById('termDrawer');
+  if(td.hidden) return;
+  const s=state.sessions.find(x=>x.id===(termTargetSid||selected))||state.sessions[0];
+  if(!s){
+    td.innerHTML=`<div class="term-bezel"><div class="term-header"><div class="term-title">AGENT_OS TERMINAL</div><button class="term-close" id="termX">×</button></div><div class="term-screen">&gt; Chưa có session nào hoạt động trong văn phòng.</div></div>`;
+    document.getElementById('termX').onclick=closeTerminal;
+    return;
+  }
+  termTargetSid=s.id;
+  const tools=s.tools||[];
+  const now=Date.now();
+  let runawayAlert='';
+  if(s.runaway){
+    runawayAlert=`<div class="term-alert">
+      [!] CẢNH BÁO VÒNG LẶP VÔ TẬN (RUNAWAY LOOP)
+      &gt; ${esc(s.runaway.msg)}
+      &gt; LOẠI: ${esc(s.runaway.type).toUpperCase()} | PHÁT HIỆN LÚC: ${clock(s.runaway.at||now)}
+    </div>`;
+  }
+  const banner=`<div class="term-banner">╔══════════════════════════════════════════════════════════════════════════════╗
+║ AGENT_OS v1.0.4 • RETRO CRT TERMINAL INSPECTOR                           ║
+║ DỰ ÁN: ${esc(s.project).padEnd(20)} MODEL: ${(esc(s.model||s.source||'claude')).padEnd(14)} TRẠNG THÁI: ${(esc(s.status)).toUpperCase().padEnd(10)}║
+║ CWD: ${(esc(s.cwd||'/workspace/'+s.project)).padEnd(68)}║
+╚══════════════════════════════════════════════════════════════════════════════╝</div>`;
+
+  const items=tools.map((t,idx)=>{
+    const isTarget=termTargetToolId&&t.id===termTargetToolId;
+    const statusText=t.error?'EXIT 1 (LỖI)':(t.output?'EXIT 0 (OK)':'RUNNING / ĐANG CHẠY');
+    const statusClass=t.error?'err':(t.output?'ok':'');
+    const promptLine=`agent@${esc(s.project)}:~$ ${esc(t.text)}`;
+    const inputContent=t.input?`<div class="cmd-body"><span style="opacity:.7">&gt; INPUT:</span>\n${esc(t.input)}</div>`:'';
+    const outputContent=t.output?`<div class="cmd-output"><span style="opacity:.7">&gt; OUTPUT:</span>\n${esc(t.output)}</div>`:'';
+    return `<div class="cmd-block${isTarget?' target':''}" id="cmd-${idx}">
+      <div><span class="cmd-time">[${clock(t.at)}]</span><span class="cmd-prompt">${promptLine}</span></div>
+      <div class="cmd-meta"><span class="cmd-status ${statusClass}">${statusText}</span><button class="term-btn copy-cmd-btn" data-cmd="${esc(t.input||t.text)}" title="Chép lệnh">📋</button></div>
+      ${inputContent}
+      ${outputContent}
+    </div>`;
+  }).join('')||'<div style="opacity:.6;padding:20px 0">&gt; Chưa có lệnh nào được gọi trong phiên này.</div>';
+
+  td.innerHTML=`
+    <div class="term-bezel">
+      <div class="term-header">
+        <div class="term-lights">
+          <span class="light red" title="Sẵn sàng"></span>
+          <span class="light green" title="Bảo vệ vòng lặp: HOẠT ĐỘNG"></span>
+          <span class="light yellow" title="Luồng sự kiện SSE: ĐÃ KẾT NỐI"></span>
+        </div>
+        <div class="term-title">AGENT_OS // CRT_CONSOLE [${esc(s.project)}]</div>
+        <div class="term-actions">
+          <select id="termSessionSelect" class="board-day" style="padding:2px 6px;font-size:11px">
+            ${state.sessions.map(x=>`<option value="${esc(x.id)}"${x.id===s.id?' selected':''}>${esc(x.project)} (${x.status})</option>`).join('')}
+          </select>
+          <button class="term-btn" id="termColorBtn" title="Đổi màu hiển thị CRT">${termColor==='green'?'🟠 Amber':'🟢 Xanh'}</button>
+          <button class="term-btn" id="termCopyBtn" title="Chép toàn bộ log">📋 Chép log</button>
+          <button class="term-close" id="termX" aria-label="Đóng">&times;</button>
+        </div>
+      </div>
+      <div class="term-screen${termColor==='amber'?' amber':''}" id="termScreen">
+        ${banner}
+        ${runawayAlert}
+        <div id="termLogContent">${items}</div>
+        <div style="margin-top:16px;opacity:.7">&gt; <span class="term-cursor" style="animation:screen .8s steps(1) infinite;background:currentColor;display:inline-block;width:8px;height:14px;vertical-align:middle"></span></div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('termX').onclick=closeTerminal;
+  document.getElementById('termColorBtn').onclick=()=>{
+    termColor=termColor==='green'?'amber':'green';
+    try{localStorage.setItem('agentOfficeTermColor',termColor)}catch(e){}
+    renderTerminal();
+  };
+  document.getElementById('termSessionSelect').onchange=e=>{
+    termTargetSid=e.target.value;
+    renderTerminal();
+  };
+  document.getElementById('termCopyBtn').onclick=()=>{
+    const text=tools.map(t=>`[${clock(t.at)}] ${t.text}\nINPUT: ${t.input||''}\nOUTPUT: ${t.output||''}\n---`).join('\n\n');
+    navigator.clipboard.writeText(text).then(()=>{
+      const b=document.getElementById('termCopyBtn');
+      if(b){b.textContent='✓ Đã chép!';setTimeout(()=>{if(document.getElementById('termCopyBtn'))document.getElementById('termCopyBtn').textContent='📋 Chép log'},1500)}
+    });
+  };
+  td.querySelectorAll('.copy-cmd-btn').forEach(b=>{
+    b.onclick=e=>{
+      e.stopPropagation();
+      navigator.clipboard.writeText(b.dataset.cmd);
+      b.textContent='✓';
+      setTimeout(()=>{b.textContent='📋'},1200);
+    };
+  });
+}
+
+function openTerminal(sid, toolId){
+  termTargetSid=sid||selected||(state.sessions[0]&&state.sessions[0].id);
+  termTargetToolId=toolId||null;
+  const td=document.getElementById('termDrawer');
+  td.hidden=false;
+  renderTerminal();
+  if(termTargetToolId){
+    setTimeout(()=>{
+      const el=td.querySelector('.cmd-block.target');
+      if(el) el.scrollIntoView({behavior:'smooth',block:'center'});
+    },50);
+  } else {
+    setTimeout(()=>{
+      const scr=document.getElementById('termScreen');
+      if(scr) scr.scrollTop=scr.scrollHeight;
+    },50);
+  }
+}
+
+function closeTerminal(){
+  document.getElementById('termDrawer').hidden=true;
+  termTargetToolId=null;
+}
+document.getElementById('termBtn').onclick=()=>{
+  const td=document.getElementById('termDrawer');
+  td.hidden?openTerminal():closeTerminal();
+};
+
+// ---------- Bảng xếp hạng trong ngày ----------
+const board=document.getElementById('board');
+let boardTimer=null;
+const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+function rankList(title,rows,row){
+  return `<h3>${title}</h3><ol class="rank">${rows.length?rows.map((r,i)=>`<li><span class="no">${['🥇','🥈','🥉'][i]||i+1}</span>${row(r)}</li>`).join(''):'<li class="st">Chưa có số liệu</li>'}</ol>`;
+}
+async function loadBoard(){
+  const day=($('boardDay')&&$('boardDay').value)||today();
+  let b;try{b=await (await fetch('/leaderboard?day='+day)).json()}catch(e){board.innerHTML='<p>Không tải được bảng xếp hạng.</p>';return}
+  const sub=a=>`${person(color(a.team),'idle',a.id,false,a.type)}<span class="who"><b title="${esc(a.desc)}">${esc(a.desc)}</b><span class="st">${esc(a.project)} · ${esc(a.type)}${a.working?' · đang chạy':''}</span></span>`;
+  const team=t=>`${person(color(t.id),'idle',t.id,true)}<span class="who"><b>${esc(t.project)}</b><span class="st" title="${esc(t.id)}">${esc(t.model||t.source||'')} · #${esc(t.id.slice(-6))}</span></span>`;
+  board.innerHTML=`<button class="x" aria-label="Đóng" id="boardX">×</button>
+    <h2>🏆 Xếp hạng trong ngày</h2>
+    <div><input type="date" class="board-day" id="boardDay" value="${b.day}" max="${today()}" aria-label="Ngày"> <span class="st">${b.subagents} sub-agent · ${b.events} sự kiện</span></div>
+    ${rankList('Chạy lâu nhất',b.longest,a=>sub(a)+`<span class="val">${ago(a.ms)}</span>`)}
+    ${rankList('Gọi nhiều tool nhất',b.busiest,a=>sub(a)+`<span class="val">${a.tools} tool</span>`)}
+    ${rankList('Nhóm tốn nhiều token nhất',b.tokens,t=>team(t)+`<span class="val">${fmtTok(t.tokens)}${t.usage&&t.usage.cost!=null?' · '+fmtCost(t.usage.cost):''}</span>`)}
+    ${rankList('Nhóm chăm chỉ nhất',b.teams,t=>team(t)+`<span class="val">${t.tools} tool · ${t.agents} sub-agent</span>`)}
+    <p class="st">Số token là của cả nhóm (omp/Claude Code không tách token cho từng sub-agent). Sub-agent đã xong vẫn được tính dù đã rời góc cà phê.</p>`;
+  $('boardX').onclick=closeBoard;
+  $('boardDay').onchange=loadBoard;
+}
+function openBoard(){board.hidden=false;loadBoard();clearInterval(boardTimer);boardTimer=setInterval(()=>{if($('boardDay').value===today())loadBoard()},30e3)}
+function closeBoard(){board.hidden=true;clearInterval(boardTimer);boardTimer=null}
+document.getElementById('boardBtn').onclick=()=>board.hidden?openBoard():closeBoard();
 
 // ---------- Xem lại (replay) từ events.jsonl ----------
 let replay=null, live=state;

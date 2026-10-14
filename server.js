@@ -48,7 +48,7 @@ function describeTool(e) {
 function getSession(map, e, now) {
   let s = map.get(e.session_id);
   if (!s) {
-    s = { id: e.session_id, project: '?', status: 'idle', task: '', prompt: '', activity: '', agents: [], tools: [], updated: now };
+    s = { id: e.session_id, project: '?', status: 'idle', task: '', prompt: '', activity: '', agents: [], tools: [], updated: now, runaway: null };
     map.set(e.session_id, s);
   }
   if (e.cwd) s.project = path.basename(e.cwd);
@@ -67,6 +67,50 @@ function isToolError(e) {
   return r.is_error === true || r.success === false || !!r.error || (typeof code === 'number' && code !== 0);
 }
 
+function extractOutput(r) {
+  if (!r) return '';
+  if (typeof r === 'string') return short(r, 600);
+  if (typeof r === 'object') {
+    const out = r.stdout ?? r.output ?? r.content ?? r.error ?? (r.exit_code != null ? `Exit code: ${r.exit_code}` : '');
+    if (typeof out === 'string') return short(out, 600);
+    if (Array.isArray(out)) return short(out.map((x) => (typeof x === 'string' ? x : x.text || '')).join('\n'), 600);
+  }
+  return '';
+}
+
+function extractInput(i) {
+  if (!i || typeof i !== 'object') return '';
+  if (i.command) return String(i.command);
+  const file = i.file_path || i.path || i.notebook_path;
+  if (file) return file + (i.content ? '\n' + short(i.content, 300) : '');
+  if (i.pattern || i.query) return String(i.pattern || i.query);
+  if (i.url) return String(i.url);
+  if (i.description) return String(i.description);
+  try { return JSON.stringify(i).slice(0, 400); } catch { return ''; }
+}
+
+function checkRunaway(s) {
+  if (!s.tools || s.tools.length < 3) return null;
+  const last3 = s.tools.slice(-3);
+  if (last3.every((t) => t.text && t.text === last3[0].text)) {
+    let count = 0;
+    for (let i = s.tools.length - 1; i >= 0; i--) {
+      if (s.tools[i].text === last3[0].text) count++;
+      else break;
+    }
+    return { type: 'loop', text: last3[0].text, count, msg: `Lặp lại tool "${last3[0].text}" ${count} lần liên tiếp` };
+  }
+  if (last3.every((t) => t.error)) {
+    let count = 0;
+    for (let i = s.tools.length - 1; i >= 0; i--) {
+      if (s.tools[i].error) count++;
+      else break;
+    }
+    return { type: 'errors', count, msg: `${count} tool liên tiếp bị lỗi (nguy cơ kẹt vòng lặp)` };
+  }
+  return null;
+}
+
 // Chỉ giữ phần cần thiết của sự kiện (bỏ tool_response và các input lớn) trước khi ghi log
 const KEEP_INPUT = ['description', 'subagent_type', 'file_path', 'path', 'notebook_path', 'command', 'pattern', 'query', 'url', 'prompt', 'task', 'agent', 'background'];
 function slim(e) {
@@ -77,6 +121,7 @@ function slim(e) {
   if (e.prompt) out.prompt = String(e.prompt).slice(0, 2000);
   if (e.message) out.message = String(e.message).slice(0, 300);
   if (isToolError(e)) out.is_error = true;
+  if (e.tool_response) { const o = extractOutput(e.tool_response); if (o) out.tool_output = o; }
   if (e.usage && typeof e.usage === 'object') {
     out.usage = {};
     for (const k of ['input', 'output', 'cacheRead', 'cacheWrite', 'cost']) if (Number.isFinite(e.usage[k])) out.usage[k] = e.usage[k];
@@ -88,7 +133,7 @@ function slim(e) {
   return out;
 }
 
-function pushTool(s, t) { s.tools.push(t); if (s.tools.length > 20) s.tools.shift(); }
+function pushTool(s, t) { s.tools.push(t); if (s.tools.length > 25) s.tools.shift(); }
 
 // Sub-agent theo id; sự kiện của phiên con có thể đến trước khi phiên cha báo (việc chưa đặt tên) nên tạo mới nếu chưa có
 function subAgent(s, e, now) {
@@ -111,7 +156,7 @@ function reduce(map, e, now) {
       s.status = 'idle'; break;
     case 'UserPromptSubmit':
       s.status = 'working'; s.task = short(e.prompt, 80); s.prompt = String(e.prompt || ''); s.tools = [];
-      s.activity = 'Đọc yêu cầu'; s.started = now; s.error = null; break;
+      s.activity = 'Đọc yêu cầu'; s.started = now; s.error = null; s.runaway = null; break;
     case 'PreToolUse':
       s.status = 'working';
       if (isAgentTool(e.tool_name)) {
@@ -127,7 +172,16 @@ function reduce(map, e, now) {
         s.activity = 'Giao việc cho sub-agent';
       } else {
         s.activity = describeTool(e);
-        pushTool(s, { id: e.tool_use_id, at: now, text: s.activity });
+        pushTool(s, {
+          id: e.tool_use_id,
+          at: now,
+          name: e.tool_name || '',
+          text: s.activity,
+          input: extractInput(ti),
+          output: null,
+          error: false,
+        });
+        s.runaway = checkRunaway(s);
       }
       break;
     case 'PostToolUse':
@@ -135,11 +189,28 @@ function reduce(map, e, now) {
         const a = s.agents.find((a) => a.status === 'working' &&
           (e.tool_use_id ? a.id === e.tool_use_id : a.desc === short(ti.description || 'Sub-agent', 50)));
         if (a) { a.status = 'done'; a.ended = now; a.activity = ''; }
-      } else if (isToolError(e)) {
-        const text = describeTool(e);
-        s.error = { text, at: now };
+      } else {
+        const isErr = isToolError(e);
+        const out = extractOutput(e.tool_response) || e.tool_output || '';
         const t = e.tool_use_id && [...s.tools].reverse().find((t) => t.id === e.tool_use_id);
-        if (t) t.error = true; else pushTool(s, { id: e.tool_use_id, at: now, text, error: true });
+        if (t) {
+          if (isErr) t.error = true;
+          if (out) t.output = out;
+        } else if (isErr) {
+          pushTool(s, {
+            id: e.tool_use_id,
+            at: now,
+            name: e.tool_name || '',
+            text: describeTool(e),
+            input: extractInput(ti),
+            output: out,
+            error: true,
+          });
+        }
+        if (isErr) {
+          s.error = { text: describeTool(e), at: now };
+        }
+        s.runaway = checkRunaway(s);
       }
       break;
     case 'SubagentStart':
@@ -151,7 +222,7 @@ function reduce(map, e, now) {
     case 'Notification':
       s.status = 'waiting'; s.activity = short(e.message || 'Cần bạn xác nhận', 50); break;
     case 'Stop':
-      s.status = 'idle'; s.activity = ''; s.error = null;
+      s.status = 'idle'; s.activity = ''; s.error = null; s.runaway = null;
       s.agents.forEach((a) => { if (a.status === 'working' && !a.bg) { a.status = 'done'; a.ended = now; } });
       break;
     case 'SessionEnd':
@@ -216,6 +287,7 @@ function apply(e, source) {
   const ev = slim(e);
   reduce(sessions, ev, now);
   if (!DEMO) logEvent(ev, now);
+  else { memLog.push({ ts: now, ...ev }); if (memLog.length > 20000) memLog.shift(); }
   dirty = true;
   broadcast();
   const s = sessions.get(e.session_id);
@@ -250,16 +322,58 @@ function snapshot() {
   return serialize(sessions, now);
 }
 
-// Dựng lại các khung hình từ events.jsonl trong `minutes` phút gần nhất
-function buildReplay(minutes) {
-  const since = Date.now() - minutes * 60e3, events = [];
+// Đọc các sự kiện đã ghi từ thời điểm `since` (demo không ghi file nên giữ trong bộ nhớ)
+const memLog = [];
+function readEvents(since, until = Infinity) {
+  if (DEMO) return memLog.filter((ev) => ev.ts >= since && ev.ts < until);
+  const events = [];
   for (const f of [LOG_FILE + '.old', LOG_FILE]) {
     let txt = ''; try { txt = fs.readFileSync(f, 'utf8'); } catch { continue; }
     for (const line of txt.split('\n')) {
       if (!line) continue;
-      try { const ev = JSON.parse(line); if (ev.ts >= since) events.push(ev); } catch {}
+      try { const ev = JSON.parse(line); if (ev.ts >= since && ev.ts < until) events.push(ev); } catch {}
     }
   }
+  return events;
+}
+
+// Bảng xếp hạng trong một ngày (giờ máy chủ): chạy lại các sự kiện và ghi lại mọi sub-agent/nhóm đã xuất hiện
+function buildLeaderboard(day) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(day || '');
+  const d = m ? new Date(+m[1], m[2] - 1, +m[3]) : new Date();
+  const from = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const to = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1).getTime();
+  const now = Date.now(), events = readEvents(from, to);
+  const map = new Map(), agents = new Map(), teams = new Map();
+  for (const ev of events) {
+    reduce(map, ev, ev.ts);
+    const s = map.get(ev.session_id);
+    if (!s) continue; // SessionEnd đã xoá; số liệu đã ghi ở các sự kiện trước
+    const t = teams.get(s.id) || { id: s.id, project: s.project, tools: 0, agents: 0, usage: null };
+    t.project = s.project; t.model = s.model; t.source = s.source; if (s.usage) t.usage = s.usage;
+    if (ev.hook_event_name === 'PreToolUse' && !isAgentTool(ev.tool_name)) t.tools++;
+    teams.set(s.id, t);
+    for (const a of s.agents) agents.set(s.id + '|' + a.id, { ...a, project: s.project, team: s.id });
+  }
+  for (const t of teams.values()) t.agents = [...agents.values()].filter((a) => a.team === t.id).length;
+  const end = Math.min(now, to);
+  const subs = [...agents.values()].map((a) => ({ desc: a.desc, type: a.type, project: a.project, team: a.team, id: a.id,
+    working: a.status === 'working', ms: (a.ended || end) - a.started, tools: a.toolCount || 0 }));
+  const tok = (t) => (t.usage ? (t.usage.input || 0) + (t.usage.output || 0) : 0);
+  const top = (arr, key) => arr.filter((x) => key(x) > 0).sort((a, b) => key(b) - key(a)).slice(0, 5);
+  return JSON.stringify({
+    day: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`, events: events.length,
+    subagents: subs.length,
+    longest: top(subs, (a) => a.ms),
+    busiest: top(subs, (a) => a.tools),
+    tokens: top([...teams.values()], tok).map((t) => ({ ...t, tokens: tok(t) })),
+    teams: top([...teams.values()], (t) => t.tools + t.agents),
+  });
+}
+
+// Dựng lại các khung hình từ events.jsonl trong `minutes` phút gần nhất
+function buildReplay(minutes) {
+  const events = readEvents(Date.now() - minutes * 60e3);
   const map = new Map(), frames = [];
   for (const ev of events.slice(-REPLAY_MAX_EVENTS)) { reduce(map, ev, ev.ts); frames.push(snapshotOf(map, ev.ts)); }
   return `[${frames.join(',')}]`;
@@ -285,6 +399,10 @@ http.createServer((req, res) => {
   if (req.url === '/debug') {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     return res.end(JSON.stringify(recent, null, 2));
+  }
+  if (url.pathname === '/leaderboard') {
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    return res.end(buildLeaderboard(url.searchParams.get('day')));
   }
   if (req.url.startsWith('/replay')) {
     const m = Math.min(24 * 60, Math.max(1, Number(new URL(req.url, 'http://x').searchParams.get('minutes')) || 60));
@@ -327,19 +445,29 @@ if (DEMO) {
       if (s && s.status === 'idle' && r < 0.6) send({ hook_event_name: 'UserPromptSubmit', prompt: pick(tasks) });
       else if (s && s.status === 'idle') { /* nghỉ */ }
       else if (r < 0.25 && working.length < 3)
-        send({ hook_event_name: 'PreToolUse', tool_name: 'Task', tool_use_id: 't' + Math.random(), tool_input: { description: pick(tasks), subagent_type: 'general-purpose' } });
+        send({ hook_event_name: 'PreToolUse', tool_name: 'Task', tool_use_id: 't' + Math.random(), tool_input: { description: pick(tasks), subagent_type: pick(['scout', 'reviewer', 'sonic', 'general-purpose']) } });
       else if (r < 0.34 && working.length) { const [t, inp] = pick(tools); send({ hook_event_name: 'SubagentTool', tool_use_id: pick(working).id, tool_name: t, tool_input: inp }); }
       else if (r < 0.42 && working.length)
         send({ hook_event_name: 'PostToolUse', tool_name: 'Task', tool_use_id: working[0].id, tool_input: { description: working[0].desc } });
       else if (r < 0.46) send({ hook_event_name: 'Notification', message: 'Đang chờ bạn cho phép chạy lệnh' });
-      else if (r < 0.52) send({ hook_event_name: 'PostToolUse', tool_name: 'Bash', tool_input: { command: 'npm test' }, tool_response: { exit_code: 1 } });
-      else if (r < 0.6 && !working.length) {
+      else if (r < 0.50) send({ hook_event_name: 'PostToolUse', tool_name: 'Bash', tool_input: { command: 'npm test' }, tool_response: { exit_code: 1, error: 'Test failed: 1 assertion error in spec.js' } });
+      else if (r < 0.55 && s && s.tools && s.tools.length) {
+        const lastT = s.tools[s.tools.length - 1];
+        send({ hook_event_name: 'PostToolUse', tool_use_id: lastT.id, tool_name: lastT.name || 'Bash', tool_input: { command: lastT.text }, tool_response: { exit_code: 0, stdout: 'Thao tác hoàn tất thành công (200 OK)' } });
+      }
+      else if (r < 0.62 && !working.length) {
         send({ hook_event_name: 'Stop' });
         use.input += 3000 + Math.random() * 9000 | 0; use.output += 500 + Math.random() * 2500 | 0; use.cacheRead += Math.random() * 60000 | 0;
         use.cost += 0.02 + Math.random() * 0.15;
         send({ hook_event_name: 'Usage', usage: { ...use, ...(i === 0 ? { cost: undefined } : {}) } }); // phiên Claude Code thật không có chi phí
       }
-      else { const [t, inp] = pick(tools); send({ hook_event_name: 'PreToolUse', tool_name: t, tool_input: inp }); }
+      else {
+        // Dự án thứ 3 thỉnh thoảng lặp tool để biểu diễn cảnh báo vòng lặp vô tận (Runaway loop alarm)
+        const isRunawayTest = i === 2 && s && s.tools && s.tools.length >= 2 && Math.random() < 0.35;
+        const [t, inp] = isRunawayTest ? ['Bash', { command: 'npm run build --verify' }] : pick(tools);
+        const tid = 'toolu_' + Math.random().toString(36).slice(2);
+        send({ hook_event_name: 'PreToolUse', tool_use_id: tid, tool_name: t, tool_input: inp });
+      }
       setTimeout(tick, 1500 + Math.random() * 2500);
     };
     setTimeout(tick, i * 700);
