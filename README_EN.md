@@ -16,7 +16,7 @@
 
 ---
 
-![Agent Office UI Screenshot](assets/screenshot.png)
+![Agent Office Live Demo](assets/demo.gif)
 
 ---
 

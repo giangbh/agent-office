@@ -16,7 +16,7 @@
 
 ---
 
-![Giao diện Văn phòng Agent](assets/screenshot.png)
+![Văn phòng Agent Demo](assets/demo.gif)
 
 ---
 
