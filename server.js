@@ -5,7 +5,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const hookManager = require('./setup-hooks');
+const hooks = require('./setup-hooks');
 
 const PORT = process.env.PORT || 4317;
 const HOST = process.env.HOST || '127.0.0.1'; // mặc định chỉ nhận từ máy này; đặt HOST=0.0.0.0 để mở cho mạng LAN
@@ -27,23 +27,68 @@ const isAgentTool = (n) => ['task', 'agent'].includes(String(n || '').toLowerCas
 const recent = []; // 50 sự kiện gần nhất, xem tại /debug để dò lỗi adapter
 const short = (s, n = 60) => { s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; };
 
-// Chuẩn hoá tên sự kiện/tool của Gemini CLI và Antigravity IDE về cách gọi của Claude Code
-const EVENT_ALIASES = {
-  BeforeAgent: 'UserPromptSubmit', PreInvocation: 'UserPromptSubmit',
-  BeforeTool: 'PreToolUse', AfterTool: 'PostToolUse',
-  AfterAgent: 'Stop', PostInvocation: 'Stop'
-};
+// Chuẩn hoá tên sự kiện/tool của Gemini CLI và Antigravity về cách gọi của Claude Code
+// (PreInvocation/PostInvocation của Antigravity chạy trước/sau MỖI lần gọi model nên không phải đầu/cuối lượt: xử lý riêng trong fromAntigravity)
+const EVENT_ALIASES = { BeforeAgent: 'UserPromptSubmit', BeforeTool: 'PreToolUse', AfterTool: 'PostToolUse', AfterAgent: 'Stop' };
 const TOOL_ALIASES = {
   run_shell_command: 'Bash', run_command: 'Bash',
   read_file: 'Read', view_file: 'Read',
   write_file: 'Write', write_to_file: 'Write',
   replace: 'Edit', replace_file_content: 'Edit', multi_replace_file_content: 'Edit',
-  search_file_content: 'Grep', grep_search: 'Grep',
+  search_file_content: 'Grep', grep_search: 'Grep', find_by_name: 'Glob',
   list_directory: 'LS', list_dir: 'LS',
   google_web_search: 'WebSearch', search_web: 'WebSearch',
   web_fetch: 'WebFetch', read_url_content: 'WebFetch',
   write_todos: 'TodoWrite', browser_subagent: 'Task'
 };
+// Tham số của tool Antigravity (viết hoa chữ đầu) -> tên mà describeTool/slim dùng
+const AGY_ARGS = { CommandLine: 'command', AbsolutePath: 'file_path', TargetFile: 'file_path', DirectoryPath: 'path',
+  SearchPath: 'path', SearchDirectory: 'path', Query: 'query', Pattern: 'pattern', Url: 'url' };
+
+// Payload của Antigravity: camelCase, không tự ghi tên sự kiện (hook truyền qua ?event=), không có id tool (dùng stepIdx).
+// Trả về danh sách sự kiện kiểu Claude Code (invoke_subagent giao nhiều sub-agent một lúc nên có thể thành nhiều sự kiện).
+function fromAntigravity(p, event) {
+  const base = { session_id: p.conversationId, cwd: (p.workspacePaths || [])[0], model: p.modelName, agent_source: 'antigravity' };
+  const s = sessions.get(p.conversationId);
+  if (event === 'SessionStart') return [{ ...base, hook_event_name: 'SessionStart' }];
+  if (event === 'Stop') return [{ ...base, hook_event_name: 'Stop' }];
+  if (event === 'PreInvocation') {
+    if (s && s.status === 'working') return [{ ...base, hook_event_name: 'Thinking' }];
+    readAgyPrompt(p.transcriptPath, p.conversationId);
+    return [{ ...base, hook_event_name: 'UserPromptSubmit', prompt: '' }];
+  }
+  if (event !== 'PreToolUse' && event !== 'PostToolUse') return [];
+  const call = p.toolCall;
+  if (!call || !call.name) return []; // PostToolUse cũng bắn cho bước không phải tool (toolCall null)
+  const id = 'step-' + p.stepIdx, args = call.args || {};
+  const err = typeof p.error === 'string' && p.error ? { tool_response: { error: p.error } } : {};
+  if (call.name === 'invoke_subagent' && Array.isArray(args.Subagents)) {
+    return args.Subagents.map((a, i) => ({ ...base, ...err, hook_event_name: event, tool_name: 'Task', tool_use_id: `${id}:${i}`,
+      tool_input: { description: a.Role || a.TypeName || 'Sub-agent', subagent_type: a.TypeName || 'subagent', prompt: a.Prompt || '' } }));
+  }
+  const input = {};
+  for (const [k, v] of Object.entries(args)) input[AGY_ARGS[k] || k] = v;
+  return [{ ...base, ...err, hook_event_name: event, tool_name: TOOL_ALIASES[call.name] || call.name, tool_use_id: id, tool_input: input }];
+}
+
+// Lấy yêu cầu mới nhất của bạn từ transcript.jsonl của Antigravity (dòng type=USER_INPUT, nội dung trong <USER_REQUEST>)
+const AGY_DIR = path.join(os.homedir(), '.gemini');
+async function readAgyPrompt(file, sessionId) {
+  if (!file || DEMO) return;
+  file = path.resolve(String(file).replace(/^~(?=\/)/, os.homedir()));
+  if (!file.startsWith(AGY_DIR + path.sep) || !file.endsWith('.jsonl')) return;
+  try {
+    const lines = (await fs.promises.readFile(file, 'utf8')).trimEnd().split('\n');
+    for (let i = lines.length - 1; i >= 0; i--) {
+      if (!lines[i].includes('"USER_INPUT"')) continue;
+      const c = String(JSON.parse(lines[i]).content || '');
+      const m = c.match(/<USER_REQUEST>\s*([\s\S]*?)\s*<\/USER_REQUEST>/);
+      const prompt = (m ? m[1] : c).trim();
+      if (prompt) apply({ session_id: sessionId, hook_event_name: 'Prompt', prompt });
+      return;
+    }
+  } catch (err) { console.error('Không đọc được transcript Antigravity:', err.message); }
+}
 
 function describeTool(e) {
   // Tên tool khác nhau giữa các công cụ (Claude: "Bash", omp: "bash"), nên so sánh không phân biệt hoa thường
@@ -171,6 +216,10 @@ function reduce(map, e, now) {
     case 'UserPromptSubmit':
       s.status = 'working'; s.task = short(e.prompt, 80); s.prompt = String(e.prompt || ''); s.tools = [];
       s.activity = 'Đọc yêu cầu'; s.started = now; s.error = null; s.runaway = null; break;
+    case 'Thinking': // Antigravity: sắp gọi model lần nữa trong cùng lượt
+      s.status = 'working'; s.activity = 'Đang nghĩ…'; break;
+    case 'Prompt': // Antigravity: yêu cầu đọc từ transcript sau UserPromptSubmit
+      s.task = short(e.prompt, 80); s.prompt = String(e.prompt || ''); break;
     case 'PreToolUse':
       s.status = 'working';
       if (isAgentTool(e.tool_name)) {
@@ -294,16 +343,13 @@ async function claudeUsage(file) {
 
 function apply(e, source, eventName) {
   if (!e) return;
-  // Chuẩn hoá payload từ Antigravity / Gemini CLI (camelCase -> snake_case)
-  if (!e.session_id && e.conversationId) e.session_id = e.conversationId;
-  if (!e.cwd && e.workspacePaths && e.workspacePaths[0]) e.cwd = e.workspacePaths[0];
-  if (!e.model && e.modelName) e.model = e.modelName;
-  if (!e.hook_event_name) e.hook_event_name = eventName || e.hookName || e.event;
-  if (e.toolCall) {
-    if (!e.tool_name && e.toolCall.name) e.tool_name = e.toolCall.name;
-    if (!e.tool_input && e.toolCall.args) e.tool_input = e.toolCall.args;
+  if (!e.session_id && e.conversationId) { // Antigravity (nhận theo hình dạng payload, kể cả hook cũ gửi ?source=gemini)
+    recent.push({ at: new Date().toISOString(), event: eventName, raw: e }); if (recent.length > 50) recent.shift();
+    for (const ev of fromAntigravity(e, eventName)) apply(ev);
+    return;
   }
   if (!e.session_id) return;
+  if (!e.hook_event_name && eventName) e.hook_event_name = eventName;
   e = { ...e, hook_event_name: EVENT_ALIASES[e.hook_event_name] || e.hook_event_name, tool_name: TOOL_ALIASES[e.tool_name] || e.tool_name };
   if (source && !e.agent_source) e.agent_source = source;
   const now = Date.now();
@@ -408,6 +454,23 @@ function broadcast() {
   for (const res of clients) res.write(data);
 }
 
+// Quản lý hook ghi vào cấu hình của Claude Code/Gemini/Codex/Antigravity trong thư mục home, nên chỉ cho phép:
+// - từ chính máy này (kể cả khi HOST=0.0.0.0), - Host là localhost (chặn DNS rebinding),
+// - POST có Origin trùng với chính server (chặn trang web lạ gửi form/fetch no-cors), - không chạy ở chế độ demo.
+const LOOPBACK = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
+function hookApi(req, res, url) {
+  const send = (code, body) => { res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8' }); res.end(JSON.stringify(body)); };
+  const host = String(req.headers.host || '');
+  const local = LOOPBACK.has(req.socket.remoteAddress) && /^(localhost|127\.0\.0\.1|\[::1\]):\d+$/.test(host);
+  if (!local) return send(403, { error: 'Chỉ quản lý hook được từ chính máy chạy server (http://localhost)' });
+  if (DEMO) return send(403, { error: 'Chế độ demo không sửa cấu hình hook' });
+  if (url.pathname === '/hooks-status') return send(200, hooks.status());
+  if (req.method !== 'POST') return send(405, { error: 'Cần POST' });
+  if (req.headers.origin !== `http://${host}`) return send(403, { error: 'Origin không hợp lệ' });
+  const ids = url.searchParams.get('only') ? url.searchParams.get('only').split(',') : undefined;
+  send(200, url.pathname === '/hooks-install' ? hooks.install(ids) : hooks.uninstall(ids));
+}
+
 http.createServer((req, res) => {
   const url = new URL(req.url, 'http://x');
   if (req.method === 'POST' && url.pathname === '/event') {
@@ -424,18 +487,7 @@ http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     return res.end(JSON.stringify(recent, null, 2));
   }
-  if (url.pathname === '/hooks-status') {
-    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-    return res.end(JSON.stringify(hookManager.getStatusAll()));
-  }
-  if (req.method === 'POST' && url.pathname === '/hooks-install') {
-    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-    return res.end(JSON.stringify(hookManager.installAll()));
-  }
-  if (req.method === 'POST' && url.pathname === '/hooks-uninstall') {
-    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-    return res.end(JSON.stringify(hookManager.uninstallAll()));
-  }
+  if (['/hooks-status', '/hooks-install', '/hooks-uninstall'].includes(url.pathname)) return hookApi(req, res, url);
   if (url.pathname === '/leaderboard') {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     return res.end(buildLeaderboard(url.searchParams.get('day')));

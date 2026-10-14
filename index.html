@@ -809,59 +809,53 @@ $('replayPlay').onclick=()=>{
   replay.timer=setInterval(()=>{if(replay.i>=replay.frames.length-1){stopPlay();return}replay.i++;showFrame()},400);
 };
 
-// ---------- Quản lý Hooks 1-Click ----------
+// ---------- Quản lý hook ----------
 const hookDrawer=document.getElementById('hookDrawer');
-async function loadHooksUI(){
-  hookDrawer.hidden=false;
-  let items=[];
-  try{items=await (await fetch('/hooks-status')).json()}catch(e){items=[]}
-  renderHooksDrawer(items);
+let hookMsg='';
+// Server trả {error} (403/405) hoặc danh sách [{id,name,file,installed,msg,error}]
+async function hookCall(path,opts){
+  try{
+    const r=await fetch(path,opts), body=await r.json();
+    if(!r.ok){hookMsg=body.error||('Lỗi '+r.status);return null}
+    hookMsg='';return body;
+  }catch(e){hookMsg='Không gọi được server: '+e.message;return null}
 }
+async function loadHooksUI(){hookDrawer.hidden=false;renderHooksDrawer(await hookCall('/hooks-status')||[])}
 function closeHooksUI(){hookDrawer.hidden=true}
+async function hookAction(kind,only){
+  if(kind==='uninstall'&&!confirm(only?'Gỡ hook của Agent Office khỏi công cụ này?':'Gỡ hook của Agent Office khỏi tất cả công cụ?'))return;
+  hookDrawer.querySelectorAll('button[data-act]').forEach(b=>b.disabled=true);
+  const res=await hookCall('/hooks-'+kind+(only?'?only='+only:''),{method:'POST'});
+  const msg=hookMsg, list=res||await hookCall('/hooks-status')||[];
+  hookMsg=hookMsg||msg;
+  renderHooksDrawer(list);
+}
 function renderHooksDrawer(items){
   const cards=items.map(it=>`
     <div class="hook-item">
-      <div class="info">
-        <b>${esc(it.name)}</b>
-        <small>${esc(it.file)}</small>
+      <div class="info"><b>${esc(it.name)}</b><small>${esc(it.file)}</small>${it.error?`<small style="color:var(--coral)">⚠ ${esc(it.error)}</small>`:it.msg?`<small>${esc(it.msg)}</small>`:''}</div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span class="hook-badge ${it.installed?'on':'off'}">${it.error?'LỖI':it.installed?'✓ ĐÃ CÀI':'○ CHƯA CÀI'}</span>
+        <button class="sound" data-act="${it.installed?'uninstall':'install'}" data-only="${esc(it.id)}" style="padding:4px 8px;font-size:11px">${it.installed?'Gỡ':'Cài'}</button>
       </div>
-      <span class="hook-badge ${it.installed?'on':'off'}">${it.installed?'✓ ĐÃ CÀI':'○ CHƯA CÀI'}</span>
-    </div>
-  `).join('');
-
+    </div>`).join('');
   hookDrawer.innerHTML=`
     <button class="x" aria-label="Đóng" id="hookX">×</button>
-    <h2>⚡ Quản lý Hooks 1-Click</h2>
-    <p class="st">Tự động cấu hình hooks để Claude Code, Gemini CLI, Antigravity và Codex tự gửi trạng thái về Văn phòng.</p>
+    <h2>⚡ Quản lý hook</h2>
+    <p class="st">Cài hook để Claude Code, Gemini CLI, Codex và Antigravity gửi hoạt động về văn phòng. File cấu hình được sao lưu thành <code>.bak-agent-office</code> trước lần sửa đầu tiên; file có comment hoặc không phải JSON chuẩn sẽ không bị sửa.</p>
+    ${hookMsg?`<p style="color:var(--coral)">⚠ ${esc(hookMsg)}</p>`:''}
     <div class="hook-btn-row">
-      <button class="btn-install" id="btnInstallAll">⚡ Cài đặt tất cả 1-Click</button>
-      <button class="btn-uninstall" id="btnUninstallAll">🗑️ Gỡ bỏ Hook</button>
+      <button class="btn-install" data-act="install">⚡ Cài tất cả</button>
+      <button class="btn-uninstall" data-act="uninstall">🗑️ Gỡ tất cả</button>
     </div>
     <div id="hookList">${cards}</div>
-    <h3>Chạy bằng dòng lệnh (Terminal)</h3>
-    <div class="prompt" style="font-size:11px">node setup-hooks.js           # Cài đặt tất cả<br>node setup-hooks.js --status  # Kiểm tra<br>node setup-hooks.js --uninstall # Gỡ bỏ</div>
-    <h3>Kết nối oh-my-pi (omp)</h3>
-    <div class="prompt" style="font-size:11px">omp -e ./omp-office.ts</div>
-  `;
-
-  document.getElementById('hookX').onclick=closeHooksUI;
-  document.getElementById('btnInstallAll').onclick=async()=>{
-    const btn=document.getElementById('btnInstallAll');
-    btn.textContent='Đang cài đặt...';
-    try{
-      const res=await (await fetch('/hooks-install',{method:'POST'})).json();
-      renderHooksDrawer(res);
-    }catch(e){alert('Lỗi khi cài đặt hooks')}
-  };
-  document.getElementById('btnUninstallAll').onclick=async()=>{
-    if(!confirm('Bạn có chắc muốn gỡ bỏ tất cả hook của Agent Office không?')) return;
-    const btn=document.getElementById('btnUninstallAll');
-    btn.textContent='Đang gỡ...';
-    try{
-      const res=await (await fetch('/hooks-uninstall',{method:'POST'})).json();
-      renderHooksDrawer(res);
-    }catch(e){alert('Lỗi khi gỡ bỏ hooks')}
-  };
+    <p class="st">Sau khi cài: khởi động lại phiên Claude Code / Gemini / Codex, mở hội thoại mới trong Antigravity.</p>
+    <h3>Dòng lệnh</h3>
+    <div class="prompt" style="font-size:11px">node setup-hooks.js --status<br>node setup-hooks.js            # cài tất cả<br>node setup-hooks.js --uninstall</div>
+    <h3>omp (oh-my-pi)</h3>
+    <div class="prompt" style="font-size:11px">omp -e ./omp-office.ts</div>`;
+  $('hookX').onclick=closeHooksUI;
+  hookDrawer.querySelectorAll('button[data-act]').forEach(b=>b.onclick=()=>hookAction(b.dataset.act,b.dataset.only));
 }
 document.getElementById('hookBtn').onclick=()=>hookDrawer.hidden?loadHooksUI():closeHooksUI();
 

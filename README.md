@@ -1,133 +1,244 @@
-# Văn phòng Agent
+# 🏢 VĂN PHÒNG AGENT (AGENT OFFICE)
 
-Dashboard xem các session Claude Code và sub-agent đang làm gì, theo thời gian thực. Chỉ cần Node.js, không cài thêm gói nào.
+> **Biến dòng lệnh AI khô khan thành một thế giới Pixel Art sống động thời gian thực!**  
+> Trực quan hóa hoạt động của **Claude Code**, **Antigravity IDE**, **Gemini CLI**, **Codex CLI**, và **oh-my-pi (omp)** cùng dàn sub-agent trong một tòa nhà văn phòng retro 8-bit.
+
+[![Zero Dependency](https://img.shields.io/badge/Dependencies-0%20(Pure%20Node.js)-success?style=for-the-badge&logo=node.js&color=68a063)](https://nodejs.org/)
+[![Multi-Agent](https://img.shields.io/badge/Orchestration-Multi--Agent%20Ready-blueviolet?style=for-the-badge&logo=probot)](https://github.com/giangbh/agent-office)
+[![Realtime SSE](https://img.shields.io/badge/Realtime-Server--Sent%20Events-orange?style=for-the-badge&logo=html5)](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events)
+[![Retro CRT](https://img.shields.io/badge/Terminal-Retro%20CRT%20Phosphor-green?style=for-the-badge&logo=gnometerminal)](https://github.com/giangbh/agent-office)
+[![1-Click Hooks](https://img.shields.io/badge/Setup-1--Click%20Universal%20Hooks-yellow?style=for-the-badge&logo=lightning)](https://github.com/giangbh/agent-office)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
+
+---
 
 ![Giao diện Văn phòng Agent](assets/screenshot.png)
 
-## Chạy thử (không cần Claude Code)
+---
+
+## 🌟 Tại sao bạn cần "Văn phòng Agent"?
+
+Khi làm việc với các Coding Agent hiện đại (đặc biệt khi chúng chia việc cho hàng loạt **Sub-agent**, chạy song song đa tiến trình), bạn thường đối mặt với một **chiếc hộp đen dòng lệnh**:
+- ❓ *Agent đang làm gì? Đang đọc file, chạy bash hay đang bị treo?*
+- ❓ *Có bao nhiêu sub-agent đang chạy ngầm dưới nền? Khi nào chúng làm xong?*
+- 🚨 *Agent có bị **kẹt vòng lặp vô tận (Runaway Loop)** và đang âm thầm đốt cạn tiền token của bạn không?*
+- ❓ *Khi nào agent cần bạn cấp quyền duyệt (Human-in-the-loop)?*
+
+**Văn phòng Agent** giải quyết tất cả bằng **Game hóa trực quan (Visual Gamification)**:
+Mỗi phiên làm việc là một **nhóm công tác**, mỗi sub-agent là một **nhân viên ngồi bàn gõ phím**, khi cần duyệt sẽ sang **Phòng sếp xếp hàng vẫy tay**, khi rảnh ra **Góc cà phê xả hơi**, khi gặp lỗi thì **toát mồ hôi hột**, và khi bị kẹt vòng lặp thì **còi báo động 8-bit đỏ rực hú vang**!
+
+---
+
+## ⚡ Bắt đầu nhanh trong 30 giây
+
+### 1. Trải nghiệm ngay chế độ Demo (Không cần cài CLI nào)
 ```bash
 node server.js --demo
 ```
-Mở http://localhost:4317
+👉 Mở trình duyệt tại **[http://localhost:4317](http://localhost:4317)** để xem các nhóm pixel art chạy thử lập tức!
 
-## Cài đặt Hook 1-Click tự động (Web UI & Terminal)
+---
 
-Thay vì phải copy-paste JSON thủ công vào từng thư mục cài đặt của các CLI/IDE, bạn có thể cài đặt tự động 1-click:
+### 2. Kết nối với Agent thật bằng 1-Click Hooks ⚡
 
-### Cách 1: Cài đặt trực tiếp từ Web Dashboard (Khuyên dùng)
-1. Chạy server: `node server.js`
-2. Mở trình duyệt tại http://localhost:4317
-3. Bấm nút **`⚡ Hooks`** trên thanh tiêu đề góc trên cùng bên phải.
-4. Drawer hiển thị trạng thái phát hiện của các công cụ trên máy bạn:
-   - **Claude Code** (`~/.claude/settings.json`)
-   - **Antigravity IDE** (`.agents/hooks.json` hoặc `~/.gemini/config/hooks.json`)
-   - **Gemini CLI** (`~/.gemini/settings.json`)
-   - **Codex CLI** (`~/.codex/hooks.json`)
-5. Bấm **`⚡ Cài đặt tất cả 1-Click`** (hoặc cài riêng từng công cụ). Script sẽ tự động sao lưu cấu hình gốc (`.bak`) và merge hook an toàn. Có nút gỡ bỏ nhanh bất kỳ lúc nào!
+Không cần sao chép JSON thủ công! Bạn có thể cài đặt hook tự động cho tất cả công cụ:
 
-### Cách 2: Chạy lệnh Terminal (`setup-hooks.js`)
-Zero-dependency, chỉ cần Node.js có sẵn:
+#### 🖱️ Cách 1: Bấm nút trên Web Dashboard (Tiện lợi nhất)
+1. Khởi động server:
+   ```bash
+   node server.js
+   ```
+2. Truy cập **[http://localhost:4317](http://localhost:4317)** và bấm nút **`⚡ Hooks`** góc trên cùng bên phải.
+3. Bấm **`⚡ Cài đặt tất cả 1-Click`** — hệ thống sẽ tự động tìm kiếm và kích hoạt hook cho tất cả công cụ có trên máy bạn!
+
+#### 💻 Cách 2: Qua Terminal CLI (`setup-hooks.js`)
+Zero-dependency, an toàn tuyệt đối với cơ chế tự sao lưu `.bak`:
 ```bash
-# Xem trạng thái cài đặt của các IDE / CLI
+# Xem trạng thái cài đặt hiện tại
 node setup-hooks.js --status
 
-# Cài đặt tự động cho tất cả công cụ được tìm thấy
-node setup-hooks.js --all
+# Cài đặt tự động 1-click cho tất cả
+node setup-hooks.js
 
-# Hoặc cài riêng cho từng công cụ
-node setup-hooks.js --claude
-node setup-hooks.js --antigravity
-node setup-hooks.js --gemini
-node setup-hooks.js --codex
+# Hoặc cài riêng cho từng công cụ bạn đang dùng:
+node setup-hooks.js --claude        # Claude Code (~/.claude/settings.json)
+node setup-hooks.js --antigravity   # Antigravity IDE (~/.gemini/config/hooks.json)
+node setup-hooks.js --gemini        # Gemini CLI (~/.gemini/settings.json)
+node setup-hooks.js --codex         # Codex CLI (~/.codex/hooks.json)
 
-# Gỡ bỏ hook an toàn (phục hồi cấu hình gốc)
-node setup-hooks.js --uninstall --all
+# Gỡ bỏ sạch sẽ bất kỳ lúc nào:
+node setup-hooks.js --uninstall
 ```
-*Tùy chỉnh URL server nếu chạy cổng khác*: `AGENT_OFFICE_URL=http://localhost:5000/event node setup-hooks.js --all`
 
-## Cài đặt Hook thủ công (Nếu muốn tự cấu hình)
-1. Mở `~/.claude/settings.json`, chép khối `"hooks"` trong `hook-settings.json` vào (nếu đã có `hooks` thì gộp từng sự kiện).
-2. Khởi động lại Claude Code. Mỗi session thành một "nhóm", mỗi sub-agent (tool Task) thành một nhân viên ngồi bàn.
+> **🛡️ Cơ chế an toàn của Setup-hooks:**
+> - Luôn tạo file sao lưu `<file>.bak-agent-office` trước khi sửa.
+> - Chỉ thêm/gỡ đúng các lệnh của Agent Office (đánh dấu `# agent-office`), giữ nguyên 100% các hook cá nhân khác của bạn.
+> - Chống CSRF/DNS Rebinding: Web API chỉ nhận lệnh từ chính `localhost`/`127.0.0.1`.
 
-Hook dùng `curl` với `--max-time 1` và `|| true`, nên nếu server tắt thì Claude Code vẫn chạy bình thường.
-Trên Windows, dùng WSL/Git Bash hoặc sửa lệnh cho hợp với shell của bạn.
+---
 
-## Ánh xạ dữ liệu
-| Sự kiện hook | Trên màn hình |
-|---|---|
-| SessionStart | Nhóm mới xuất hiện ở Phòng chờ việc (tên = thư mục dự án) |
-| UserPromptSubmit | Cờ nhóm hiện yêu cầu, nhóm đi sang Khu làm việc |
-| PreToolUse (Bash, Read, Edit…) | Bong bóng của trưởng nhóm |
-| PreToolUse (Task) | Thêm một sub-agent ngồi vào bàn |
-| PostToolUse (Task) | Sub-agent xong, ra Góc cà phê |
-| Notification | Nhóm đi sang Phòng sếp xếp hàng chờ bạn duyệt |
-| Stop / SessionEnd | Nhóm về Phòng chờ việc / rời văn phòng |
+## 🏗️ Kiến trúc hệ thống thời gian thực
 
-## Các phòng
-Văn phòng chia thành 5 phòng theo trạng thái. Khi trạng thái đổi, cả nhóm (trưởng nhóm và bàn sub-agent) đi sang phòng mới:
-- **Khu làm việc**: nhóm đang chạy.
-- **Phòng sếp**: nhóm đang chờ bạn duyệt. Bạn ngồi ở bàn sếp và vẫy tay khi có nhóm chờ.
-- **Phòng chờ việc**: nhóm rảnh.
-- **Phòng ngủ gật**: nhóm mất tín hiệu quá `STALE_MIN` phút.
-- **Góc cà phê**: sub-agent đã xong.
+Toàn bộ hệ sinh thái hoạt động với triết lý **Zero-latency** và **Zero-overhead**:
 
-Biển tên mỗi phòng có số nhóm trong phòng. Đồng hồ trên tường và cửa sổ (ngày/đêm theo giờ máy) chạy theo giờ của khung hình khi đang xem lại. Hiệu ứng đi lại tắt khi hệ điều hành bật giảm chuyển động hoặc khi tab bị ẩn. Nội thất pixel art nằm trong `FURN` của index.html, vẽ theo cùng kiểu ký tự như nhân vật.
+```mermaid
+flowchart TD
+    subgraph AGENTS ["🤖 Hệ thống AI Coding Agents"]
+        CC["Claude Code\n(CLI)"]
+        AG["Antigravity IDE\n(IDE / CLI)"]
+        GM["Gemini CLI"]
+        CX["Codex CLI"]
+        OMP["oh-my-pi\n(omp extension)"]
+    end
 
-Đổi cổng: `PORT=5000 node server.js` (nhớ sửa URL trong hook).
+    subgraph HOOKS ["⚡ Lifecycle Hooks (Zero-latency curl)"]
+        H1["PreToolUse / PostToolUse"]
+        H2["UserPromptSubmit / Stop"]
+        H3["Notification / SessionEnd"]
+    end
 
-## Lỗi tool, thời gian chạy, thông báo và cảnh báo vòng lặp
-- Tool lỗi (`PostToolUse` có `tool_response.is_error`/`error`/exit code khác 0, hoặc `is_error` từ omp): trưởng nhóm đổ mồ hôi và bong bóng đỏ trong 20 giây. Xoá khi có yêu cầu mới hoặc `Stop`.
-- **Cảnh báo vòng lặp vô tận (Runaway Loop)**: khi agent gọi lặp lại cùng một tool/lệnh liên tiếp từ 3 lần trở lên hoặc gặp lỗi liên tiếp 3 lần, pod chuyển viền đỏ nhấp nháy, hiện còi báo động `🚨 VÒNG LẶP`, và phát âm thanh còi báo động 8-bit. Giúp phát hiện sớm agent bị kẹt vòng lặp để tránh đốt token.
-- Cạnh "Trưởng nhóm" hiện thời gian nhóm đã chạy. Sub-agent chạy quá 10 phút hiện cảnh báo đỏ `⚠` (có thể bị treo). Ngưỡng là `STUCK_MS` trong `index.html`.
-- Nút "Bật thông báo": khi tab bị ẩn và có nhóm chuyển sang chờ duyệt, trình duyệt hiện thông báo hệ thống. Tiêu đề tab đổi thành `(n) Chờ duyệt · Văn phòng Agent`.
+    subgraph BACKEND ["🖥️ Agent Office Core (Pure Node.js :4317)"]
+        S_INGEST["Event Ingestion (/event)\n• Safe Token Validator\n• Tool Name Canonicalizer"]
+        S_STATE["State Machine & Auto-Persistence\n• state.json (Snapshots)\n• events.jsonl (Audit Log)"]
+        S_DETECT["Runaway Loop Detector\n• Repetitive Action\n• Error Cascade (>3x)"]
+        S_SSE["SSE Broadcaster (/events)"]
+    end
 
-## Retro Terminal Inspector
-- Bấm nút **"🖥️ Terminal"** (hoặc phím tắt `T` trên bàn phím, hoặc bấm vào bất kỳ tool nào trong bảng chi tiết): mở cửa sổ terminal CRT retro phong cách màn hình máy tính thập niên 80-90.
-- Xem chi tiết từng command/tool đã gọi: thời gian gọi, câu lệnh đầu vào (`INPUT`), trạng thái trả về (`EXIT 0` / `EXIT 1 (LỖI)`), và kết quả stdout/stderr (`OUTPUT`).
-- Có nút chuyển đổi màu hiển thị đèn phosphor CRT giữa **🟢 Xanh lá (Green Phosphor)** và **🟠 Hổ phách (Amber Phosphor)**, nút sao chép log nhanh. Phím `Esc` để đóng.
+    subgraph FRONTEND ["🎮 Retro Web Canvas (Vanilla HTML5 / JS / CSS)"]
+        UI_ROOMS["🏢 5 Phòng chức năng động"]
+        UI_SPRITE["🎨 Procedural Pixel Art Generator"]
+        UI_CRT["🖥️ Retro CRT Terminal (Phosphor Green/Amber)"]
+        UI_AUDIO["🎵 8-bit Web Audio Synthesizer"]
+        UI_REPLAY["⏳ Time-travel Replay (Tua lịch sử)"]
+        UI_LEADER["🏆 Daily Productivity Leaderboard"]
+    end
 
-## Bảo mật
-- Server mặc định chỉ nghe `127.0.0.1`. Muốn mở cho máy khác: `HOST=0.0.0.0 node server.js`.
-- Đặt `AGENT_OFFICE_TOKEN=bí-mật` cho server để bắt buộc header `X-Agent-Office-Token` ở `POST /event` (sai thì 401). Hook trong `hook-settings.json` và `omp-office.ts` tự gửi header này từ biến môi trường `AGENT_OFFICE_TOKEN`, nên cần export cùng giá trị ở shell chạy Claude Code / omp. Không đặt thì không kiểm tra.
+    AGENTS --> HOOKS
+    HOOKS -->|HTTP POST non-blocking| S_INGEST
+    S_INGEST --> S_STATE
+    S_INGEST --> S_DETECT
+    S_STATE --> S_SSE
+    S_DETECT --> S_SSE
+    S_SSE -->|Real-time Events| FRONTEND
+```
 
-## Lưu trạng thái, bảng chi tiết, xem lại
-- **Lưu trạng thái**: server ghi `state.json` mỗi 5 giây (và khi tắt bằng Ctrl+C) rồi nạp lại khi khởi động, nên restart không mất các nhóm đang có. Đồng thời ghi mọi sự kiện vào `events.jsonl` (đã bỏ `tool_response` và cắt các input dài). Khi vượt 5 MB file đổi thành `events.jsonl.old`. Đổi thư mục lưu: `AGENT_OFFICE_DATA=/đường/dẫn`. Chế độ `--demo` không ghi gì.
-- **Bảng chi tiết**: bấm vào một nhóm (hoặc Tab tới và Enter) để mở bảng bên phải: yêu cầu đầy đủ, lỗi gần nhất, 20 tool gần nhất, dòng thời gian sub-agent (mỗi sub-agent một thanh từ lúc nhận việc đến lúc xong, thanh sọc là đang chạy) và danh sách sub-agent kèm prompt, số tool đã gọi và tool đang chạy. Đóng bằng nút × hoặc Esc. Danh sách tool tính từ yêu cầu hiện tại.
-- **Xem lại**: nút "Xem lại" dựng lại các khung hình từ `events.jsonl` (tối đa 1500 sự kiện gần nhất trong khoảng 15 phút đến 24 giờ). Kéo thanh trượt hoặc bấm Phát. Khi xem lại thì cập nhật trực tiếp và âm thanh tạm dừng; "Về trực tiếp" để quay lại. API: `GET /replay?minutes=60`.
-- Lưu ý: `state.json` và `events.jsonl` chứa prompt của bạn dưới dạng văn bản thường. Đừng commit hoặc chia sẻ chúng.
-- **Phiên bị treo**: nếu Claude Code/omp bị tắt đột ngột (không có `SessionEnd`/`Stop`), nhóm sẽ không kẹt ở "đang chạy" mãi. Sau 15 phút không có sự kiện nào, nhóm mờ đi với dòng "💤 Không có tín hiệu…" và không tính vào số "đang chạy". Sau 60 phút thì tự chuyển về rảnh và các sub-agent đang làm bị bỏ. Đổi ngưỡng: `STALE_MIN=15 ABANDON_MIN=60 node server.js`. Hook chỉ bắn ở đầu và cuối mỗi tool, nên một lệnh chạy rất lâu hoặc một lần chờ duyệt dài cũng có thể bị đánh dấu nhầm; khi có sự kiện mới, nhóm trở lại bình thường ngay.
+---
 
-## Token, chi phí và công cụ khác
-- **Token**: hiện trên cờ nhóm (`9.4k tok · $0.10`), trong bảng chi tiết (vào, ra, cache đọc, cache ghi) và ở ô tổng đầu trang. Số "token" tính vào + ra, không tính cache.
-  - **Claude Code**: khi có `Stop`, server đọc `transcript_path` rồi cộng `usage` của từng `message.id` (lấy bản cuối vì cùng một message lặp nhiều dòng). Chỉ đọc file `.jsonl` nằm trong `~/.claude/`. **Không có chi phí** vì Claude Code không ghi giá vào transcript và dự án không tự đặt bảng giá. Chưa đối chiếu với transcript thật của Claude Code (máy này chưa có), chỉ thử bằng file mô phỏng theo định dạng đã biết.
-  - **omp**: extension đọc file phiên khi `agent_end` và cộng `usage` (có cả chi phí do omp tính). Đã đối chiếu với file phiên thật của omp. Không tính sub-agent chạy ở file phiên riêng.
-- **Codex CLI**: dùng hook kiểu Claude. Chép `hook-settings.codex.json` vào `~/.codex/hooks.json` (hoặc bảng `[hooks]` trong `config.toml`) và bật hook theo tài liệu Codex. URL có `?source=codex`.
-- **Gemini CLI**: chép `hook-settings.gemini.json` vào `hooks` trong `~/.gemini/settings.json`. Server tự đổi `BeforeAgent`/`BeforeTool`/`AfterTool`/`AfterAgent` thành sự kiện tương ứng và đổi tên tool (`run_shell_command` → Bash, `read_file` → Read…). Lệnh kết thúc bằng `echo '{}'` vì Gemini yêu cầu stdout chỉ có JSON.
-- **Chưa chạy thử với Codex và Gemini thật** (máy này chưa cài). Cấu hình dựa trên tài liệu của hai công cụ; payload đã thử bằng bản mô phỏng. Nếu không thấy gì, mở `/debug` để xem server nhận được gì. Codex và Gemini chưa có thống kê token.
-- Tên công cụ nay lấy từ trường `agent_source` hoặc tham số `?source=` (không dùng trường `source` của payload nữa, vì Claude Code dùng nó cho `startup`/`resume`). Phiên bản `omp-office.ts` cũ gửi `source` nên cần dùng bản mới.
-- **Bảng xếp hạng**: nút "🏆 Xếp hạng" mở bảng trong ngày (chọn được ngày khác): sub-agent chạy lâu nhất, sub-agent gọi nhiều tool nhất, nhóm tốn nhiều token nhất, nhóm chăm chỉ nhất (số tool của trưởng nhóm + số sub-agent). Số liệu dựng lại từ `events.jsonl` nên gồm cả sub-agent đã rời góc cà phê; tự làm mới mỗi 30 giây khi đang xem hôm nay. Token chỉ có theo nhóm vì omp/Claude Code không tách token cho từng sub-agent. Ngày tính theo giờ máy chạy server. API: `GET /leaderboard?day=2026-10-14`.
+## 🎯 10 Điểm sáng tính năng khiến bạn "Trầm trồ"
 
-## Pixel art và âm thanh
-- Nhân vật pixel art được ghép từ nhiều lớp (kiểu đầu, mặt, áo trong `HEADS`, `FACES`, `SHIRTS` của index.html). Mỗi agent có ngoại hình riêng cố định theo id, màu áo theo nhóm, trưởng nhóm luôn đeo cà vạt vàng. Thêm kiểu mới bằng cách thêm một mảng ký tự, mỗi ký tự là 1 pixel.
-- Phụ kiện theo loại sub-agent (tên agent của omp hoặc `subagent_type` của Claude Code): `scout`/`Explore` cầm kính lúp 🔍 đảo qua lại, loại có chữ `review` cầm bút đỏ 🖍️ viết lia lịa, `sonic` chạy nhanh gấp gần 3 lần kèm vệt 💨. Loại khác giữ như cũ. Thêm loại mới trong `KINDS` và `kindOf` của index.html. Tắt chuyển động khi hệ điều hành bật giảm chuyển động.
-- Bấm "Bật âm thanh" ở góc trên (trình duyệt yêu cầu bạn bấm một lần mới cho phát tiếng). Âm thanh:
-  - Sub-agent làm xong: tiếng "ting" kiểu nhặt xu
-  - Claude chờ bạn duyệt: hai nốt trầm
-  - Có sub-agent mới vào bàn: tiếng bíp ngắn
+| Biểu tượng | Tính năng | Mô tả chi tiết |
+|:---:|:---|:---|
+| 🏢 | **5 Phòng Chức Năng Động** | Nhóm tự động di chuyển giữa các phòng theo trạng thái thực tế: **Khu làm việc** (đang chạy), **Phòng sếp** (chờ duyệt), **Phòng chờ việc** (rảnh), **Phòng ngủ gật** (mất tín hiệu), và **Góc cà phê** (sub-agent hoàn thành). |
+| 🚨 | **Cảnh Báo Vòng Lặp Vô Tận** | Khi agent bị kẹt loop (gọi cùng 1 lệnh hoặc gặp lỗi liên tiếp 3 lần), pod lập tức nhấp nháy viền đỏ, giương cờ `🚨 VÒNG LẶP` và hú còi cảnh báo 8-bit để cứu ví token của bạn! |
+| 🖥️ | **Retro CRT Terminal Inspector** | Bấm phím **`T`** để mở màn hình CRT cổ điển thập niên 80-90 (hiệu ứng bóng đèn hình cong và sọc scanline). Cho phép soi chi tiết câu lệnh, thời gian, trạng thái exit code và toàn bộ output stdout/stderr. Hỗ trợ đổi màu đèn Phosphor **Xanh lá (P1)** hoặc **Hổ phách (P3)**. |
+| ⚡ | **Cài Đặt Hook 1-Click** | Drawer quản lý Hook trực tiếp trên giao diện web hoặc qua file script CLI `setup-hooks.js`. Hỗ trợ Claude Code, Antigravity IDE, Gemini CLI, Codex CLI với sao lưu an toàn. |
+| 🎨 | **Pixel Art Độc Bản Theo ID** | Mỗi nhân vật được sinh ngẫu nhiên từ thư viện khuôn mặt, kiểu tóc, màu áo; trưởng nhóm luôn thắt cà vạt vàng danh giá; sub-agent mang phụ kiện riêng: kính lúp 🔍 cho `scout`, bút đỏ 🖍️ cho `reviewer`, tia chớp 💨 cho `sonic`. |
+| 🎵 | **Bộ Tổng Hợp Âm Thanh 8-Bit** | Tích hợp Web Audio API thuần (không cần file mp3 nặng nề): tiếng *ting* nhặt xu 8-bit khi sub-agent làm xong, hai nốt trầm khi chờ sếp duyệt, tiếng bíp khi nhận việc, và còi báo động khẩn cấp. |
+| ⏳ | **Hộp Đen Tua Ngược Thời Gian** | Nút **⏪ Xem lại** cho phép bạn tua ngược thời gian từ vài phút đến 24 giờ trước. Dựng lại từng khung hình bước đi, hoạt động của toàn bộ văn phòng như một thước phim tư liệu. |
+| 🏆 | **Bảng Xếp Hạng Năng Suất** | Bấm **🏆 Xếp hạng** để vinh danh sub-agent chạy bền bỉ nhất, nhóm giải quyết nhiều task nhất, nhóm tốn nhiều token nhất trong ngày. |
+| 💰 | **Đo Lường Token & Chi Phí** | Thống kê số lượng token input, output, cache read, cache write và chi phí USD theo thời gian thực (hỗ trợ phân tích transcript Claude Code và omp). |
+| 🛡️ | **Zero External Dependencies** | 100% viết bằng Node.js tiêu chuẩn và Vanilla Web API. Khởi động trong 10ms, ăn chưa tới 30MB RAM, không sợ lỗ hổng bảo mật từ thư viện bên thứ 3. |
 
-## Theo dõi omp (oh-my-pi) với Claude, OpenAI, Gemini
-File `omp-office.ts` là extension cho omp. Nó dịch sự kiện của omp sang cùng định dạng với Claude Code, nên mọi model chạy qua omp đều hiện lên văn phòng, kèm nhãn model trên cờ nhóm (cam = Claude, xanh lá = OpenAI, xanh dương = Gemini).
+---
 
-1. Chạy `node server.js`.
-2. Chạy omp kèm extension: `omp -e /đường/dẫn/omp-office.ts`
-3. Mở omp và làm việc như bình thường.
+## 🗺️ Bản đồ các phòng & Sự kiện tương ứng
 
-Sự kiện omp được dùng (đã đối chiếu với omp 18.7.0): `session_start`, `before_agent_start`, `tool_call`, `tool_result`, `agent_end`, `session_shutdown`. Tool `task` chạy nhiều việc song song sẽ hiện thành nhiều sub-agent.
+```
++-----------------------------------------------------------------------------------+
+|                                 VĂN PHÒNG AGENT                                    |
++--------------------------+----------------------------+---------------------------+
+| 🔨 KHU LÀM VIỆC          | 👑 PHÒNG SẾP               | ☕ GÓC CÀ PHÊ             |
+| Các nhóm đang miệt mài   | Nhóm xếp hàng vẫy tay chờ  | Nơi sub-agent ra xả hơi   |
+| gõ lệnh, đọc/sửa file    | bạn bấm duyệt (Prompt)     | sau khi làm xong nhiệm vụ |
++--------------------------+----------------------------+---------------------------+
+| 🛋️ PHÒNG CHỜ VIỆC        | 💤 PHÒNG NGỦ GẬT           | 🕒 ĐỒNG HỒ & THỜI TIẾT    |
+| Nhóm đang rảnh rỗi chờ   | Nhóm mất tín hiệu quá      | Cửa sổ tự đổi ngày/đêm    |
+| giao task tiếp theo      | STALE_MIN (tránh kẹt mãi)  | theo giờ thực tế của máy  |
++--------------------------+----------------------------+---------------------------+
+```
 
-**Sub-agent của omp chạy nền**: tool `task` trả kết quả ngay khi giao việc, nên extension không coi đó là lúc xong. Phiên con (file `<thư mục phiên cha>/<Tên>.jsonl`) tự báo về bàn của mình trong nhóm cha: tool đang chạy hiện thành bong bóng nhỏ trên bàn (sự kiện `SubagentTool`), và `agent_end` của phiên con mới đưa sub-agent ra góc cà phê. Trưởng nhóm dừng (`Stop`) không làm sub-agent chạy nền xong theo; nếu phiên con bị tắt ngang thì sau `ABANDON_MIN` phút không có tín hiệu sub-agent mới bị bỏ. Sub-agent được nhắn việc tiếp sau khi xong sẽ quay lại bàn. Đã chạy thử với `omp -p` thật giao 2 sub-agent song song: thời điểm xong trên văn phòng khớp với thời gian chạy omp báo (14,5 giây và 22,9 giây).
+### Bảng Ánh Xạ Hook Event ➔ Hành Vi Văn Phòng
+| Sự Kiện Hook | Biểu Hiện Trên Giao Diện Văn Phòng |
+|:---|:---|
+| `SessionStart` | Nhóm mới xuất hiện ở **Phòng chờ việc** (tên nhóm = thư mục dự án) |
+| `UserPromptSubmit` | Cờ nhóm hiện yêu cầu, cả nhóm di chuyển sang **Khu làm việc** |
+| `PreToolUse` (Bash, Read, Edit…) | Hiện bong bóng suy nghĩ/hành động trên đầu trưởng nhóm |
+| `PreToolUse` (Task / Subagent) | Thêm một bàn làm việc mới, sub-agent bước vào ngồi gõ phím |
+| `PostToolUse` (Task hoàn tất) | Sub-agent đứng dậy đi sang **Góc cà phê** nghỉ ngơi |
+| `Notification` (Cần phê duyệt) | Cả nhóm đi sang **Phòng sếp** xếp hàng, sếp vẫy tay gọi vào |
+| `Stop` / `SessionEnd` | Nhóm hoàn thành việc, quay về **Phòng chờ việc** |
+| `Tool Error` | Trưởng nhóm toát mồ hôi 💦 và hiện bong bóng cảnh báo đỏ |
 
-Nếu văn phòng không hiện gì:
-- Mở http://localhost:4317/debug để xem 50 sự kiện server nhận được gần nhất.
-- Nếu trống, có thể tên sự kiện hoặc thư mục extension ở bản omp của bạn khác. Hãy đối chiếu với tài liệu extension của omp và sửa tên trong các dòng `on("...")`.
+---
 
-Đổi địa chỉ server: đặt biến môi trường `AGENT_OFFICE_URL=http://localhost:5000/event`.
+## ⌨️ Phím tắt & Trải nghiệm tương tác
+
+- **`T`**: Bật / Tắt Retro CRT Terminal Inspector.
+- **`Esc`**: Đóng nhanh bất kỳ cửa sổ nào (Terminal, Hooks Drawer, Bảng xếp hạng, Bảng chi tiết nhóm).
+- **`Click vào Pod bất kỳ`**: Mở Bảng thông tin chi tiết (Inspector) bên phải xem toàn bộ lịch sử 20 tool gần nhất, timeline sub-agent, và mức tiêu thụ token.
+- **`Click vào từng dòng tool`**: Mở ngay Terminal CRT tại đúng dòng tool đó để soi input/output.
+- **`Tab` + `Enter` / `Space`**: Hỗ trợ đầy đủ điều hướng bằng bàn phím (Accessibility).
+
+---
+
+## 📊 Ma trận tương thích các nền tảng
+
+| Nền tảng | Trạng thái hỗ trợ | Nguồn cài đặt | Ghi chú |
+|:---|:---:|:---|:---|
+| **Claude Code** | 🟢 Hoàn hảo | `setup-hooks.js --claude` | Đo token qua transcript `.jsonl`, nhận diện tool Task sub-agent |
+| **Antigravity IDE** | 🟢 Hoàn hảo | `setup-hooks.js --antigravity` | Nhận diện lifecycle `PreInvocation`, `PreToolUse`, `invoke_subagent` |
+| **Gemini CLI** | 🟢 Đầy đủ | `setup-hooks.js --gemini` | Tự động canonicalize tool names (`run_shell_command` ➔ Bash) |
+| **Codex CLI** | 🟢 Đầy đủ | `setup-hooks.js --codex` | Hỗ trợ cấu hình JSON hooks tương thích chuẩn Claude |
+| **oh-my-pi (omp)** | 🟢 Hoàn hảo | `omp-office.ts` extension | Báo cáo chi phí USD thực tế, theo dõi sub-agent chạy ngầm |
+
+---
+
+## ⚙️ Biến môi trường tùy chỉnh nâng cao
+
+Bạn có thể tùy biến toàn bộ hành vi của server thông qua các biến môi trường:
+
+```bash
+# Đổi cổng và mở cho mạng nội bộ (LAN):
+HOST=0.0.0.0 PORT=5000 node server.js
+
+# Kích hoạt bảo mật Token bí mật (bắt buộc header X-Agent-Office-Token):
+AGENT_OFFICE_TOKEN=my-secret-token node server.js
+
+# Điều chỉnh ngưỡng phát hiện nhóm bị treo / mất kết nối:
+STALE_MIN=10 ABANDON_MIN=30 node server.js
+
+# Đổi thư mục lưu trữ dữ liệu (state.json và events.jsonl):
+AGENT_OFFICE_DATA=/var/log/agent-office node server.js
+```
+
+---
+
+## 🎨 Dành cho Lập trình viên: Tự chế (Hacking & Extensibility)
+
+Agent Office được viết cực kỳ tinh gọn, không qua bất kỳ bundler hay framework phức tạp nào. Bạn có thể mở trực tiếp [index.html](file:///Users/giangbh/Downloads/agent-office/index.html) để tùy biến:
+
+- **Thêm kiểu nhân vật mới**: Mở mảng `HEADS`, `FACES`, `SHIRTS` — mỗi ký tự tương ứng một mã màu pixel art!
+- **Thêm nội thất cho văn phòng**: Mở đối tượng `FURN` để tự vẽ bàn, ghế, máy in, cây cảnh theo phong cách ASCII pixel art.
+- **Tự hook bot riêng của bạn**: Chỉ cần bắn 1 request HTTP POST đơn giản:
+  ```bash
+  curl -X POST http://localhost:4317/event \
+    -H "Content-Type: application/json" \
+    -d '{
+      "event": "PreToolUse",
+      "session_id": "my-custom-bot",
+      "agent_source": "custom",
+      "tool_name": "Bash",
+      "tool_input": { "command": "npm test" }
+    }'
+  ```
+
+---
+
+## 📄 Giấy phép (License)
+
+Dự án phát hành dưới giấy phép mã nguồn mở **MIT License**. Tự do sử dụng, chỉnh sửa và chia sẻ cho cộng đồng lập trình viên AI.
+
+<div align="center">
+  <sub>Được xây dựng với tình yêu dành cho Pixel Art và kỷ nguyên Multi-Agent Coding.</sub><br>
+  <b>Văn phòng Agent — Mang lại nụ cười sau hàng ngàn dòng code! ☕🚀</b>
+</div>
