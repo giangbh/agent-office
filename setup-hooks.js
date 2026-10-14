@@ -132,6 +132,20 @@ function run(mode, ids = IDS) {
 }
 const status = (ids) => run('status', ids);
 const install = (ids) => run('install', ids);
+
+// Lệnh SessionStart đã cài (chỉ lệnh có dấu MARK, không bao giờ chạy lệnh tự viết của bạn) và payload mẫu đúng kiểu công cụ đó gửi
+function testCommand(id) {
+  const t = TOOLS[id];
+  if (!t) throw new Error('Không biết công cụ ' + id);
+  const data = readConfig(t.file);
+  const groups = id === 'antigravity' ? [{ hooks: ((data[AGY_KEY] || {}).SessionStart) || [] }] : ((data.hooks || {}).SessionStart) || [];
+  const h = groups.flatMap((g) => g.hooks || []).find((x) => typeof x.command === 'string' && x.command.includes(MARK));
+  if (!h) throw new Error('Chưa cài bằng script này (hoặc cài tay). Bấm Cài để cài lại rồi thử');
+  const payload = id === 'antigravity'
+    ? (sid) => ({ conversationId: sid, workspacePaths: ['/agent-office-hook-test'] })
+    : (sid) => ({ session_id: sid, hook_event_name: 'SessionStart', cwd: '/agent-office-hook-test' });
+  return { command: h.command, payload };
+}
 const uninstall = (ids) => run('uninstall', ids);
 
 if (require.main === module) {
@@ -157,4 +171,4 @@ Biến môi trường: AGENT_OFFICE_URL (mặc định http://localhost:4317/eve
   process.exit(rows.some((r) => r.error) ? 1 : 0);
 }
 
-module.exports = { status, install, uninstall, IDS };
+module.exports = { status, install, uninstall, testCommand, IDS };

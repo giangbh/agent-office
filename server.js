@@ -20,6 +20,8 @@ const REPLAY_MAX_EVENTS = 1500;
 // Hook chỉ bắn ở đầu và cuối mỗi tool nên một lệnh chạy lâu có thể im lặng hợp lệ, vì vậy ngưỡng stale chỉ cảnh báo chứ không đổi trạng thái.
 const STALE_MS = (Number(process.env.STALE_MIN) || 15) * 60e3;
 const ABANDON_MS = Math.max(STALE_MS, (Number(process.env.ABANDON_MIN) || 60) * 60e3);
+const REMOVE_MS = Math.max(ABANDON_MS, (Number(process.env.REMOVE_MIN) || 120) * 60e3); // nhóm rảnh không có tín hiệu quá lâu thì rời văn phòng
+const CONFLICT_MS = (Number(process.env.CONFLICT_MIN) || 10) * 60e3; // hai nhóm sửa cùng file trong khoảng này thì cảnh báo
 const sessions = new Map();
 const clients = new Set();
 
@@ -47,15 +49,13 @@ const AGY_ARGS = { CommandLine: 'command', AbsolutePath: 'file_path', TargetFile
 
 // Payload của Antigravity: camelCase, không tự ghi tên sự kiện (hook truyền qua ?event=), không có id tool (dùng stepIdx).
 // Trả về danh sách sự kiện kiểu Claude Code (invoke_subagent giao nhiều sub-agent một lúc nên có thể thành nhiều sự kiện).
-function fromAntigravity(p, event) {
+// `status`: trạng thái hiện tại của nhóm (hàm thuần để test được; apply truyền vào)
+function fromAntigravity(p, event, status) {
   const base = { session_id: p.conversationId, cwd: (p.workspacePaths || [])[0], model: p.modelName, agent_source: 'antigravity' };
-  const s = sessions.get(p.conversationId);
   if (event === 'SessionStart') return [{ ...base, hook_event_name: 'SessionStart' }];
   if (event === 'Stop') return [{ ...base, hook_event_name: 'Stop' }];
-  if (event === 'PreInvocation') {
-    if (s && s.status === 'working') return [{ ...base, hook_event_name: 'Thinking' }];
-    readAgyPrompt(p.transcriptPath, p.conversationId);
-    return [{ ...base, hook_event_name: 'UserPromptSubmit', prompt: '' }];
+  if (event === 'PreInvocation') { // lần gọi model đầu tiên sau khi rảnh = lượt mới (apply đọc yêu cầu từ transcript)
+    return [{ ...base, hook_event_name: status === 'working' ? 'Thinking' : 'UserPromptSubmit', prompt: '' }];
   }
   if (event !== 'PreToolUse' && event !== 'PostToolUse') return [];
   const call = p.toolCall;
@@ -110,11 +110,45 @@ function getSession(map, e, now) {
     s = { id: e.session_id, project: '?', status: 'idle', task: '', prompt: '', activity: '', agents: [], tools: [], updated: now, runaway: null };
     map.set(e.session_id, s);
   }
-  if (e.cwd) s.project = path.basename(e.cwd);
+  if (e.cwd) { s.cwd = String(e.cwd); s.project = path.basename(s.cwd); }
   s.source = e.source || s.source || 'claude';
   if (e.model) s.model = e.model;
   s.updated = now;
   return s;
+}
+
+// Ghi lại file mà nhóm (trưởng nhóm hoặc sub-agent `who`) vừa sửa, để phát hiện hai nhóm cùng sửa một file (xem annotateConflicts)
+const WRITE_TOOLS = new Set(['edit', 'write', 'multiedit', 'notebookedit', 'apply_patch']);
+function noteEdit(s, e, now, who) {
+  if (!WRITE_TOOLS.has(String(e.tool_name || '').toLowerCase())) return;
+  const ti = e.tool_input || {};
+  let file = ti.file_path || ti.path || ti.notebook_path;
+  if (!file) return;
+  file = String(file);
+  if (!path.isAbsolute(file)) { if (!s.cwd) return; file = path.resolve(s.cwd, file); } // omp gửi đường dẫn tương đối
+  s.edits = (s.edits || []).filter((x) => x.file !== file && now - x.at < CONFLICT_MS);
+  s.edits.push({ file, at: now, who });
+  if (s.edits.length > 40) s.edits.shift();
+}
+
+// Hai nhóm khác nhau sửa cùng một file trong CONFLICT_MIN phút: gắn `conflicts` cho cả hai (tính lại mỗi lần gửi trạng thái)
+function annotateConflicts(map, now) {
+  const byFile = new Map();
+  for (const s of map.values()) {
+    s.conflicts = [];
+    for (const x of s.edits || []) {
+      if (now - x.at >= CONFLICT_MS) continue;
+      if (!byFile.has(x.file)) byFile.set(x.file, []);
+      byFile.get(x.file).push({ s, at: x.at, who: x.who });
+    }
+  }
+  for (const [file, list] of byFile) {
+    if (new Set(list.map((x) => x.s.id)).size < 2) continue;
+    for (const x of list) {
+      const others = list.filter((o) => o.s.id !== x.s.id).map((o) => ({ id: o.s.id, project: o.s.project, who: o.who, at: o.at }));
+      x.s.conflicts.push({ file, who: x.who, at: x.at, others });
+    }
+  }
 }
 
 // Nhận diện tool lỗi: Claude Code gửi tool_response (is_error / error / exit code), adapter omp gửi is_error
@@ -245,6 +279,7 @@ function reduce(map, e, now) {
           error: false,
         });
         s.runaway = checkRunaway(s);
+        noteEdit(s, e, now, 'Trưởng nhóm');
       }
       break;
     case 'PostToolUse':
@@ -271,7 +306,7 @@ function reduce(map, e, now) {
           });
         }
         if (isErr) {
-          s.error = { text: describeTool(e), at: now };
+          s.error = { text: t ? t.text : describeTool(e), at: now }; // PostToolUse có thể không có args (Antigravity): lấy chữ của lần gọi đã ghép
         }
         s.runaway = checkRunaway(s);
       }
@@ -280,7 +315,7 @@ function reduce(map, e, now) {
       if (e.tool_use_id) subAgent(s, e, now);
       break;
     case 'SubagentTool':
-      if (e.tool_use_id) { const a = subAgent(s, e, now); a.activity = describeTool(e); a.toolCount = (a.toolCount || 0) + 1; }
+      if (e.tool_use_id) { const a = subAgent(s, e, now); a.activity = describeTool(e); a.toolCount = (a.toolCount || 0) + 1; noteEdit(s, e, now, a.desc); }
       break;
     case 'Notification':
       s.status = 'waiting'; s.activity = short(e.message || 'Cần bạn xác nhận', 50); break;
@@ -312,11 +347,26 @@ function saveState() {
     fs.renameSync(STATE_FILE + '.tmp', STATE_FILE);
   } catch (err) { console.error('Không lưu được trạng thái:', err.message); }
 }
-if (!DEMO) {
+function loadState() {
+  if (DEMO) return;
   try { for (const s of JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'))) sessions.set(s.id, s); } catch {}
+  // Lần cuối nhận sự kiện của từng công cụ (cho ngăn Hooks): lấy từ log 7 ngày gần nhất
+  for (const ev of readEvents(Date.now() - 7 * 86400e3)) lastSeen[ev.source || 'claude'] = Math.max(lastSeen[ev.source || 'claude'] || 0, ev.ts);
   setInterval(saveState, 5e3).unref();
   const bye = () => { saveState(); process.exit(0); };
   process.on('SIGINT', bye); process.on('SIGTERM', bye);
+}
+
+// Sự kiện từ hook (POST /event): ghi "lần cuối nhận" theo công cụ và báo cho lệnh Gửi thử đang chờ
+const lastSeen = {};
+const pendingTests = new Map(); // session_id của sự kiện thử -> hàm resolve
+function receive(e, source, eventName) {
+  if (!e || typeof e !== 'object') return;
+  const tool = e.conversationId && !e.session_id ? 'antigravity' : String(e.agent_source || source || 'claude');
+  if (/^[a-z0-9-]{1,20}$/.test(tool)) lastSeen[tool] = Date.now();
+  const sid = e.session_id || e.conversationId;
+  if (pendingTests.has(sid)) { pendingTests.get(sid)(); return; } // sự kiện thử không hiện lên văn phòng và không ghi log
+  apply(e, source, eventName);
 }
 
 // Cộng token từ transcript của Claude Code (JSONL; mỗi message.id có thể lặp lại nhiều dòng nên lấy bản cuối)
@@ -345,7 +395,9 @@ function apply(e, source, eventName) {
   if (!e) return;
   if (!e.session_id && e.conversationId) { // Antigravity (nhận theo hình dạng payload, kể cả hook cũ gửi ?source=gemini)
     recent.push({ at: new Date().toISOString(), event: eventName, raw: e }); if (recent.length > 50) recent.shift();
-    for (const ev of fromAntigravity(e, eventName)) apply(ev);
+    const evs = fromAntigravity(e, eventName, (sessions.get(e.conversationId) || {}).status);
+    for (const ev of evs) apply(ev);
+    if (evs.some((ev) => ev.hook_event_name === 'UserPromptSubmit')) readAgyPrompt(e.transcriptPath, e.conversationId);
     return;
   }
   if (!e.session_id) return;
@@ -379,12 +431,12 @@ function sweep(map, now) {
     }
     const kept = s.agents.filter((a) => a.status === 'working' || now - a.ended < 15 * 60e3); // giữ việc xong trong 15 phút
     if (kept.length !== s.agents.length) { s.agents = kept; changed = true; }
-    if (s.status === 'idle' && now - s.updated > 2 * 3600e3) { map.delete(id); changed = true; } // dọn session ngủ quá 2 giờ
+    if (s.status === 'idle' && now - s.updated > REMOVE_MS) { map.delete(id); changed = true; } // dọn nhóm rảnh im lặng quá REMOVE_MIN phút
     else s.stale = s.status !== 'idle' && now - s.updated > STALE_MS;
   }
   return changed;
 }
-const serialize = (map, now) => JSON.stringify({ now, sessions: [...map.values()] });
+function serialize(map, now) { annotateConflicts(map, now); return JSON.stringify({ now, sessions: [...map.values()] }); }
 function snapshotOf(map, now) { sweep(map, now); return serialize(map, now); }
 function snapshot() {
   const now = Date.now();
@@ -454,31 +506,56 @@ function broadcast() {
   for (const res of clients) res.write(data);
 }
 
-// Quản lý hook ghi vào cấu hình của Claude Code/Gemini/Codex/Antigravity trong thư mục home, nên chỉ cho phép:
+// Các API sửa cấu hình hook (trong thư mục home) hoặc xoá nhóm chỉ cho phép:
 // - từ chính máy này (kể cả khi HOST=0.0.0.0), - Host là localhost (chặn DNS rebinding),
-// - POST có Origin trùng với chính server (chặn trang web lạ gửi form/fetch no-cors), - không chạy ở chế độ demo.
+// - POST có Origin trùng với chính server (chặn trang web lạ gửi form/fetch no-cors). Chế độ demo không đụng cấu hình hook.
 const LOOPBACK = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
-function hookApi(req, res, url) {
+const LOCAL_API = ['/hooks-status', '/hooks-install', '/hooks-uninstall', '/hooks-test', '/session-remove'];
+async function localApi(req, res, url) {
   const send = (code, body) => { res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8' }); res.end(JSON.stringify(body)); };
   const host = String(req.headers.host || '');
   const local = LOOPBACK.has(req.socket.remoteAddress) && /^(localhost|127\.0\.0\.1|\[::1\]):\d+$/.test(host);
-  if (!local) return send(403, { error: 'Chỉ quản lý hook được từ chính máy chạy server (http://localhost)' });
+  if (!local) return send(403, { error: 'Chỉ dùng được từ chính máy chạy server (http://localhost)' });
+  const post = req.method === 'POST' && req.headers.origin === `http://${host}`;
+  if (url.pathname !== '/hooks-status' && !post) return send(req.method === 'POST' ? 403 : 405, { error: req.method === 'POST' ? 'Origin không hợp lệ' : 'Cần POST' });
+  if (url.pathname === '/session-remove') {
+    const id = url.searchParams.get('id');
+    if (!sessions.has(id)) return send(404, { error: 'Không có nhóm này' });
+    apply({ session_id: id, hook_event_name: 'SessionEnd' }); // ghi vào log để xem lại cũng thấy nhóm rời đi
+    return send(200, { ok: true });
+  }
   if (DEMO) return send(403, { error: 'Chế độ demo không sửa cấu hình hook' });
-  if (url.pathname === '/hooks-status') return send(200, hooks.status());
-  if (req.method !== 'POST') return send(405, { error: 'Cần POST' });
-  if (req.headers.origin !== `http://${host}`) return send(403, { error: 'Origin không hợp lệ' });
   const ids = url.searchParams.get('only') ? url.searchParams.get('only').split(',') : undefined;
-  send(200, url.pathname === '/hooks-install' ? hooks.install(ids) : hooks.uninstall(ids));
+  const withSeen = (rows) => rows.map((r) => ({ ...r, lastSeen: lastSeen[r.id] || null }));
+  if (url.pathname === '/hooks-status') return send(200, withSeen(hooks.status()));
+  if (url.pathname === '/hooks-test') return send(200, await testHook(url.searchParams.get('only')));
+  send(200, withSeen(url.pathname === '/hooks-install' ? hooks.install(ids) : hooks.uninstall(ids)));
 }
 
-http.createServer((req, res) => {
+// Gửi thử: chạy đúng lệnh hook đã cài (bằng sh, như công cụ sẽ chạy) với payload mẫu và chờ server nhận được.
+// Sự kiện thử bị receive() chặn lại nên không hiện lên văn phòng, không ghi log.
+function testHook(id) {
+  let t;
+  try { t = hooks.testCommand(id); } catch (err) { return { ok: false, error: err.message }; }
+  const sid = `hook-test-${id}-${Date.now()}`, started = Date.now();
+  return new Promise((resolve) => {
+    const done = (r) => { clearTimeout(timer); pendingTests.delete(sid); resolve(r); };
+    const timer = setTimeout(() => done({ ok: false, error: 'Lệnh đã chạy nhưng server không nhận được sự kiện trong 3 giây (sai địa chỉ/cổng, hoặc sai token?)' }), 3000);
+    pendingTests.set(sid, () => done({ ok: true, ms: Date.now() - started }));
+    const child = require('child_process').spawn('sh', ['-c', t.command], { stdio: ['pipe', 'ignore', 'ignore'] });
+    child.on('error', (err) => done({ ok: false, error: 'Không chạy được lệnh hook: ' + err.message }));
+    child.stdin.end(JSON.stringify(t.payload(sid)));
+  });
+}
+
+function handle(req, res) {
   const url = new URL(req.url, 'http://x');
   if (req.method === 'POST' && url.pathname === '/event') {
     if (TOKEN && req.headers['x-agent-office-token'] !== TOKEN) { res.writeHead(401).end('unauthorized'); return; }
     let body = '';
     req.on('data', (c) => (body += c));
     req.on('end', () => {
-      try { apply(JSON.parse(body), url.searchParams.get('source'), url.searchParams.get('event')); } catch (err) { console.error('Sự kiện lỗi:', err.message); }
+      try { receive(JSON.parse(body), url.searchParams.get('source'), url.searchParams.get('event')); } catch (err) { console.error('Sự kiện lỗi:', err.message); }
       res.end('ok');
     });
     return;
@@ -487,7 +564,7 @@ http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     return res.end(JSON.stringify(recent, null, 2));
   }
-  if (['/hooks-status', '/hooks-install', '/hooks-uninstall'].includes(url.pathname)) return hookApi(req, res, url);
+  if (LOCAL_API.includes(url.pathname)) return localApi(req, res, url);
   if (url.pathname === '/leaderboard') {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     return res.end(buildLeaderboard(url.searchParams.get('day')));
@@ -509,12 +586,10 @@ http.createServer((req, res) => {
     return fs.createReadStream(path.join(__dirname, 'index.html')).pipe(res);
   }
   res.writeHead(404).end();
-}).listen(PORT, HOST, () => console.log(`Văn phòng Agent: http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${PORT}`));
-
-setInterval(broadcast, 30e3); // giữ kết nối và dọn dẹp định kỳ
+}
 
 // ---------- Chế độ demo ----------
-if (DEMO) {
+function startDemo() {
   const pick = (a) => a[Math.floor(Math.random() * a.length)];
   const projects = ['articles', 'tools', 'migrate', 'live-backup'];
   const engines = [['claude', 'claude-sonnet-4-5'], ['omp', 'gpt-5'], ['omp', 'gemini-2.5-pro'], ['omp', 'claude-opus-4-1']];
@@ -562,3 +637,14 @@ if (DEMO) {
   });
   console.log('Đang chạy chế độ demo với dữ liệu giả.');
 }
+
+function start() {
+  loadState();
+  http.createServer(handle).listen(PORT, HOST, () => console.log(`Văn phòng Agent: http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${PORT}`));
+  setInterval(broadcast, 30e3); // giữ kết nối và dọn dẹp định kỳ
+  if (DEMO) startDemo();
+}
+
+// require('./server') (test) chỉ lấy các hàm thuần, không mở cổng và không đọc/ghi state
+if (require.main === module) start();
+module.exports = { reduce, slim, fromAntigravity, sweep, annotateConflicts, CONFLICT_MS, REMOVE_MS };

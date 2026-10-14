@@ -132,7 +132,8 @@ flowchart TD
 | 🚨 | **Cảnh Báo Vòng Lặp Vô Tận** | Khi agent bị kẹt loop (gọi cùng 1 lệnh hoặc gặp lỗi liên tiếp 3 lần), pod lập tức nhấp nháy viền đỏ, giương cờ `🚨 VÒNG LẶP` và hú còi cảnh báo 8-bit để cứu ví token của bạn! |
 | 🖥️ | **Retro CRT Terminal Inspector** | Bấm phím **`T`** để mở màn hình CRT cổ điển thập niên 80-90 (hiệu ứng bóng đèn hình cong và sọc scanline). Cho phép soi chi tiết câu lệnh, thời gian, trạng thái exit code và toàn bộ output stdout/stderr. Hỗ trợ đổi màu đèn Phosphor **Xanh lá (P1)** hoặc **Hổ phách (P3)**. |
 | ⚡ | **Cài Đặt Hook 1-Click** | Drawer quản lý Hook trực tiếp trên giao diện web hoặc qua file script CLI `setup-hooks.js`. Hỗ trợ Claude Code, Antigravity IDE, Gemini CLI, Codex CLI với sao lưu an toàn. |
-| 🎨 | **Pixel Art Độc Bản Theo ID** | Mỗi nhân vật được sinh ngẫu nhiên từ thư viện khuôn mặt, kiểu tóc, màu áo; trưởng nhóm luôn thắt cà vạt vàng danh giá; sub-agent mang phụ kiện riêng: kính lúp 🔍 cho `scout`, bút đỏ 🖍️ cho `reviewer`, tia chớp 💨 cho `sonic`. |
+| 🎨 | **Pixel Art Đa Dạng & Độc Bản** | Nhân vật phong phú với **13 kiểu tóc/mũ** (mũ bảo hộ 👷, mũ phù thủy 🧙‍♂️, tóc xù afro, mũ lưỡi trai...), **9 kiểu mặt** (kính VR Cyberpunk 🥽, kính cận nerd 🤓, khẩu trang 😷, râu quai nón 🧔...), **9 kiểu áo** (áo Hawaii 🌺, vest 👔, hoodie, áo len...). Phụ kiện động theo vai trò: 🔍 `scout`, 🖍️ `reviewer`, 💨 `sonic`, 🔨 `builder`, 🪲 `debugger`, 📜 `writer`, 🛡️ `security`. |
+| 🛋️ | **Nội Thất & Đồ Đạc Sống Động** | Hàng loạt đồ vật pixel art: **Cây nước nóng lạnh**, **Tủ lạnh Pantry**, **Máy bán nước tự động**, **Tủ Server Rack** đèn LED xanh đỏ nhấp nháy, **Bảng trắng dự án**, **Thùng rác tái chế**, máy pha cà phê, sofa và cây cảnh. |
 | 🎵 | **Bộ Tổng Hợp Âm Thanh 8-Bit** | Tích hợp Web Audio API thuần (không cần file mp3 nặng nề): tiếng *ting* nhặt xu 8-bit khi sub-agent làm xong, hai nốt trầm khi chờ sếp duyệt, tiếng bíp khi nhận việc, và còi báo động khẩn cấp. |
 | ⏳ | **Hộp Đen Tua Ngược Thời Gian** | Nút **⏪ Xem lại** cho phép bạn tua ngược thời gian từ vài phút đến 24 giờ trước. Dựng lại từng khung hình bước đi, hoạt động của toàn bộ văn phòng như một thước phim tư liệu. |
 | 🏆 | **Bảng Xếp Hạng Năng Suất** | Bấm **🏆 Xếp hạng** để vinh danh sub-agent chạy bền bỉ nhất, nhóm giải quyết nhiều task nhất, nhóm tốn nhiều token nhất trong ngày. |
@@ -147,13 +148,13 @@ flowchart TD
 +-----------------------------------------------------------------------------------+
 |                                 VĂN PHÒNG AGENT                                    |
 +--------------------------+----------------------------+---------------------------+
-| 🔨 KHU LÀM VIỆC          | 👑 PHÒNG SẾP               | ☕ GÓC CÀ PHÊ             |
-| Các nhóm đang miệt mài   | Nhóm xếp hàng vẫy tay chờ  | Nơi sub-agent ra xả hơi   |
-| gõ lệnh, đọc/sửa file    | bạn bấm duyệt (Prompt)     | sau khi làm xong nhiệm vụ |
+| 🖥️ KHU LÀM VIỆC          | 📋 PHÒNG SẾP               | ☕ PANTRY & CÀ PHÊ        |
+| Bảng trắng, máy tính,    | Sếp ngồi bàn gỗ lớn, vẫy   | Tủ lạnh, cây nước nóng    |
+| giá sách và thùng rác    | tay khi chờ duyệt          | lạnh, máy bán nước tự động|
 +--------------------------+----------------------------+---------------------------+
-| 🛋️ PHÒNG CHỜ VIỆC        | 💤 PHÒNG NGỦ GẬT           | 🕒 ĐỒNG HỒ & THỜI TIẾT    |
-| Nhóm đang rảnh rỗi chờ   | Nhóm mất tín hiệu quá      | Cửa sổ tự đổi ngày/đêm    |
-| giao task tiếp theo      | STALE_MIN (tránh kẹt mãi)  | theo giờ thực tế của máy  |
+| 🛋️ PHÒNG CHỜ VIỆC        | 💤 NGỦ GẬT & SERVER RACK   | 🕒 ĐỒNG HỒ & THỜI TIẾT    |
+| Ghế sofa, cây nước, nhóm | Tủ server đèn led nhấp     | Cửa sổ tự đổi ngày/đêm    |
+| rảnh ngồi chờ task mới   | nháy khi agent chạy bash   | theo giờ thực tế của máy  |
 +--------------------------+----------------------------+---------------------------+
 ```
 

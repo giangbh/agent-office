@@ -119,19 +119,33 @@ h1 small{display:block;font:400 13px/1.4 var(--body);color:var(--muted);margin-t
 @keyframes f1{0%{visibility:visible}50%{visibility:hidden}}
 @keyframes f2{0%{visibility:hidden}50%{visibility:visible}}
 .lead .person{width:48px;height:60px}
-/* hiệu ứng theo loại sub-agent: scout cầm kính lúp, reviewer cầm bút đỏ, sonic chạy nhanh */
+/* hiệu ứng theo loại sub-agent: scout, reviewer, sonic, builder, debugger, writer, security */
 .person .acc{position:absolute;font-size:14px;line-height:1;pointer-events:none}
 .k-scout .acc{right:-12px;top:14px}
 .k-reviewer .acc{right:-11px;top:18px;filter:hue-rotate(-20deg) saturate(1.6)}
 .k-sonic .acc{left:-16px;top:20px;font-size:12px}
+.k-builder .acc{right:-14px;top:10px}
+.k-debugger .acc{right:-13px;top:16px}
+.k-writer .acc{left:-14px;top:16px}
+.k-security .acc{left:-14px;top:14px}
 .person.working.k-scout .acc{animation:scan 1.6s ease-in-out infinite}
 .person.working.k-reviewer .acc{animation:scribble .35s steps(2) infinite}
 .person.working.k-sonic .acc{animation:dash .3s steps(2) infinite}
 .person.working.k-sonic .f1{animation-duration:.18s}
 .person.working.k-sonic .f2{animation-duration:.18s}
+.person.working.k-builder .acc{animation:hammer .4s ease-in-out infinite}
+.person.working.k-debugger .acc{animation:spray .6s ease-in-out infinite}
+.person.working.k-writer .acc{animation:scroll .8s ease-in-out infinite}
+.person.working.k-security .acc{animation:guard 1.4s ease-in-out infinite}
 @keyframes scan{50%{transform:translate(-8px,-4px) rotate(-18deg)}}
 @keyframes scribble{50%{transform:translate(2px,2px) rotate(12deg)}}
 @keyframes dash{50%{transform:translateX(-4px);opacity:.4}}
+@keyframes hammer{0%,100%{transform:rotate(0)}50%{transform:rotate(-35deg) translate(-2px,-3px)}}
+@keyframes spray{0%,100%{transform:scale(1)}50%{transform:scale(1.25) rotate(10deg)}}
+@keyframes scroll{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes guard{0%,100%{transform:translateX(0)}50%{transform:translateX(3px)}}
+.server-blink{animation:server-led 1.2s steps(2) infinite}
+@keyframes server-led{50%{filter:brightness(1.35) drop-shadow(0 0 4px #22C55E)}}
 .sound{font:600 13px var(--body);background:var(--night);color:var(--paper);border:2px solid #3A4766;border-radius:8px;padding:8px 12px;cursor:pointer}
 .sound[aria-pressed="true"]{border-color:var(--mint);color:var(--mint)}
 .sound:focus-visible{outline:3px solid var(--lamp);outline-offset:2px}
@@ -142,6 +156,10 @@ h1 small{display:block;font:400 13px/1.4 var(--body);color:var(--muted);margin-t
 .pod.stale .bubble{background:transparent;color:var(--muted);padding:0}
 .pod.stale .person .f1,.pod.stale .person .f2,.pod.stale .person .acc,.pod.stale .desk.working .laptop{animation:none!important}
 .pod.stale .lead .person::before{content:'💤';position:absolute;right:-14px;top:-8px;font-size:14px}
+.pod.conflict{border-color:var(--coral);border-style:solid}
+.conflict{margin-top:8px;font-size:11px;line-height:1.4;color:var(--ink);background:var(--coral);border-radius:6px;padding:4px 8px}
+.conflict b{font-weight:700}
+.btn-remove{margin-top:22px;width:100%;background:transparent;color:var(--coral);border:1px dashed var(--coral);border-radius:8px;padding:8px;font:600 12px var(--body);cursor:pointer}
 .bubble.err{background:var(--coral);color:var(--ink)}
 .person.err::after{content:'💦';position:absolute;right:-10px;top:-6px;font-size:14px}
 .timer.stuck{color:var(--coral);font-weight:600}
@@ -256,29 +274,33 @@ h1 small{display:block;font:400 13px/1.4 var(--body);color:var(--muted);margin-t
   <section class="room r-work" aria-label="Khu làm việc">
     <header class="wall"><span class="plaque">🖥 Khu làm việc<b id="n-work">0</b></span><div class="deco"><div class="wboard"></div><div class="win"></div><div class="clock"></div></div></header>
     <div class="pods" id="room-work"></div>
-    <div class="fdeco l"><img class="furn" data-furn="plant" alt=""></div>
-    <div class="fdeco r"><img class="furn" data-furn="shelf" alt=""><img class="furn" data-furn="plant" alt=""></div>
+    <div class="fdeco l"><img class="furn" data-furn="whiteboard" alt=""><img class="furn" data-furn="plant" alt=""></div>
+    <div class="fdeco r"><img class="furn" data-furn="shelf" alt=""><img class="furn" data-furn="bin" alt=""></div>
   </section>
   <section class="room r-boss" aria-label="Phòng sếp: nhóm chờ bạn duyệt">
     <header class="wall"><span class="plaque">📋 Phòng sếp<b id="n-boss">0</b></span><div class="deco"><div class="win"></div></div></header>
     <div class="bossdesk" id="bossdesk"></div>
     <div class="pods" id="room-boss"></div>
+    <div class="fdeco r"><img class="furn" data-furn="shelf" alt=""><img class="furn" data-furn="plant" alt=""></div>
   </section>
   <section class="room r-rest" aria-label="Phòng chờ việc: nhóm rảnh">
     <header class="wall"><span class="plaque">🛋 Phòng chờ việc<b id="n-rest">0</b></span><div class="deco"><img class="furn" data-furn="shelf" alt=""><div class="win"></div></div></header>
     <div class="pods" id="room-rest"></div>
+    <div class="fdeco l"><img class="furn" data-furn="cooler" alt=""></div>
     <div class="fdeco r"><img class="furn" data-furn="sofa" alt=""><img class="furn" data-furn="plant" alt=""></div>
   </section>
   <section class="room r-nap" aria-label="Phòng ngủ gật: nhóm mất tín hiệu">
-    <header class="wall"><span class="plaque">💤 Phòng ngủ gật<b id="n-nap">0</b></span><div class="deco"><div class="win"></div></div></header>
+    <header class="wall"><span class="plaque">💤 Phòng ngủ gật & Server<b id="n-nap">0</b></span><div class="deco"><div class="win"></div></div></header>
     <div class="pods" id="room-nap"></div>
     <span class="zzz" aria-hidden="true">z Z z</span>
+    <div class="fdeco l"><img class="furn server-blink" data-furn="server" alt=""><img class="furn" data-furn="bin" alt=""></div>
     <div class="fdeco r"><img class="furn" data-furn="napsofa" alt=""></div>
   </section>
-  <section class="room r-cafe" aria-label="Góc cà phê">
-    <header class="wall"><span class="plaque">☕ Góc cà phê<b id="n-cafe">0</b></span><div class="deco"><img class="furn" data-furn="coffee" alt=""></div></header>
-    <div class="lounge"><p>Sub-agent làm xong ra đây nghỉ</p><div id="lounge"></div></div>
-    <div class="fdeco l"><img class="furn" data-furn="plant" alt=""></div>
+  <section class="room r-cafe" aria-label="Pantry & Cà phê">
+    <header class="wall"><span class="plaque">☕ Pantry & Cà phê<b id="n-cafe">0</b></span><div class="deco"><img class="furn" data-furn="coffee" alt=""><img class="furn" data-furn="cooler" alt=""></div></header>
+    <div class="lounge"><p>Sub-agent làm xong ra đây ăn nhẹ & xả hơi</p><div id="lounge"></div></div>
+    <div class="fdeco l"><img class="furn" data-furn="fridge" alt=""><img class="furn" data-furn="plant" alt=""></div>
+    <div class="fdeco r"><img class="furn" data-furn="vending" alt=""></div>
   </section>
 </main>
 <aside class="drawer" id="board" aria-label="Bảng xếp hạng" style="--team:var(--lamp)" hidden></aside>
@@ -344,15 +366,24 @@ const HEADS={
   side:    L(["............","...HHHHHHH..","..HHHHHHHHH.","..H.HHHH.H.."]),
   bald:    L(["............","............","....SSSS....","...SSSSSS..."]),
   headset: L(["............","...HHHHHH...","..KHHHHHHK..","..K......K..",".KK......KK.",".KK......KK."]),
+  helmet:  L(["....yyyy....","...YYYYYY...","..YYYYYYYY..","..yy....yy.."]),
+  wizard:  L([".....PP.....","....PPPP....","...PPPPPP...","..PPPPPPPP..","..pppppppp.."]),
+  afro:    L(["...HHHHHH...","..HHHHHHHH..",".HHHHHHHHHH.",".HHHHHHHHHH.","..H......H.."]),
+  retro:   L(["...HHHHHH...","..HH.HH.HH..","..HHHHHHHH..","..H......H..","..HH....HH.."]),
 };
 const FACES={
   none:L([]), glasses:L(["...GEGGEG..."],4), shades:L(["...KKKKKK..."],4),
   beard:L(["...HSSSSH...","....HHHH...."],5), stache:L(["....HHHH...."],5),
+  vr:L(["...MMMMMM...","...mmmmmm..."],3), nerd:L(["..KEKK.KKEK."],4),
+  mask:L(["....wwww....","....wwww...."],5), fullbeard:L(["...HSSSSH...","..HHSSSSH..","...HHHHHH..."],4),
 };
 const SHIRTS={
   plain:L([]), tie:L([".....TT.....","..BBBTTBBB..","..BBBTTBBB..","....TTTT...."],7),
   stripe:L(["..wwwwwwww.."],9), hoodie:L(["....w..w....","....w..w...."],7),
   collar:L(["....wwww...."],7), badge:L([".......ww..."],9),
+  hawaii:L(["..B.w..w.B..",".SBwBwwBwBS.",".SBBwwBBwBS.","..B.w..w.B.."],7),
+  suit:L(["..KK.ww.KK..",".SKK.ww.KKS.",".SKK.ww.KKS.","..KK....KK.."],7),
+  sweater:L(["..wwwwwwww..","..w.ww.w.w..","..wwwwwwww.."],7),
 };
 const SKINS=['#F2C29B','#E0A878','#C68650','#8D5A3B','#FFD9B8','#6B4430'];
 const HAIRS=['#2B1E16','#5A3825','#A0522D','#E8C07A','#C9C9D1','#D9534F','#3B5BA5','#111111'];
@@ -375,7 +406,8 @@ function sprite(team,seed,frame,leader){
   const t=traits(seed,leader);
   const cap=t.capTone<.5?team:shade(team,.7+t.capTone*.5);
   const pal={S:t.skin,E:'#2B2233',B:shade(team,.85),b:shade(team,.6),L:t.pants,D:t.shoes,H:t.hair,
-    C:cap,c:shade(cap,.72),G:'#E9EEF7',K:'#1A1A22',T:leader?'#FFC857':'#C8423B',w:'#F4EEE2'};
+    C:cap,c:shade(cap,.72),G:'#E9EEF7',K:'#1A1A22',T:leader?'#FFC857':'#C8423B',w:'#F4EEE2',
+    Y:'#FFC857',y:'#CCA025',P:'#9333EA',p:'#6B21A8',M:'#38BDF8',m:'#0284C7',R:'#EF4444'};
   const grid=BASE.map(r=>[...r]);
   if(frame===1) ARMS_UP.forEach((r,i)=>grid[7+i]=[...r]);
   for(const layer of [HEADS[t.head],FACES[t.face],SHIRTS[t.shirt]])
@@ -385,8 +417,26 @@ function sprite(team,seed,frame,leader){
   return spriteCache[key]=c.toDataURL();
 }
 // Phụ kiện theo loại sub-agent (tên agent của omp hoặc subagent_type của Claude Code)
-const KINDS={scout:['🔍','Trinh sát'],reviewer:['🖍️','Soát lỗi'],sonic:['💨','Làm nhanh']};
-const kindOf=t=>{t=String(t||'').toLowerCase();return /scout|explore/.test(t)?'scout':/review/.test(t)?'reviewer':/sonic|quick|fast/.test(t)?'sonic':''};
+const KINDS={
+  scout:['🔍','Trinh sát'],
+  reviewer:['🖍️','Soát lỗi'],
+  sonic:['💨','Làm nhanh'],
+  builder:['🔨','Thợ xây/Build'],
+  debugger:['🪲','Diệt bọ/Fix'],
+  writer:['📜','Tài liệu/Doc'],
+  security:['🛡️','Bảo mật/Audit']
+};
+const kindOf=t=>{
+  t=String(t||'').toLowerCase();
+  if(/scout|explore|find|search/.test(t)) return 'scout';
+  if(/review|check|audit|inspect/.test(t)) return /sec|vuln|auth/.test(t)?'security':'reviewer';
+  if(/sonic|quick|fast/.test(t)) return 'sonic';
+  if(/build|make|compile|deploy/.test(t)) return 'builder';
+  if(/debug|fix|patch|bug/.test(t)) return 'debugger';
+  if(/doc|write|read|readme/.test(t)) return 'writer';
+  if(/sec|safety|guard/.test(t)) return 'security';
+  return '';
+};
 const person=(col,state,seed='x',leader=false,type='')=>{const k=kindOf(type),acc=k&&KINDS[k];
   return `<div class="person ${state}${k?' k-'+k:''}"${acc?` title="${acc[1]}"`:''}><img class="f1" alt="" src="${sprite(col,seed,0,leader)}"><img class="f2" alt="" src="${sprite(col,seed,1,leader)}">${acc?`<span class="acc" aria-hidden="true">${acc[0]}</span>`:''}</div>`};
 // ---------- Nội thất pixel art (cùng kiểu ghép ký tự như nhân vật) ----------
@@ -403,10 +453,22 @@ const FURN={
     {W:'#7A4E2D',r:'#FF7A6B',b:'#5AB0FF',g:'#7BD389',y:'#FFC857'},4),
   coffee:pix(["KKKKKKKKKK","KmmmmmmmmK","KmRmmmmmmK","KmmmmmwwmK","KKKKKKKKKK",".Kk....kK.",".Kk.cc.kK.",".Kk.cc.kK.","KKKKKKKKKK","KmmmmmmmmK","KKKKKKKKKK"],
     {K:'#2A2F45',m:'#9AA6C2',k:'#4A5270',R:'#FF7A6B',w:'#7BD389',c:'#FFF4DE'},4),
+  cooler:pix(["...BBB...","..BBBBB..","..BBBBB..","...BBB...","..WWWWW..","..Wr.bW..","..W...W..","..WWWWW..","..WWWWW..","..WWWWW..","..KK.KK.."],
+    {B:'#38BDF8',b:'#0284C7',W:'#E2E8F0',r:'#EF4444',K:'#475569'},4),
+  fridge:pix(["SSSSSSSSSS","SssssssssS","SssssssssS","SKsssssssS","SSSSSSSSSS","SSSSSSSSSS","SsyysssssS","SKyysssssS","SssssssssS","SssssssssS","SssssssssS","KKKKKKKKKK"],
+    {S:'#94A3B8',s:'#CBD5E1',K:'#334155',y:'#FDE047'},4),
+  server:pix(["KKKKKKKKKK","Kggy.r..gK","KmmmmmmmmK","KKKKKKKKKK","K.rr.g.gyK","KmmmmmmmmK","KKKKKKKKKK","Ky.g.rr.gK","KmmmmmmmmK","KKKKKKKKKK","K.gg.y.rrK","KmmmmmmmmK","KKKKKKKKKK","KK......KK"],
+    {K:'#0F172A',m:'#334155',g:'#22C55E',r:'#EF4444',y:'#FACC15'},4),
+  vending:pix(["KKKKKKKKKKKK","KwwwwwwwwwwK","Kw.SODA..wK","KKKKKKKKKKKK","K.r.g.b.y..K","K.r.g.b.y..K","KKKKKKKKKKKK","K.b.r.y.g..K","K.b.r.y.g..K","KKKKKKKKKKKK","Kmm.y...mmmK","K...k......K","KKKKKKKKKKKK","KK........KK"],
+    {K:'#1E293B',w:'#F8FAFC',r:'#EF4444',g:'#22C55E',b:'#38BDF8',y:'#FACC15',m:'#475569',k:'#020617'},4),
+  whiteboard:pix(["WWWWWWWWWWWWWW","W............W","W.rrr..ggg...W","W..|....|....W","W.bbbbbbbb...W","W............W","WWWWWWWWWWWWWW","....A....A....","...A......A...","..A........A.."],
+    {W:'#94A3B8','.':'#F8FAFC',r:'#EF4444',g:'#22C55E',b:'#3B82F6',A:'#475569'},4),
+  bin:pix([".GGGGGGG.","GGGGGGGGG",".GwwwwwG.",".G.w.w.G.",".GwwwwwG.",".G.w.w.G.","..GGGGG.."],
+    {G:'#15803D',w:'#86EFAC'},4),
   sofa:pix(SOFA,{A:'#B5546A',a:'#D9728A',F:'#3A2A22'},6),
   napsofa:pix(SOFA,{A:'#4A5C9A',a:'#6B80C4',F:'#141828'},6),
 };
-document.querySelectorAll('[data-furn]').forEach(el=>{const f=FURN[el.dataset.furn];el.src=f.src;el.width=f.w;el.height=f.h});
+document.querySelectorAll('[data-furn]').forEach(el=>{const f=FURN[el.dataset.furn];if(f){el.src=f.src;el.width=f.w;el.height=f.h}});
 // Phòng theo trạng thái: mất tín hiệu ưu tiên trước, rồi chờ duyệt, đang chạy, rảnh
 const roomOf=s=>s.stale?'nap':s.status==='waiting'?'boss':s.status==='working'?'work':'rest';
 const VACANT={work:'Chưa ai làm việc',boss:'Không ai chờ duyệt 🎉',rest:'Không có nhóm rảnh',nap:'Không ai ngủ gật'};
@@ -476,6 +538,12 @@ function notifyWaiting(s){
   if(!notifyOn||!document.hidden) return;
   try{new Notification('Chờ bạn duyệt: '+s.project,{body:s.activity||'Cần bạn xác nhận',tag:'agent-office-'+s.id})}catch(e){}
 }
+const baseName=f=>String(f||'').split('/').pop();
+function notifyConflict(s){
+  if(!notifyOn||!document.hidden) return;
+  const c=s.conflicts[0];
+  try{new Notification('Hai nhóm cùng sửa '+baseName(c.file),{body:`${s.project} và ${[...new Set(c.others.map(o=>o.project))].join(', ')}`,tag:'agent-office-conflict-'+c.file})}catch(e){}
+}
 
 let prev=null; // trạng thái lần trước để phát hiện thay đổi
 function detectChanges(S){
@@ -486,6 +554,10 @@ function detectChanges(S){
     cur['s'+s.id]=s.status;
     cur['r'+s.id]=s.runaway?s.runaway.count:0;
     if(s.runaway && (!prev || !prev['r'+s.id])) alarm=true;
+    // Trùng file mới (so theo danh sách file): kêu và báo hệ thống như vòng lặp
+    const files=(s.conflicts||[]).map(c=>c.file).sort().join('|');
+    cur['c'+s.id]=files;
+    if(prev&&files&&(prev['c'+s.id]||'')!==files&&(s.conflicts||[]).some(c=>!(prev['c'+s.id]||'').split('|').includes(c.file))){alarm=true;notifyConflict(s)}
     s.agents.forEach(a=>cur['a'+a.id]=a.status);
   });
   if(prev){
@@ -525,9 +597,11 @@ function render(){
     const runawayChip=isRunaway?`<span class="runaway-badge" title="${esc(s.runaway.msg)}">🚨 VÒNG LẶP (${s.runaway.count})</span>`:'';
     const bubble=isRunaway?`🚨 ${esc(s.runaway.msg)}`:s.stale?'💤 Không có tín hiệu '+ago(now-s.updated):err?'⚠ Lỗi: '+esc(s.error.text):s.status==='waiting'?'⏳ '+esc(s.activity):s.status==='working'?esc(s.activity||'Đang nghĩ…'):'Đang chờ việc mới';
     const run=s.status!=='idle'&&s.started?` · <span class="timer">${ago(now-s.started)}</span>`:'';
-    return `<section class="pod ${s.status}${s.stale?' stale':''}${isRunaway?' runaway':''}" data-sid="${esc(s.id)}" tabindex="0" role="button" style="--team:${col}">
+    const cf=s.conflicts||[];
+    return `<section class="pod ${s.status}${s.stale?' stale':''}${isRunaway?' runaway':''}${cf.length?' conflict':''}" data-sid="${esc(s.id)}" tabindex="0" role="button" style="--team:${col}">
       <header class="flag"><span class="flag-name">${esc(s.project)}</span>${engineChip(s)}${usageChip(s)}${runawayChip}<span class="flag-task" title="${esc(s.task)}">${esc(s.task)}</span></header>
       <div class="lead">${person(col,s.stale?'idle':s.status+(isRunaway?' runaway':err?' err':''),s.id,true)}<div><div class="role">Trưởng nhóm${run}</div><div class="bubble${isRunaway?' err':err&&!s.stale?' err':''}">${bubble}</div></div></div>
+      ${cf.length?`<div class="conflict" title="${esc(cf.map(c=>c.file).join('\n'))}">⚠ Cùng sửa ${cf.slice(0,2).map(c=>`<b>${esc(baseName(c.file))}</b> với ${esc([...new Set(c.others.map(o=>o.project))].join(', '))}`).join('; ')}${cf.length>2?` và ${cf.length-2} file khác`:''}</div>`:''}
       ${mine.length?`<div class="desks">${mine.map(a=>`<div class="desk working">${a.activity?`<span class="act" title="${esc(a.activity)}">${esc(a.activity)}</span>`:''}${person(col,'working',a.id,false,a.type)}<div class="table"><span class="laptop"></span></div>
         <span class="tag" title="${esc(a.desc)}">${esc(a.desc)}</span><span class="timer${now-a.started>STUCK_MS?' stuck':''}">${now-a.started>STUCK_MS?'⚠ ':''}${ago(now-a.started)}</span></div>`).join('')}</div>`:''}
     </section>`};
@@ -574,6 +648,7 @@ function renderDrawer(now){
     <h2>${esc(s.project)}</h2>
     <div>${engineChip(s)} <span class="st">${ST[s.status]||s.status}${s.started&&s.status!=='idle'?' · '+ago(now-s.started):''}</span></div>
     <div class="st" title="${esc(s.id)}">${esc(s.id)}</div>
+    ${(s.conflicts||[]).length?`<h3>⚠ Đang sửa trùng file</h3><ul>${s.conflicts.map(c=>`<li class="bad"><b>${esc(c.file)}</b><div class="st">Nhóm này (${esc(c.who)}, ${clock(c.at)})${c.others.map(o=>` · ${esc(o.project)} (${esc(o.who)}, ${clock(o.at)})`).join('')}</div></li>`).join('')}</ul>`:''}
     ${runawayBox}
     ${s.error?`<h3>Lỗi gần nhất</h3><ul><li class="bad"><small>${clock(s.error.at)}</small>${esc(s.error.text)}</li></ul>`:''}
     ${s.usage?`<h3>Token và chi phí</h3><ul><li>Vào: <b>${fmtTok(s.usage.input||0)}</b> · Ra: <b>${fmtTok(s.usage.output||0)}</b></li>
@@ -587,12 +662,20 @@ function renderDrawer(now){
     <ul>${tools.map(t=>`<li class="${t.error?'bad':''} tool-item" data-tool-id="${esc(t.id||'')}" title="Bấm để soi lệnh trong Terminal"><small>${clock(t.at)}</small>${t.error?'⚠ ':''}${esc(t.text)}<span class="inspect-tag">&gt;_ Soi</span></li>`).join('')||'<li>Chưa có</li>'}</ul>
     <h3>Sub-agent (${s.agents.length})</h3>
     ${gantt(s.agents,now)}
-    <ul>${s.agents.map(a=>`<li><small>${a.status==='working'?'⏳':'✓'}</small><b>${esc(a.desc)}</b> <span class="st">${esc(a.type)} · ${ago((a.ended||now)-a.started)}${a.toolCount?' · '+a.toolCount+' tool':''}</span>${a.status==='working'&&a.activity?`<div class="st">▶ ${esc(a.activity)}</div>`:''}${a.prompt?`<div class="st">${esc(a.prompt)}</div>`:''}</li>`).join('')||'<li>Chưa có</li>'}</ul>`;
+    <ul>${s.agents.map(a=>`<li><small>${a.status==='working'?'⏳':'✓'}</small><b>${esc(a.desc)}</b> <span class="st">${esc(a.type)} · ${ago((a.ended||now)-a.started)}${a.toolCount?' · '+a.toolCount+' tool':''}</span>${a.status==='working'&&a.activity?`<div class="st">▶ ${esc(a.activity)}</div>`:''}${a.prompt?`<div class="st">${esc(a.prompt)}</div>`:''}</li>`).join('')||'<li>Chưa có</li>'}</ul>
+    ${replay?'':`<button class="btn-remove" id="removeGroup" title="Dùng khi phiên đã tắt nhưng nhóm vẫn còn. Nếu phiên còn chạy, nhóm sẽ quay lại ở sự kiện kế tiếp">🗑 Xoá nhóm khỏi văn phòng</button>`}`;
   const top=drawer.scrollTop;
   drawer.style.setProperty('--team',col); drawer.innerHTML=h; drawer.hidden=false; drawer.scrollTop=top;
   document.getElementById('drawerX').onclick=()=>{selected=null;render()};
   const otb=document.getElementById('openTermFromDrawer');
   if(otb) otb.onclick=()=>openTerminal(s.id);
+  const rm=document.getElementById('removeGroup');
+  if(rm) rm.onclick=async()=>{
+    if(!confirm(`Xoá nhóm "${s.project}" khỏi văn phòng?`))return;
+    let r;try{r=await fetch('/session-remove?id='+encodeURIComponent(s.id),{method:'POST'})}catch(e){alert('Không gọi được server');return}
+    if(!r.ok){alert((await r.json().catch(()=>({}))).error||'Lỗi '+r.status);return}
+    selected=null;render();
+  };
   drawer.querySelectorAll('.tool-item').forEach(li=>{
     li.onclick=()=>openTerminal(s.id, li.dataset.toolId);
   });
@@ -822,20 +905,26 @@ async function hookCall(path,opts){
 }
 async function loadHooksUI(){hookDrawer.hidden=false;renderHooksDrawer(await hookCall('/hooks-status')||[])}
 function closeHooksUI(){hookDrawer.hidden=true}
+const hookTests={}; // id -> kết quả Gửi thử gần nhất {ok, ms, error}
 async function hookAction(kind,only){
   if(kind==='uninstall'&&!confirm(only?'Gỡ hook của Agent Office khỏi công cụ này?':'Gỡ hook của Agent Office khỏi tất cả công cụ?'))return;
   hookDrawer.querySelectorAll('button[data-act]').forEach(b=>b.disabled=true);
   const res=await hookCall('/hooks-'+kind+(only?'?only='+only:''),{method:'POST'});
+  if(kind==='test'){if(res)hookTests[only]=res;renderHooksDrawer(await hookCall('/hooks-status')||[]);return}
   const msg=hookMsg, list=res||await hookCall('/hooks-status')||[];
   hookMsg=hookMsg||msg;
   renderHooksDrawer(list);
 }
+const seenText=t=>t?'Nhận sự kiện lần cuối '+ago(Date.now()-t)+' trước':'Chưa nhận sự kiện nào (7 ngày qua)';
 function renderHooksDrawer(items){
   const cards=items.map(it=>`
     <div class="hook-item">
-      <div class="info"><b>${esc(it.name)}</b><small>${esc(it.file)}</small>${it.error?`<small style="color:var(--coral)">⚠ ${esc(it.error)}</small>`:it.msg?`<small>${esc(it.msg)}</small>`:''}</div>
-      <div style="display:flex;gap:6px;align-items:center">
+      <div class="info"><b>${esc(it.name)}</b><small>${esc(it.file)}</small>${it.error?`<small style="color:var(--coral)">⚠ ${esc(it.error)}</small>`:it.msg?`<small>${esc(it.msg)}</small>`:''}
+        <small style="color:${it.lastSeen?'var(--mint)':'var(--muted)'}">${seenText(it.lastSeen)}</small>
+        ${hookTests[it.id]?`<small style="color:${hookTests[it.id].ok?'var(--mint)':'var(--coral)'}">${hookTests[it.id].ok?`✓ Gửi thử: server nhận sau ${hookTests[it.id].ms} ms`:'✗ Gửi thử: '+esc(hookTests[it.id].error)}</small>`:''}</div>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
         <span class="hook-badge ${it.installed?'on':'off'}">${it.error?'LỖI':it.installed?'✓ ĐÃ CÀI':'○ CHƯA CÀI'}</span>
+        ${it.installed?`<button class="sound" data-act="test" data-only="${esc(it.id)}" style="padding:4px 8px;font-size:11px" title="Chạy lệnh hook đã cài với payload mẫu và kiểm tra server có nhận được không">Gửi thử</button>`:''}
         <button class="sound" data-act="${it.installed?'uninstall':'install'}" data-only="${esc(it.id)}" style="padding:4px 8px;font-size:11px">${it.installed?'Gỡ':'Cài'}</button>
       </div>
     </div>`).join('');
