@@ -92,8 +92,8 @@ h1 small{display:block;font:400 13px/1.4 var(--body);color:var(--muted);margin-t
 .replaybar input[type=range]{flex:1;min-width:160px}
 .replaybar select{background:var(--wall);color:var(--paper);border:1px solid #3A4766;border-radius:6px;padding:6px}
 .flag{display:flex;align-items:center;gap:8px;margin-bottom:10px;min-width:0}
-.flag-name{font:800 17px/1.2 var(--display);background:var(--team);color:var(--ink);padding:2px 12px 0;border-radius:4px 14px 14px 4px}
-.engine{font:600 11px/1 var(--body);padding:4px 7px;border-radius:999px;background:color-mix(in srgb,var(--pc) 22%,transparent);color:var(--pc);white-space:nowrap;border:1px solid color-mix(in srgb,var(--pc) 50%,transparent)}
+.engine{display:inline-flex;align-items:center;gap:5px;font:700 11px/1 var(--body);padding:3px 8px 3px 6px;border-radius:999px;background:color-mix(in srgb,var(--pc) 22%,transparent);color:var(--pc);white-space:nowrap;border:1px solid color-mix(in srgb,var(--pc) 50%,transparent)}
+.pixel-logo{display:inline-block;width:14px;height:14px;image-rendering:pixelated;flex:none}
 .usage{font-size:11px;color:var(--muted);white-space:nowrap}
 .flag-task{color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lead{display:flex;align-items:center;gap:10px;min-height:76px}
@@ -331,23 +331,116 @@ h1 small{display:block;font:400 13px/1.4 var(--body);color:var(--muted);margin-t
 </div>
 <footer class="bar" id="bar"><span><span class="dot"></span><span id="conn">Đang kết nối</span></span><span>Agent Office · Claude Code · omp</span></footer>
 <script>
+function pix(rows,pal,scale=3){
+  const c=document.createElement('canvas');c.width=rows[0].length;c.height=rows.length;const g=c.getContext('2d');
+  rows.forEach((r,y)=>[...r].forEach((p,x)=>{if(pal[p]){g.fillStyle=pal[p];g.fillRect(x,y,1,1)}}));
+  return {src:c.toDataURL(),w:c.width*scale,h:c.height*scale};
+}
+
+// Logo Pixel Art của các hãng AI / công cụ
+const LOGOS={
+  claude: pix([
+    "....CC....",
+    "...CCCC...",
+    "...CCCC...",
+    "..CCCCCC..",
+    "CCCCCCCCCC",
+    "CCCCCCCCCC",
+    "..CCCCCC..",
+    "...CCCC...",
+    "...CCCC...",
+    "....CC...."
+  ], {C:'#E8946A'}, 1.5),
+
+  gemini: pix([
+    "....BB....",
+    "...bBBb...",
+    "...bBBb...",
+    "..bbBBbb..",
+    "PPPBBPBPPP",
+    "PPPBBPBPPP",
+    "..bbBBbb..",
+    "...bBBb...",
+    "...bBBb...",
+    "....BB...."
+  ], {B:'#4285F4', b:'#7FA7FF', P:'#A855F7'}, 1.5),
+
+  openai: pix([
+    "...GGGG...",
+    "..GG..GG..",
+    ".GG.GG.GG.",
+    "GG.GGGG.GG",
+    "GG.GGGG.GG",
+    ".GG.GG.GG.",
+    "..GG..GG..",
+    "...GGGG..."
+  ], {G:'#10A37F'}, 1.5),
+
+  antigravity: pix([
+    "....AA....",
+    "...AAAA...",
+    "..AA..AA..",
+    "..AAAAAA..",
+    ".AAAAAAAA.",
+    ".AA....AA.",
+    "AA......AA"
+  ], {A:'#8B5CF6'}, 1.5),
+
+  codex: pix([
+    "GGGGGGGGGG",
+    "G........G",
+    "G..GG....G",
+    "G...GG...G",
+    "G....GG..G",
+    "G...GG...G",
+    "G..GG....G",
+    "G........G",
+    "GGGGGGGGGG"
+  ], {G:'#5FD3A8'}, 1.5),
+
+  omp: pix([
+    "PPPPPPPPPP",
+    "..PP..PP..",
+    "..PP..PP..",
+    "..PP..PP..",
+    "..PP..PP..",
+    "..PP...PP."
+  ], {P:'#F59E0B'}, 1.5),
+
+  generic: pix([
+    "..KKKKKK..",
+    ".K.K..K.K.",
+    ".KKKKKKKK.",
+    ".KK.KK.KK.",
+    ".KKKKKKKK.",
+    "..KK..KK.."
+  ], {K:'#94A3B8'}, 1.5),
+};
+
 const COLORS=['#FF7A6B','#5AB0FF','#B98CFF','#FFC857','#4FD1C5','#FF9ECF','#9AD45A'];
 const color=id=>{let h=0;for(const c of id)h=(h*31+c.charCodeAt(0))>>>0;return COLORS[h%COLORS.length]};
-// Màu theo nhà cung cấp model
-const provider=m=>{m=String(m||'').toLowerCase();
-  if(/claude|anthropic|opus|sonnet|haiku/.test(m))return['Claude','#E8946A'];
-  if(/gpt|openai|codex|\bo[1-9]/.test(m))return['OpenAI','#5FD3A8'];
-  if(/gemini|google/.test(m))return['Gemini','#7FA7FF'];
-  return[m?m.split('/').pop():'','#B6BCCB']};
+// Nhận diện hãng và logo pixel art tương ứng
+const provider=(m, source)=>{
+  const text=(String(m||'')+' '+String(source||'')).toLowerCase();
+  if(/antigravity/.test(text)) return ['Antigravity','#8B5CF6','antigravity'];
+  if(/claude|anthropic|opus|sonnet|haiku/.test(text)) return ['Claude','#E8946A','claude'];
+  if(/gemini|google/.test(text)) return ['Gemini','#7FA7FF','gemini'];
+  if(/codex/.test(text)) return ['Codex','#5FD3A8','codex'];
+  if(/gpt|openai|\bo[1-9]/.test(text)) return ['OpenAI','#5FD3A8','openai'];
+  if(/omp/.test(text)) return ['omp','#F59E0B','omp'];
+  return [m?m.split('/').pop():source||'Agent','#B6BCCB','generic'];
+};
 const fmtTok=n=>n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'k':String(Math.round(n));
 const fmtCost=c=>'$'+(c<0.01?c.toFixed(4):c.toFixed(2));
 const usageChip=s=>{const u=s.usage;if(!u)return'';
   const tip=`vào ${fmtTok(u.input||0)} · ra ${fmtTok(u.output||0)} · cache đọc ${fmtTok(u.cacheRead||0)} · cache ghi ${fmtTok(u.cacheWrite||0)}`+(u.cost!=null?` · ${fmtCost(u.cost)}`:'');
   return `<span class="usage" title="${tip}">${fmtTok((u.input||0)+(u.output||0))} tok${u.cost!=null?' · '+fmtCost(u.cost):''}</span>`};
-const engineChip=s=>{const [name,c]=provider(s.model||(s.source==='claude'?'claude':s.source||''));
+const engineChip=s=>{
+  const [name,c,key]=provider(s.model, s.source);
+  const logo=LOGOS[key]||LOGOS.generic;
   const label=[s.source==='claude'?'Claude Code':s.source,s.model||name].filter(Boolean).join(' · ');
-  const pre=s.source!=='claude'&&String(s.source).toLowerCase()!==String(name).toLowerCase()?esc(s.source)+' · ':'';
-  return `<span class="engine" style="--pc:${c}" title="${esc(label)}">${pre}${esc(name||s.model)}</span>`};
+  return `<span class="engine" style="--pc:${c}" title="${esc(label)}"><img class="pixel-logo" src="${logo.src}" alt="${esc(name)}"><span>${esc(name)}</span></span>`;
+};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 // ---------- Pixel art: ghép nhân vật từ nhiều lớp ----------
 // Mỗi ký tự là 1 pixel. "." = giữ nguyên lớp dưới.
@@ -454,11 +547,6 @@ const kindOf=t=>{
 const person=(col,state,seed='x',leader=false,type='')=>{const k=kindOf(type),acc=k&&KINDS[k];
   return `<div class="person ${state}${k?' k-'+k:''}"${acc?` title="${acc[1]}"`:''}><img class="f1" alt="" src="${sprite(col,seed,0,leader)}"><img class="f2" alt="" src="${sprite(col,seed,1,leader)}">${acc?`<span class="acc" aria-hidden="true">${acc[0]}</span>`:''}</div>`};
 // ---------- Nội thất pixel art (cùng kiểu ghép ký tự như nhân vật) ----------
-function pix(rows,pal,scale=3){
-  const c=document.createElement('canvas');c.width=rows[0].length;c.height=rows.length;const g=c.getContext('2d');
-  rows.forEach((r,y)=>[...r].forEach((p,x)=>{if(pal[p]){g.fillStyle=pal[p];g.fillRect(x,y,1,1)}}));
-  return {src:c.toDataURL(),w:c.width*scale,h:c.height*scale};
-}
 const SOFA=["..AAAAAAAAAAAA..",".AaaaaaaaaaaaaA.","AAaaaaaaaaaaaaAA","AAAAAAAAAAAAAAAA","AaaaaaaaaaaaaaaA","AAAAAAAAAAAAAAAA",".F............F."];
 const FURN={
   plant:pix(["..g...g..",".gGg.gGg.","gGGgGgGGg",".gGGGGGg.","..ggGgg..","....G....","..PPPPP..","..ppppp..","...ppp..."],
