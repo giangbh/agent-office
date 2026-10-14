@@ -8,3 +8,6 @@ events.jsonl*
 Thumbs.db
 .vscode/
 .idea/
+*.bak
+*.bak-*
+

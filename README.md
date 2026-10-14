@@ -10,10 +10,44 @@ node server.js --demo
 ```
 Mở http://localhost:4317
 
-## Nối với Claude Code thật
-1. Chạy `node server.js` (để cửa sổ này mở).
-2. Mở `~/.claude/settings.json`, chép khối `"hooks"` trong `hook-settings.json` vào (nếu đã có `hooks` thì gộp từng sự kiện).
-3. Khởi động lại Claude Code. Mỗi session thành một "nhóm", mỗi sub-agent (tool Task) thành một nhân viên ngồi bàn.
+## Cài đặt Hook 1-Click tự động (Web UI & Terminal)
+
+Thay vì phải copy-paste JSON thủ công vào từng thư mục cài đặt của các CLI/IDE, bạn có thể cài đặt tự động 1-click:
+
+### Cách 1: Cài đặt trực tiếp từ Web Dashboard (Khuyên dùng)
+1. Chạy server: `node server.js`
+2. Mở trình duyệt tại http://localhost:4317
+3. Bấm nút **`⚡ Hooks`** trên thanh tiêu đề góc trên cùng bên phải.
+4. Drawer hiển thị trạng thái phát hiện của các công cụ trên máy bạn:
+   - **Claude Code** (`~/.claude/settings.json`)
+   - **Antigravity IDE** (`.agents/hooks.json` hoặc `~/.gemini/config/hooks.json`)
+   - **Gemini CLI** (`~/.gemini/settings.json`)
+   - **Codex CLI** (`~/.codex/hooks.json`)
+5. Bấm **`⚡ Cài đặt tất cả 1-Click`** (hoặc cài riêng từng công cụ). Script sẽ tự động sao lưu cấu hình gốc (`.bak`) và merge hook an toàn. Có nút gỡ bỏ nhanh bất kỳ lúc nào!
+
+### Cách 2: Chạy lệnh Terminal (`setup-hooks.js`)
+Zero-dependency, chỉ cần Node.js có sẵn:
+```bash
+# Xem trạng thái cài đặt của các IDE / CLI
+node setup-hooks.js --status
+
+# Cài đặt tự động cho tất cả công cụ được tìm thấy
+node setup-hooks.js --all
+
+# Hoặc cài riêng cho từng công cụ
+node setup-hooks.js --claude
+node setup-hooks.js --antigravity
+node setup-hooks.js --gemini
+node setup-hooks.js --codex
+
+# Gỡ bỏ hook an toàn (phục hồi cấu hình gốc)
+node setup-hooks.js --uninstall --all
+```
+*Tùy chỉnh URL server nếu chạy cổng khác*: `AGENT_OFFICE_URL=http://localhost:5000/event node setup-hooks.js --all`
+
+## Cài đặt Hook thủ công (Nếu muốn tự cấu hình)
+1. Mở `~/.claude/settings.json`, chép khối `"hooks"` trong `hook-settings.json` vào (nếu đã có `hooks` thì gộp từng sự kiện).
+2. Khởi động lại Claude Code. Mỗi session thành một "nhóm", mỗi sub-agent (tool Task) thành một nhân viên ngồi bàn.
 
 Hook dùng `curl` với `--max-time 1` và `|| true`, nên nếu server tắt thì Claude Code vẫn chạy bình thường.
 Trên Windows, dùng WSL/Git Bash hoặc sửa lệnh cho hợp với shell của bạn.

@@ -5,6 +5,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const hookManager = require('./setup-hooks');
 
 const PORT = process.env.PORT || 4317;
 const HOST = process.env.HOST || '127.0.0.1'; // mặc định chỉ nhận từ máy này; đặt HOST=0.0.0.0 để mở cho mạng LAN
@@ -422,6 +423,18 @@ http.createServer((req, res) => {
   if (req.url === '/debug') {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     return res.end(JSON.stringify(recent, null, 2));
+  }
+  if (url.pathname === '/hooks-status') {
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    return res.end(JSON.stringify(hookManager.getStatusAll()));
+  }
+  if (req.method === 'POST' && url.pathname === '/hooks-install') {
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    return res.end(JSON.stringify(hookManager.installAll()));
+  }
+  if (req.method === 'POST' && url.pathname === '/hooks-uninstall') {
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    return res.end(JSON.stringify(hookManager.uninstallAll()));
   }
   if (url.pathname === '/leaderboard') {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
