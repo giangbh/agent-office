@@ -581,10 +581,41 @@ function handle(req, res) {
     req.on('close', () => clients.delete(res));
     return;
   }
-  if (req.url === '/' || req.url.startsWith('/?')) {
+  if (url.pathname === '/' || url.pathname === '/index.html') {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     return fs.createReadStream(path.join(__dirname, 'index.html')).pipe(res);
   }
+
+  // Phục vụ file tĩnh từ thư mục public/ hoặc assets/
+  const MIME_TYPES = {
+    '.html': 'text/html; charset=utf-8',
+    '.css': 'text/css; charset=utf-8',
+    '.js': 'text/javascript; charset=utf-8',
+    '.json': 'application/json; charset=utf-8',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.svg': 'image/svg+xml',
+    '.ico': 'image/x-icon',
+    '.gif': 'image/gif',
+    '.webp': 'image/webp'
+  };
+
+  const safePath = path.normalize(url.pathname.replace(/^\/+/, ''));
+  const publicCandidate = path.join(__dirname, 'public', safePath);
+  if (publicCandidate.startsWith(path.join(__dirname, 'public')) && fs.existsSync(publicCandidate) && fs.statSync(publicCandidate).isFile()) {
+    const ext = path.extname(publicCandidate).toLowerCase();
+    res.writeHead(200, { 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream' });
+    return fs.createReadStream(publicCandidate).pipe(res);
+  }
+
+  const assetsCandidate = path.join(__dirname, safePath);
+  if (safePath.startsWith('assets' + path.sep) && fs.existsSync(assetsCandidate) && fs.statSync(assetsCandidate).isFile()) {
+    const ext = path.extname(assetsCandidate).toLowerCase();
+    res.writeHead(200, { 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream' });
+    return fs.createReadStream(assetsCandidate).pipe(res);
+  }
+
   res.writeHead(404).end();
 }
 
