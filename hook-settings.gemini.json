@@ -1,0 +1,76 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -s --max-time 1 -X POST -H 'Content-Type: application/json' -H \"X-Agent-Office-Token: $AGENT_OFFICE_TOKEN\" --data-binary @- 'http://localhost:4317/event?source=gemini' >/dev/null 2>&1; echo '{}'"
+          }
+        ]
+      }
+    ],
+    "BeforeAgent": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -s --max-time 1 -X POST -H 'Content-Type: application/json' -H \"X-Agent-Office-Token: $AGENT_OFFICE_TOKEN\" --data-binary @- 'http://localhost:4317/event?source=gemini' >/dev/null 2>&1; echo '{}'"
+          }
+        ]
+      }
+    ],
+    "BeforeTool": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -s --max-time 1 -X POST -H 'Content-Type: application/json' -H \"X-Agent-Office-Token: $AGENT_OFFICE_TOKEN\" --data-binary @- 'http://localhost:4317/event?source=gemini' >/dev/null 2>&1; echo '{}'"
+          }
+        ]
+      }
+    ],
+    "AfterTool": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -s --max-time 1 -X POST -H 'Content-Type: application/json' -H \"X-Agent-Office-Token: $AGENT_OFFICE_TOKEN\" --data-binary @- 'http://localhost:4317/event?source=gemini' >/dev/null 2>&1; echo '{}'"
+          }
+        ]
+      }
+    ],
+    "AfterAgent": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -s --max-time 1 -X POST -H 'Content-Type: application/json' -H \"X-Agent-Office-Token: $AGENT_OFFICE_TOKEN\" --data-binary @- 'http://localhost:4317/event?source=gemini' >/dev/null 2>&1; echo '{}'"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -s --max-time 1 -X POST -H 'Content-Type: application/json' -H \"X-Agent-Office-Token: $AGENT_OFFICE_TOKEN\" --data-binary @- 'http://localhost:4317/event?source=gemini' >/dev/null 2>&1; echo '{}'"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -s --max-time 1 -X POST -H 'Content-Type: application/json' -H \"X-Agent-Office-Token: $AGENT_OFFICE_TOKEN\" --data-binary @- 'http://localhost:4317/event?source=gemini' >/dev/null 2>&1; echo '{}'"
+          }
+        ]
+      }
+    ]
+  }
+}

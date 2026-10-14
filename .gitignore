@@ -1,0 +1,10 @@
+# Runtime state & logs (contain user prompts and event history)
+state.json
+events.jsonl
+events.jsonl*
+
+# OS / Editor artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

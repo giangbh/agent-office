@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Văn phòng Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Be+Vietnam+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#1C2438; --tile-a:#26314B; --tile-b:#2A3652; --wall:#151B2B;
+  --desk:#A86A35; --desk-top:#C98B4F; --paper:#FFF4DE; --ink:#2B2233;
+  --lamp:#FFC857; --mint:#7BD389; --coral:#FF7A6B; --muted:#9AA6C2;
+  --display:'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
+  --body:'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--wall);color:var(--paper);font-family:var(--body);font-size:14px}
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px 32px;padding:20px 24px 16px;max-width:1280px;margin:auto}
+h1{font-family:var(--display);font-weight:800;font-size:32px;line-height:1;margin:0;letter-spacing:-.5px}
+h1 small{display:block;font:400 13px/1.4 var(--body);color:var(--muted);margin-top:6px;letter-spacing:0}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto}
+.stat{background:var(--night);border-radius:10px;padding:8px 14px;min-width:96px;border-bottom:3px solid var(--c)}
+.stat b{display:block;font:800 24px/1 var(--display);color:var(--c)}
+.stat span{font-size:12px;color:var(--muted)}
+.floor{max-width:1280px;margin:0 auto 24px;display:grid;grid-template-columns:1fr 260px;gap:0;border-radius:18px;overflow:hidden;
+  background:repeating-conic-gradient(var(--tile-a) 0 25%, var(--tile-b) 0 50%) 0 0/48px 48px;min-height:520px;box-shadow:0 0 0 6px var(--night)}
+.pods{padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;align-content:start}
+.pod{cursor:pointer;border:2px dashed color-mix(in srgb,var(--team) 55%,transparent);border-radius:16px;padding:14px 14px 18px;position:relative;background:color-mix(in srgb,var(--team) 6%,transparent)}
+.pod:hover,.pod:focus-visible{border-style:solid;outline:none}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(400px,100vw);background:var(--night);border-left:4px solid var(--team);padding:18px 18px 70px;overflow:auto;z-index:10;box-shadow:-8px 0 24px rgba(0,0,0,.4)}
+.drawer[hidden],.replaybar[hidden]{display:none}
+.drawer h2{font:800 20px/1.2 var(--display);margin:0 0 4px;color:var(--team)}
+.drawer h3{font:800 13px var(--display);margin:18px 0 6px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.drawer .x{position:absolute;top:10px;right:12px;background:none;border:0;color:var(--muted);font-size:22px;cursor:pointer}
+.drawer .prompt{white-space:pre-wrap;word-break:break-word;background:var(--wall);border-radius:8px;padding:10px;font-size:12px;line-height:1.5;max-height:200px;overflow:auto}
+.drawer ul{list-style:none;margin:0;padding:0;font-size:12px}
+.drawer li{padding:5px 0;border-bottom:1px solid #2E3955;word-break:break-word}
+.drawer li small{color:var(--muted);margin-right:6px}
+.drawer li.bad{color:var(--coral)}
+.drawer .st{font-size:11px;color:var(--muted)}
+.gantt{position:relative;font-size:11px}
+.gantt .row{display:grid;grid-template-columns:90px 1fr;gap:6px;align-items:center;margin:3px 0}
+.gantt .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--paper)}
+.gantt .lane{position:relative;height:12px;background:var(--wall);border-radius:3px}
+.gantt .bar{position:absolute;top:0;bottom:0;min-width:3px;border-radius:3px;background:var(--team);opacity:.55}
+.gantt .bar.on{opacity:1;background:repeating-linear-gradient(45deg,var(--team) 0 6px,var(--lamp) 0 12px)}
+.gantt .axis{display:flex;justify-content:space-between;margin-left:96px;color:var(--muted);font-size:10px}
+.replaybar{position:fixed;left:0;right:0;bottom:0;z-index:11;background:var(--night);border-top:3px solid var(--lamp);padding:10px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.replaybar input[type=range]{flex:1;min-width:160px}
+.replaybar select{background:var(--wall);color:var(--paper);border:1px solid #3A4766;border-radius:6px;padding:6px}
+.flag{display:flex;align-items:center;gap:8px;margin-bottom:10px;min-width:0}
+.flag-name{font:800 17px/1.2 var(--display);background:var(--team);color:var(--ink);padding:2px 12px 0;border-radius:4px 14px 14px 4px}
+.engine{font:600 11px/1 var(--body);padding:4px 7px;border-radius:999px;background:color-mix(in srgb,var(--pc) 22%,transparent);color:var(--pc);white-space:nowrap;border:1px solid color-mix(in srgb,var(--pc) 50%,transparent)}
+.usage{font-size:11px;color:var(--muted);white-space:nowrap}
+.flag-task{color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lead{display:flex;align-items:center;gap:10px;min-height:76px}
+.desks{display:flex;flex-wrap:wrap;gap:14px 10px;margin-top:12px}
+.desk{width:88px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.table{width:76px;height:12px;background:var(--desk-top);border-bottom:6px solid var(--desk);position:relative;margin-top:-6px;
+  box-shadow:4px 0 0 var(--desk),-4px 0 0 var(--desk),0 10px 0 -2px rgba(0,0,0,.25)}
+.laptop{position:absolute;left:50%;top:-12px;width:24px;height:12px;background:#D7DEEA;transform:translateX(-50%);
+  box-shadow:inset 0 0 0 3px #6C7894,0 2px 0 #6C7894}
+.desk.working .laptop{background:var(--lamp);animation:screen 1.2s steps(1) infinite}
+@keyframes screen{50%{background:#FFE29A}}
+.tag{font-size:11px;line-height:1.3;color:var(--paper);margin-top:5px;max-width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.act{font-size:10px;line-height:1.25;color:var(--ink);background:var(--paper);border-radius:8px 8px 8px 2px;padding:2px 6px;margin-bottom:4px;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.timer{font-size:10px;color:var(--muted)}
+/* nhân vật */
+.person{position:relative;width:36px;height:45px;flex:none}
+.person img{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated}
+.person .f2{visibility:hidden}
+.person.working .f1{animation:f1 .5s steps(1) infinite}
+.person.working .f2{animation:f2 .5s steps(1) infinite}
+.person.waiting .f1{animation:f1 1s steps(1) infinite}
+.person.waiting .f2{animation:f2 1s steps(1) infinite}
+@keyframes f1{0%{visibility:visible}50%{visibility:hidden}}
+@keyframes f2{0%{visibility:hidden}50%{visibility:visible}}
+.lead .person{width:48px;height:60px}
+.sound{font:600 13px var(--body);background:var(--night);color:var(--paper);border:2px solid #3A4766;border-radius:8px;padding:8px 12px;cursor:pointer}
+.sound[aria-pressed="true"]{border-color:var(--mint);color:var(--mint)}
+.sound:focus-visible{outline:3px solid var(--lamp);outline-offset:2px}
+.bubble{background:var(--paper);color:var(--ink);font-size:12px;padding:6px 10px;border-radius:12px 12px 12px 3px;max-width:210px;line-height:1.35;word-break:break-word}
+.waiting .bubble{background:var(--lamp)}
+.idle .bubble{background:transparent;color:var(--muted);padding:0}
+.pod.stale{opacity:.6;border-style:dotted}
+.pod.stale .bubble{background:transparent;color:var(--muted);padding:0}
+.pod.stale .person .f1,.pod.stale .person .f2,.pod.stale .desk.working .laptop{animation:none!important}
+.bubble.err{background:var(--coral);color:var(--ink)}
+.person.err::after{content:'💦';position:absolute;right:-10px;top:-6px;font-size:14px}
+.timer.stuck{color:var(--coral);font-weight:600}
+.role{font:600 11px var(--body);color:var(--team)}
+/* góc cà phê */
+.lounge{background:repeating-linear-gradient(90deg,#2F4A3F 0 24px,#2B4439 0 48px);padding:20px 16px;border-left:6px solid var(--night)}
+.lounge h2{font:800 18px/1.2 var(--display);margin:0 0 2px}
+.lounge p{margin:0 0 14px;color:#B6CFC2;font-size:12px}
+.done{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.done .tag{margin:0;font-size:12px}
+.done .check{color:var(--mint);font-size:11px}
+.empty{grid-column:1/-1;color:var(--muted);text-align:center;padding:80px 20px;font-size:15px;line-height:1.6}
+.empty code{background:var(--night);padding:2px 6px;border-radius:4px;color:var(--paper)}
+.bar{max-width:1280px;margin:0 auto 24px;padding:0 24px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--mint);margin-right:6px}
+.off .dot{background:var(--coral)}
+@media (max-width:760px){.floor{grid-template-columns:1fr}.lounge{border-left:0;border-top:6px solid var(--night)}.pods{padding:16px}.stats{margin-left:0}}
+@media (prefers-reduced-motion:reduce){.person .f1,.person .f2,.desk.working .laptop{animation:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Văn phòng Agent<small id="sub">Đang kết nối…</small></h1>
+  <div class="stats" id="stats"></div>
+  <button class="sound" id="sound" aria-pressed="false">🔈 Bật âm thanh</button>
+  <button class="sound" id="notify" aria-pressed="false">🔕 Bật thông báo</button>
+  <button class="sound" id="replayBtn">⏪ Xem lại</button>
+</header>
+<main class="floor">
+  <div class="pods" id="pods"></div>
+  <aside class="lounge"><h2>Góc cà phê</h2><p>Sub-agent làm xong ra đây nghỉ</p><div id="lounge"></div></aside>
+</main>
+<aside class="drawer" id="drawer" hidden></aside>
+<div class="replaybar" id="replaybar" hidden>
+  <b>⏪ Xem lại</b>
+  <select id="replayMin" aria-label="Khoảng thời gian"><option value="15">15 phút</option><option value="60" selected>1 giờ</option><option value="240">4 giờ</option><option value="1440">24 giờ</option></select>
+  <button class="sound" id="replayPlay">▶ Phát</button>
+  <input type="range" id="replaySlider" min="0" max="0" value="0" aria-label="Thời điểm">
+  <span id="replayLabel"></span>
+  <button class="sound" id="replayLive">Về trực tiếp</button>
+</div>
+<footer class="bar" id="bar"><span><span class="dot"></span><span id="conn">Đang kết nối</span></span><span>Agent Office · Claude Code · omp</span></footer>
+<script>
+const COLORS=['#FF7A6B','#5AB0FF','#B98CFF','#FFC857','#4FD1C5','#FF9ECF','#9AD45A'];
+const color=id=>{let h=0;for(const c of id)h=(h*31+c.charCodeAt(0))>>>0;return COLORS[h%COLORS.length]};
+// Màu theo nhà cung cấp model
+const provider=m=>{m=String(m||'').toLowerCase();
+  if(/claude|anthropic|opus|sonnet|haiku/.test(m))return['Claude','#E8946A'];
+  if(/gpt|openai|codex|\bo[1-9]/.test(m))return['OpenAI','#5FD3A8'];
+  if(/gemini|google/.test(m))return['Gemini','#7FA7FF'];
+  return[m?m.split('/').pop():'','#B6BCCB']};
+const fmtTok=n=>n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'k':String(Math.round(n));
+const fmtCost=c=>'$'+(c<0.01?c.toFixed(4):c.toFixed(2));
+const usageChip=s=>{const u=s.usage;if(!u)return'';
+  const tip=`vào ${fmtTok(u.input||0)} · ra ${fmtTok(u.output||0)} · cache đọc ${fmtTok(u.cacheRead||0)} · cache ghi ${fmtTok(u.cacheWrite||0)}`+(u.cost!=null?` · ${fmtCost(u.cost)}`:'');
+  return `<span class="usage" title="${tip}">${fmtTok((u.input||0)+(u.output||0))} tok${u.cost!=null?' · '+fmtCost(u.cost):''}</span>`};
+const engineChip=s=>{const [name,c]=provider(s.model||(s.source==='claude'?'claude':s.source||''));
+  const label=[s.source==='claude'?'Claude Code':s.source,s.model||name].filter(Boolean).join(' · ');
+  const pre=s.source!=='claude'&&String(s.source).toLowerCase()!==String(name).toLowerCase()?esc(s.source)+' · ':'';
+  return `<span class="engine" style="--pc:${c}" title="${esc(label)}">${pre}${esc(name||s.model)}</span>`};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// ---------- Pixel art: ghép nhân vật từ nhiều lớp ----------
+// Mỗi ký tự là 1 pixel. "." = giữ nguyên lớp dưới.
+// S da, E mắt, B áo (màu nhóm), b áo tối, L quần, D giày, H tóc, C/c mũ, G kính, K đen, T cà vạt, w chi tiết sáng
+const BASE=[
+"............",
+"............",
+"....SSSS....",
+"...SSSSSS...",
+"...SESSES...",
+"...SSSSSS...",
+"....SSSS....",
+"..BBBBBBBB..",
+".SBBBBBBBBS.",
+".SBBBBBBBBS.",
+"..BBBBBBBB..",
+"..bbbbbbbb..",
+"...LL..LL...",
+"...LL..LL...",
+"..DDD..DDD.."];
+const ARMS_UP=[".SBBBBBBBBS.","..BBBBBBBB..","..BBBBBBBB.."]; // khung 2: tay đưa lên (hàng 7-9)
+const L=(rows,start=0)=>({rows,start});
+const HEADS={
+  cap:     L(["....CCCC....","...CCCCCC...","..CCCCCCccc."]),
+  beanie:  L([".....ww.....","...CCCCCC...","..CCCCCCCC..","..cccccccc.."]),
+  short:   L(["............","...HHHHHH...","..HHHHHHHH..","..H......H.."]),
+  spiky:   L(["..H.H..H.H..","..HHHHHHHH..","..HHHHHHHH..","..H......H.."]),
+  long:    L(["............","...HHHHHH...","..HHHHHHHH..","..HHHHHHHH..","..H......H..","..H......H..","..HH....HH..","..HH....HH.."]),
+  bun:     L([".....HH.....","....HHHH....","...HHHHHH...","..HH....HH.."]),
+  side:    L(["............","...HHHHHHH..","..HHHHHHHHH.","..H.HHHH.H.."]),
+  bald:    L(["............","............","....SSSS....","...SSSSSS..."]),
+  headset: L(["............","...HHHHHH...","..KHHHHHHK..","..K......K..",".KK......KK.",".KK......KK."]),
+};
+const FACES={
+  none:L([]), glasses:L(["...GEGGEG..."],4), shades:L(["...KKKKKK..."],4),
+  beard:L(["...HSSSSH...","....HHHH...."],5), stache:L(["....HHHH...."],5),
+};
+const SHIRTS={
+  plain:L([]), tie:L([".....TT.....","..BBBTTBBB..","..BBBTTBBB..","....TTTT...."],7),
+  stripe:L(["..wwwwwwww.."],9), hoodie:L(["....w..w....","....w..w...."],7),
+  collar:L(["....wwww...."],7), badge:L([".......ww..."],9),
+};
+const SKINS=['#F2C29B','#E0A878','#C68650','#8D5A3B','#FFD9B8','#6B4430'];
+const HAIRS=['#2B1E16','#5A3825','#A0522D','#E8C07A','#C9C9D1','#D9534F','#3B5BA5','#111111'];
+const PANTS=['#3A3F5C','#2D4C7A','#1F1F27','#7A6A4F','#4F5D45'];
+const SHOES=['#1E2233','#5A3420','#EDEDED','#B33A3A'];
+const shade=(hex,k)=>'#'+[1,3,5].map(i=>Math.min(255,Math.round(parseInt(hex.slice(i,i+2),16)*k)).toString(16).padStart(2,'0')).join('');
+function rng(seed){let h=2166136261;for(const c of seed)h=Math.imul(h^c.charCodeAt(0),16777619);
+  return()=>{h=Math.imul(h^(h>>>15),2246822507);h=Math.imul(h^(h>>>13),3266489909);h^=h>>>16;return (h>>>0)/4294967296}}
+const pickR=(r,arr)=>arr[Math.floor(r()*arr.length)];
+// Đặc điểm cố định theo id: cùng agent luôn trông giống nhau
+function traits(seed,leader){
+  const r=rng(seed);
+  return {head:pickR(r,Object.keys(HEADS)), face:r()<.55?'none':pickR(r,Object.keys(FACES)),
+    shirt:leader?'tie':pickR(r,Object.keys(SHIRTS).filter(k=>k!=='tie')),
+    skin:pickR(r,SKINS), hair:pickR(r,HAIRS), pants:pickR(r,PANTS), shoes:pickR(r,SHOES), capTone:r()};
+}
+const spriteCache={};
+function sprite(team,seed,frame,leader){
+  const key=team+seed+frame+leader; if(spriteCache[key]) return spriteCache[key];
+  const t=traits(seed,leader);
+  const cap=t.capTone<.5?team:shade(team,.7+t.capTone*.5);
+  const pal={S:t.skin,E:'#2B2233',B:shade(team,.85),b:shade(team,.6),L:t.pants,D:t.shoes,H:t.hair,
+    C:cap,c:shade(cap,.72),G:'#E9EEF7',K:'#1A1A22',T:leader?'#FFC857':'#C8423B',w:'#F4EEE2'};
+  const grid=BASE.map(r=>[...r]);
+  if(frame===1) ARMS_UP.forEach((r,i)=>grid[7+i]=[...r]);
+  for(const layer of [HEADS[t.head],FACES[t.face],SHIRTS[t.shirt]])
+    layer.rows.forEach((r,i)=>[...r].forEach((p,x)=>{if(p!=='.')grid[layer.start+i][x]=p}));
+  const c=document.createElement('canvas');c.width=12;c.height=grid.length;const g=c.getContext('2d');
+  grid.forEach((r,y)=>r.forEach((p,x)=>{if(pal[p]){g.fillStyle=pal[p];g.fillRect(x,y,1,1)}}));
+  return spriteCache[key]=c.toDataURL();
+}
+const person=(col,state,seed='x',leader=false)=>`<div class="person ${state}"><img class="f1" alt="" src="${sprite(col,seed,0,leader)}"><img class="f2" alt="" src="${sprite(col,seed,1,leader)}"></div>`;
+
+// ---------- Âm thanh 8-bit ----------
+let audio=null, soundOn=false;
+try{soundOn=localStorage.getItem('agentOfficeSound')==='1'}catch(e){}
+function beep(notes){
+  if(!soundOn) return;
+  audio=audio||new (window.AudioContext||window.webkitAudioContext)();
+  let t=audio.currentTime;
+  for(const [f,d] of notes){
+    const o=audio.createOscillator(), g=audio.createGain();
+    o.type='square'; o.frequency.value=f;
+    g.gain.setValueAtTime(.05,t); g.gain.exponentialRampToValueAtTime(.0001,t+d);
+    o.connect(g).connect(audio.destination); o.start(t); o.stop(t+d); t+=d*.85;
+  }
+}
+const SOUND={done:[[784,.1],[1047,.22]], waiting:[[523,.14],[392,.2]], hired:[[660,.07]]};
+const btn=document.getElementById('sound');
+function paintBtn(){btn.setAttribute('aria-pressed',soundOn);btn.textContent=soundOn?'🔊 Tắt âm thanh':'🔈 Bật âm thanh'}
+btn.onclick=()=>{soundOn=!soundOn;try{localStorage.setItem('agentOfficeSound',soundOn?'1':'0')}catch(e){};paintBtn();if(soundOn)beep(SOUND.done)};
+paintBtn();
+
+// ---------- Thông báo hệ thống + tiêu đề tab ----------
+const STUCK_MS=10*60e3, ERR_MS=20e3;
+let notifyOn=false;
+try{notifyOn=localStorage.getItem('agentOfficeNotify')==='1'&&'Notification' in window&&Notification.permission==='granted'}catch(e){}
+const nbtn=document.getElementById('notify');
+function paintNotify(){nbtn.setAttribute('aria-pressed',notifyOn);nbtn.textContent=notifyOn?'🔔 Tắt thông báo':'🔕 Bật thông báo'}
+nbtn.onclick=async()=>{
+  if(!('Notification' in window)){nbtn.textContent='Trình duyệt không hỗ trợ';return}
+  if(notifyOn){notifyOn=false}
+  else{const p=Notification.permission==='granted'?'granted':await Notification.requestPermission();notifyOn=p==='granted'}
+  try{localStorage.setItem('agentOfficeNotify',notifyOn?'1':'0')}catch(e){}
+  paintNotify();
+};
+paintNotify();
+function notifyWaiting(s){
+  if(!notifyOn||!document.hidden) return;
+  try{new Notification('Chờ bạn duyệt: '+s.project,{body:s.activity||'Cần bạn xác nhận',tag:'agent-office-'+s.id})}catch(e){}
+}
+
+let prev=null; // trạng thái lần trước để phát hiện thay đổi
+function detectChanges(S){
+  if(prev) S.forEach(s=>{if(s.status==='waiting'&&prev['s'+s.id]!=='waiting') notifyWaiting(s)});
+  const cur={};
+  S.forEach(s=>{cur['s'+s.id]=s.status; s.agents.forEach(a=>cur['a'+a.id]=a.status)});
+  if(prev){
+    let done=false,waiting=false,hired=false;
+    for(const k in cur){
+      if(k[0]==='a'&&cur[k]==='done'&&prev[k]==='working') done=true;
+      if(k[0]==='a'&&cur[k]==='working'&&!prev[k]) hired=true;
+      if(k[0]==='s'&&cur[k]==='waiting'&&prev[k]!=='waiting') waiting=true;
+    }
+    if(waiting) beep(SOUND.waiting); else if(done) beep(SOUND.done); else if(hired) beep(SOUND.hired);
+  }
+  prev=cur;
+}
+const ago=ms=>{const s=Math.max(0,Math.round(ms/1000));return s<60?s+' giây':Math.floor(s/60)+' phút '+(s%60)+' giây'};
+let state={now:Date.now(),sessions:[]},offset=0;
+
+function render(){
+  const now=replay?state.now:Date.now()+offset, S=state.sessions;
+  const agents=S.flatMap(s=>s.agents.map(a=>({...a,team:color(s.id),project:s.project,stale:!!s.stale})));
+  const working=agents.filter(a=>a.status==='working'&&!a.stale), done=agents.filter(a=>a.status==='done');
+  const running=S.filter(s=>s.status!=='idle'&&!s.stale).length;
+  const tokTotal=S.reduce((a,s)=>a+((s.usage&&(s.usage.input||0)+(s.usage.output||0))||0),0);
+  const costTotal=S.reduce((a,s)=>a+((s.usage&&s.usage.cost)||0),0);
+  document.getElementById('stats').innerHTML=[
+    ['#5AB0FF',S.length,'nhóm (session)'],['#B98CFF',running,'nhóm đang chạy'],
+    ['#FFC857',working.length,'sub đang làm'],['#7BD389',done.length,'sub xong'],
+    ...(tokTotal?[['#4FD1C5',fmtTok(tokTotal),'token (vào+ra)']]:[]),...(costTotal?[['#FF9ECF',fmtCost(costTotal),'chi phí']]:[])]
+    .map(([c,n,l])=>`<div class="stat" style="--c:${c}"><b>${n}</b><span>${l}</span></div>`).join('');
+  document.getElementById('sub').textContent=`${running} nhóm đang chạy, ${working.length} sub-agent đang làm`;
+
+  const nWait=S.filter(s=>s.status==='waiting').length;
+  document.title=(nWait?`(${nWait}) Chờ duyệt · `:'')+'Văn phòng Agent';
+  document.getElementById('pods').innerHTML=S.length?S.map(s=>{
+    const col=color(s.id), mine=s.agents.filter(a=>a.status==='working');
+    const err=s.status==='working'&&s.error&&now-s.error.at<ERR_MS;
+    const bubble=s.stale?'💤 Không có tín hiệu '+ago(now-s.updated):err?'⚠ Lỗi: '+esc(s.error.text):s.status==='waiting'?'⏳ '+esc(s.activity):s.status==='working'?esc(s.activity||'Đang nghĩ…'):'Đang chờ việc mới';
+    const run=s.status!=='idle'&&s.started?` · <span class="timer">${ago(now-s.started)}</span>`:'';
+    return `<section class="pod ${s.status}${s.stale?' stale':''}" data-sid="${esc(s.id)}" tabindex="0" role="button" style="--team:${col}">
+      <header class="flag"><span class="flag-name">${esc(s.project)}</span>${engineChip(s)}${usageChip(s)}<span class="flag-task" title="${esc(s.task)}">${esc(s.task)}</span></header>
+      <div class="lead">${person(col,s.stale?'idle':s.status+(err?' err':''),s.id,true)}<div><div class="role">Trưởng nhóm${run}</div><div class="bubble${err&&!s.stale?' err':''}">${bubble}</div></div></div>
+      ${mine.length?`<div class="desks">${mine.map(a=>`<div class="desk working">${a.activity?`<span class="act" title="${esc(a.activity)}">${esc(a.activity)}</span>`:''}${person(col,'working',a.id)}<div class="table"><span class="laptop"></span></div>
+        <span class="tag" title="${esc(a.desc)}">${esc(a.desc)}</span><span class="timer${now-a.started>STUCK_MS?' stuck':''}">${now-a.started>STUCK_MS?'⚠ ':''}${ago(now-a.started)}</span></div>`).join('')}</div>`:''}
+    </section>`}).join('')
+    :`<div class="empty">Chưa có nhóm nào trong văn phòng.<br>Mở Claude Code ở một thư mục bất kỳ, hoặc chạy <code>node server.js --demo</code> để xem thử.</div>`;
+
+  document.getElementById('lounge').innerHTML=done.sort((a,b)=>b.ended-a.ended).slice(0,10)
+    .map(a=>`<div class="done">${person(a.team,'idle',a.id)}<div><div class="tag">${esc(a.desc)}</div><span class="check">✓ ${esc(a.project)}, ${ago(now-a.ended)} trước</span></div></div>`).join('')
+    ||'<p>Chưa ai xong việc.</p>';
+  renderDrawer(now);
+}
+
+// ---------- Bảng chi tiết ----------
+let selected=null;
+const drawer=document.getElementById('drawer');
+const clock=t=>new Date(t).toLocaleTimeString('vi-VN');
+function renderDrawer(now){
+  const s=selected&&state.sessions.find(x=>x.id===selected);
+  if(!s){drawer.hidden=true;return}
+  const col=color(s.id), tools=(s.tools||[]).slice().reverse();
+  const ST={working:'đang chạy',waiting:'chờ bạn duyệt',idle:'rảnh'};
+  const h=`<button class="x" aria-label="Đóng" id="drawerX">×</button>
+    <h2>${esc(s.project)}</h2>
+    <div>${engineChip(s)} <span class="st">${ST[s.status]||s.status}${s.started&&s.status!=='idle'?' · '+ago(now-s.started):''}</span></div>
+    <div class="st" title="${esc(s.id)}">${esc(s.id)}</div>
+    ${s.error?`<h3>Lỗi gần nhất</h3><ul><li class="bad"><small>${clock(s.error.at)}</small>${esc(s.error.text)}</li></ul>`:''}
+    ${s.usage?`<h3>Token và chi phí</h3><ul><li>Vào: <b>${fmtTok(s.usage.input||0)}</b> · Ra: <b>${fmtTok(s.usage.output||0)}</b></li>
+      <li>Cache đọc: ${fmtTok(s.usage.cacheRead||0)} · Cache ghi: ${fmtTok(s.usage.cacheWrite||0)}</li>
+      <li>${s.usage.cost!=null?'Chi phí: <b>'+fmtCost(s.usage.cost)+'</b>':'<span class="st">Công cụ này không báo chi phí</span>'}</li></ul>`:''}
+    <h3>Yêu cầu</h3><div class="prompt">${esc(s.prompt||s.task||'(chưa có)')}</div>
+    <h3>Tool gần đây (${tools.length})</h3>
+    <ul>${tools.map(t=>`<li class="${t.error?'bad':''}"><small>${clock(t.at)}</small>${t.error?'⚠ ':''}${esc(t.text)}</li>`).join('')||'<li>Chưa có</li>'}</ul>
+    <h3>Sub-agent (${s.agents.length})</h3>
+    ${gantt(s.agents,now)}
+    <ul>${s.agents.map(a=>`<li><small>${a.status==='working'?'⏳':'✓'}</small><b>${esc(a.desc)}</b> <span class="st">${esc(a.type)} · ${ago((a.ended||now)-a.started)}${a.toolCount?' · '+a.toolCount+' tool':''}</span>${a.status==='working'&&a.activity?`<div class="st">▶ ${esc(a.activity)}</div>`:''}${a.prompt?`<div class="st">${esc(a.prompt)}</div>`:''}</li>`).join('')||'<li>Chưa có</li>'}</ul>`;
+  const top=drawer.scrollTop;
+  drawer.style.setProperty('--team',col); drawer.innerHTML=h; drawer.hidden=false; drawer.scrollTop=top;
+  document.getElementById('drawerX').onclick=()=>{selected=null;render()};
+}
+// Dòng thời gian: mỗi sub-agent một thanh từ lúc bắt đầu đến lúc xong (đang chạy thì kéo tới hiện tại)
+function gantt(agents,now){
+  if(!agents.length) return '';
+  const t0=Math.min(...agents.map(a=>a.started)), t1=Math.max(now,...agents.map(a=>a.ended||now)), span=Math.max(1,t1-t0);
+  const pct=t=>((t-t0)/span*100).toFixed(2)+'%';
+  return `<div class="gantt" aria-label="Dòng thời gian sub-agent">${agents.map(a=>{const end=a.ended||now;
+    return `<div class="row"><span class="nm" title="${esc(a.desc)}">${esc(a.desc)}</span><span class="lane"><span class="bar${a.status==='working'?' on':''}" style="left:${pct(a.started)};width:calc(${pct(end)} - ${pct(a.started)})" title="${clock(a.started)} → ${a.ended?clock(a.ended):'đang chạy'} (${ago(end-a.started)})"></span></span></div>`}).join('')}
+    <div class="axis"><span>${clock(t0)}</span><span>${ago(span)}</span><span>${clock(t1)}</span></div></div>`;
+}
+const podsEl=document.getElementById('pods');
+podsEl.onclick=e=>{const p=e.target.closest('[data-sid]');if(p){selected=p.dataset.sid;render()}};
+podsEl.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){const p=e.target.closest('[data-sid]');if(p){e.preventDefault();selected=p.dataset.sid;render()}}};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&selected){selected=null;render()}});
+
+// ---------- Xem lại (replay) từ events.jsonl ----------
+let replay=null, live=state;
+const $=id=>document.getElementById(id);
+function showFrame(){
+  state=replay.frames[replay.i];
+  $('replaySlider').value=replay.i;
+  $('replayLabel').textContent=`${clock(state.now)} (${replay.i+1}/${replay.frames.length})`;
+  render();
+}
+function stopPlay(){if(replay&&replay.timer){clearInterval(replay.timer);replay.timer=null}$('replayPlay').textContent='▶ Phát'}
+async function startReplay(){
+  const r=await fetch('/replay?minutes='+$('replayMin').value);
+  const frames=await r.json();
+  $('replaybar').hidden=false;
+  if(!frames.length){stopPlay();replay=null;$('replayLabel').textContent='Chưa có log trong khoảng này';return}
+  stopPlay();
+  replay={frames,i:frames.length-1,timer:null};
+  $('replaySlider').max=frames.length-1;
+  showFrame();
+}
+function exitReplay(){
+  stopPlay();replay=null;$('replaybar').hidden=true;prev=null;
+  state=live;offset=state.now-Date.now();render();
+}
+$('replayBtn').onclick=startReplay;
+$('replayMin').onchange=startReplay;
+$('replayLive').onclick=exitReplay;
+$('replaySlider').oninput=e=>{if(!replay)return;stopPlay();replay.i=+e.target.value;showFrame()};
+$('replayPlay').onclick=()=>{
+  if(!replay)return;
+  if(replay.timer){stopPlay();return}
+  if(replay.i>=replay.frames.length-1)replay.i=0;
+  $('replayPlay').textContent='⏸ Dừng';
+  replay.timer=setInterval(()=>{if(replay.i>=replay.frames.length-1){stopPlay();return}replay.i++;showFrame()},400);
+};
+
+function connect(){
+  const es=new EventSource('/events');
+  es.onopen=()=>{document.getElementById('bar').classList.remove('off');document.getElementById('conn').textContent='Đã kết nối'};
+  es.onmessage=e=>{live=JSON.parse(e.data);if(replay)return;state=live;offset=state.now-Date.now();detectChanges(state.sessions);render()};
+  es.onerror=()=>{document.getElementById('bar').classList.add('off');document.getElementById('conn').textContent='Mất kết nối tới server, đang thử lại…'};
+}
+connect(); setInterval(render,1000);
+</script>
+</body>
+</html>
